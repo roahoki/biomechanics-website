@@ -1,2 +1,3 @@
-# biomechanics-website
-Source code of the dj biomechanics official website
+# BIOMECHANICS 🎧🌱
+
+This is the source code of the official biomechanics website
