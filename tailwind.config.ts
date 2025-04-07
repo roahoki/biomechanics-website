@@ -1,6 +1,7 @@
 // tailwind.config.ts
 import type { Config } from 'tailwindcss'
 
+
 const config: Config = {
     content: [
         './src/app/**/*.{js,ts,jsx,tsx}',
@@ -14,8 +15,8 @@ const config: Config = {
                 dark: '#111111',
             },
             fontFamily: {
-                display: ['var(--font-geist-sans)', 'sans-serif'],
-                mono: ['var(--font-geist-mono)', 'monospace'],
+                title: ["Noto Sans", "sans-serif"],
+                body: ["DM Sans", "sans-serif"],
             },
         },
     },
