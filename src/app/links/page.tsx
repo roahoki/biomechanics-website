@@ -27,25 +27,39 @@ export default async function LinksPage() {
                     action={async (formData) => {
                         'use server'
                         const urls = formData.getAll('url') as string[]
+                        const deleteFlags = formData.getAll('delete') as string[]
+
                         const newLinks = urls
-                            .map((url, idx) => url.trim())
-                            .filter(Boolean)
-                            .map((url, i) => ({ id: i + 1, url }))
+                            .map((url, index) => ({
+                                url: url.trim(),
+                                delete: deleteFlags.includes(String(index)),
+                            }))
+                            .filter(link => link.url && !link.delete)
+                            .map((link, i) => ({ id: i + 1, url: link.url }))
+
                         await updateLinks(newLinks)
                     }}
                     style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
                 >
                     <h2>Editar Links</h2>
+
                     {links.map((link, index) => (
-                        <input
-                            key={index}
-                            name="url"
-                            defaultValue={link.url}
-                            placeholder="Nuevo link"
-                        />
+                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <input name="url" defaultValue={link.url} placeholder="Link" style={{ flex: 1 }} />
+                            <label>
+                                <input type="checkbox" name="delete" value={index} />
+                                Eliminar
+                            </label>
+                        </div>
                     ))}
+
+                    {/* Input vacío para nuevo link */}
+                    <input name="url" placeholder="Nuevo link..." />
+
                     <button type="submit">Guardar Cambios</button>
                 </form>
+              
+              
             )}
         </div>
     )
