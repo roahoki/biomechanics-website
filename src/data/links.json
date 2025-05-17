@@ -1,14 +1,18 @@
 [
   {
     "id": 1,
-    "url": "hola mi publico"
+    "url": "https://trello.com/b/VmIe2orS/biomechanics-website"
   },
   {
     "id": 2,
-    "url": "https://www.youtube.com/"
+    "url": "https://github.com/"
   },
   {
     "id": 3,
-    "url": "hola"
+    "url": "https://soundcloud.com/"
+  },
+  {
+    "id": 4,
+    "url": "blogs"
   }
 ]
