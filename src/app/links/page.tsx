@@ -17,7 +17,15 @@ export default async function Page() {
 
     // Vista de solo lectura para usuarios comunes
     return (
-        <div className="flex flex-col items-center min-h-screen px-4 py-10 bg-[var(--color-neutral-base)] text-[var(--color-neutral-light)] font-body">
+        <div
+            className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body"
+            style={{
+                backgroundImage: "url('/bg.png')", // asegúrate de tener esta imagen en /public
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundColor: "var(--color-neutral-base)",
+            }}
+        >
             {/* Foto de perfil */}
             <img
                 src="/profile.jpg" // asegúrate de tener esta imagen en /public
@@ -51,7 +59,7 @@ export default async function Page() {
 
             {/* Lista de links como tarjetas */}
             <ul className="w-full max-w-md space-y-4">
-                {links.map((link: { id: number; url: string }) => (
+                {links.map((link: { id: number; url: string; label: string }) => (
                     <li key={link.id}>
                         <a
                             href={link.url}
@@ -59,7 +67,8 @@ export default async function Page() {
                             rel="noopener noreferrer"
                             className="block p-4 bg-[var(--color-neutral-light)] text-[var(--color-neutral-base)] rounded-lg shadow-md hover:bg-[var(--color-secondary)] hover:text-[var(--color-neutral-base)] transition-colors font-body"
                         >
-                            {link.url}
+                            
+                            {link.label || link.url}
                         </a>
                     </li>
                 ))}

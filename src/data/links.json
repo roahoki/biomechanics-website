@@ -1,18 +1,22 @@
 [
   {
     "id": 1,
-    "url": "https://www.tiktok.com/@biomechanics.wav"
+    "url": "https://www.instagram.com/biomechanics.wav",
+    "label": "Instagram"
   },
   {
     "id": 2,
-    "url": "https://www.soundcloud.com/biomechanics-wav"
+    "url": "https://www.soundcloud.com/biomechanics-wav",
+    "label": "SoundCloud"
   },
   {
     "id": 3,
-    "url": "https://www.instagram.com/biomechanics.wav"
+    "url": "https://youtube.com/@biomechanics-wav",
+    "label": "YouTube"
   },
   {
     "id": 4,
-    "url": "https://youtube.com/@biomechanics-wav"
+    "url": "https://www.tiktok.com/@biomechanics.wav",
+    "label": "TikTok"
   }
 ]
