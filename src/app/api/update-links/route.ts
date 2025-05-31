@@ -8,6 +8,7 @@ export async function POST(request: Request) {
 
     const urls = formData.getAll('url') as string[]
     const labels = formData.getAll('label') as string[]
+    const description = formData.get('description') as string
 
     // Asegurar que se mantenga el índice entre URL y Label
     const newLinks = urls
@@ -20,7 +21,13 @@ export async function POST(request: Request) {
         }))
 
     const filePath = path.resolve(process.cwd(), 'src/data/links.json')
-    await fs.writeFile(filePath, JSON.stringify(newLinks, null, 2))
+
+    const updatedData = {
+        description: description?.trim() || '',
+        items: newLinks,
+    }
+
+    await fs.writeFile(filePath, JSON.stringify(updatedData, null, 2))
 
     revalidatePath('/links')
 

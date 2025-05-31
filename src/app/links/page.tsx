@@ -11,8 +11,10 @@ export default async function Page() {
     const user = await getUserFromCookie()
     const isAdmin = user === process.env.ADMIN_USER
 
+    const description = links.description || ""; // Obtener la descripción del archivo JSON
+
     if (isAdmin) {
-        return <SortableLinksForm links={links} />
+        return <SortableLinksForm links={links.items} description={description} />;
     }
 
     // Vista de solo lectura para usuarios comunes
@@ -41,6 +43,11 @@ export default async function Page() {
                 biomechanics.wav
             </h1>
 
+            {/* Descripción */}
+            <p className="text-center text-lg mb-6 max-w-2xl">
+                {description}
+            </p>
+
             {/* Redes sociales */}
             <div className="flex gap-6 mb-8">
                 <a href="https://www.instagram.com/biomechanics.wav" target="_blank" rel="noopener noreferrer">
@@ -59,7 +66,7 @@ export default async function Page() {
 
             {/* Lista de links como tarjetas */}
             <ul className="w-full max-w-md space-y-4">
-                {links.map((link: { id: number; url: string; label: string }) => (
+                {links.items.map((link: { id: number; url: string; label: string }) => (
                     <li key={link.id}>
                         <a
                             href={link.url}
@@ -67,13 +74,11 @@ export default async function Page() {
                             rel="noopener noreferrer"
                             className="block p-4 bg-[var(--color-neutral-light)] text-[var(--color-neutral-base)] rounded-lg shadow-md hover:bg-[var(--color-secondary)] hover:text-[var(--color-neutral-base)] transition-colors font-body"
                         >
-                            
                             {link.label || link.url}
                         </a>
                     </li>
                 ))}
             </ul>
         </div>
-    )
-      
+    );
 }
