@@ -1,11 +1,7 @@
-import fs from 'fs/promises'
-import path from 'path'
+import { getLinksData } from '@/utils/links'
 
 export default async function Page() {
-    const filePath = path.resolve(process.cwd(), 'src/data/links.json')
-    const file = await fs.readFile(filePath, 'utf-8')
-    const links = JSON.parse(file)
-    const description = links.description || ""; // Obtener la descripción del archivo JSON
+    const { links, description } = await getLinksData()
 
 
     // Vista de solo lectura para usuarios comunes
@@ -57,7 +53,7 @@ export default async function Page() {
 
             {/* Lista de links como tarjetas */}
             <ul className="w-full max-w-md space-y-4">
-                {links.items.map((link: { id: number; url: string; label: string }) => (
+                {links.map((link: { id: number; url: string; label: string }) => (
                     <li key={link.id}>
                         <a
                             href={link.url}

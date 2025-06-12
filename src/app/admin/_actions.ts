@@ -2,6 +2,11 @@
 
 import { checkRole } from '@/utils/roles'
 import { clerkClient } from '@clerk/nextjs/server'
+import { revalidatePath } from 'next/cache'
+import { getLinksData } from '@/utils/links'
+const fs = require('fs/promises')
+const path = require('path')
+const filePath = path.resolve(process.cwd(), 'src/data/links.json')
 
 export async function setRole(formData: FormData): Promise<void> {
     const client = await clerkClient()
@@ -34,12 +39,6 @@ export async function removeRole(formData: FormData): Promise<void> {
     }
 }
 
-import fs from 'fs/promises'
-import path from 'path'
-import { revalidatePath } from 'next/cache'
-
-const filePath = path.resolve(process.cwd(), 'src/data/links.json')
-
 export async function updateAdminLinks(formData: FormData) {
   try {
     // Verificar permisos
@@ -48,8 +47,7 @@ export async function updateAdminLinks(formData: FormData) {
     }
     
     // Obtener los datos actuales para mantener la estructura
-    const currentFile = await fs.readFile(filePath, 'utf-8')
-    const currentData = JSON.parse(currentFile)
+    const currentData = await getLinksData()
     
     // Obtener la descripción del formulario
     const description = formData.get('description')?.toString() || currentData.description || ''
