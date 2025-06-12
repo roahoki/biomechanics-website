@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Sortable from 'sortablejs'
+import { updateAdminLinks } from '@/app/admin/_actions'
+import { useRouter } from 'next/navigation'
 
 export function SortableLinksForm({
     links,
@@ -11,6 +13,9 @@ export function SortableLinksForm({
     description: string
 }) {
     const listRef = useRef<HTMLUListElement>(null)
+    const router = useRouter()
+    const [status, setStatus] = useState<{ message?: string; error?: string } | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     useEffect(() => {
         if (listRef.current) {
@@ -21,9 +26,28 @@ export function SortableLinksForm({
         }
     }, [])
 
+    async function handleSubmit(formData: FormData) {
+        setIsSubmitting(true)
+        setStatus(null)
+        
+        try {
+            const result = await updateAdminLinks(formData)
+            if (result.success) {
+                setStatus({ message: result.message || 'Enlaces actualizados con éxito' })
+                router.refresh()
+            } else {
+                setStatus({ error: result.error || 'Error al actualizar los enlaces' })
+            }
+        } catch (error) {
+            setStatus({ error: 'Error al procesar la solicitud' })
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
     return (
         <form
-            action=""
+            action={handleSubmit}
             method="POST"
             className="flex flex-col items-center min-h-screen px-4 py-10 space-y-6 text-[var(--color-neutral-light)] font-body"
             style={{
@@ -84,12 +108,24 @@ export function SortableLinksForm({
                 ))}
             </ul>
 
+            {/* Mensaje de estado */}
+            {status && (
+                <div className={`w-full max-w-md p-3 rounded-md text-center ${
+                    status.message ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                    {status.message || status.error}
+                </div>
+            )}
+
             {/* Botón para guardar cambios */}
             <button
                 type="submit"
-                className="px-4 py-2 text-white bg-blue-600 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                disabled={isSubmitting}
+                className={`px-4 py-2 text-white ${
+                    isSubmitting ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                } rounded-md shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
             >
-                Guardar Cambios
+                {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
             </button>
         </form>
     )

@@ -1,21 +1,12 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { SortableLinksForm } from '@/app/components/SortableLinksForm'
-import { getUserFromCookie } from '@/lib/auth'
 
 export default async function Page() {
     const filePath = path.resolve(process.cwd(), 'src/data/links.json')
     const file = await fs.readFile(filePath, 'utf-8')
     const links = JSON.parse(file)
-
-    const user = await getUserFromCookie()
-    const isAdmin = user === process.env.ADMIN_USER
-
     const description = links.description || ""; // Obtener la descripción del archivo JSON
 
-    if (isAdmin) {
-        return <SortableLinksForm links={links.items} description={description} />;
-    }
 
     // Vista de solo lectura para usuarios comunes
     return (
