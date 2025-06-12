@@ -1,13 +1,11 @@
 
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import AdminBadge from '@/app/components/AdminBadge';
 import {
   ClerkProvider,
   SignedIn,
   SignedOut,
   SignInButton,
-  SignUpButton,
   UserButton,
 } from '@clerk/nextjs';
 
