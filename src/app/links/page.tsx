@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { SortableLinksForm } from '@/components/SortableLinksForm'
+import { SortableLinksForm } from '@/app/components/SortableLinksForm'
 import { getUserFromCookie } from '@/lib/auth'
 
 export default async function Page() {

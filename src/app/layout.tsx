@@ -1,6 +1,7 @@
+
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import AdminBadge from '@/components/AdminBadge';
+import AdminBadge from '@/app/components/AdminBadge';
 import {
   ClerkProvider,
   SignedIn,

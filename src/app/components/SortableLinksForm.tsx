@@ -23,7 +23,7 @@ export function SortableLinksForm({
 
     return (
         <form
-            action="/api/update-links"
+            action=""
             method="POST"
             className="flex flex-col items-center min-h-screen px-4 py-10 space-y-6 text-[var(--color-neutral-light)] font-body"
             style={{
