@@ -10,6 +10,7 @@ interface Link {
 interface LinksData {
   links: Link[]
   description: string
+  profileImage: string
 }
 
 export async function getLinksData(): Promise<LinksData> {
@@ -20,13 +21,15 @@ export async function getLinksData(): Promise<LinksData> {
     
     return {
       links: data.items || [],
-      description: data.description || ""
+      description: data.description || "",
+      profileImage: data.profileImage || "/profile.jpg"
     }
   } catch (error) {
     console.error('Error al cargar los enlaces:', error)
     return {
       links: [],
-      description: ""
+      description: "",
+      profileImage: "/profile.jpg"
     }
   }
 }

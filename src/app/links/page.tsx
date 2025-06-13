@@ -1,7 +1,7 @@
 import { getLinksData } from '@/utils/links'
 
 export default async function Page() {
-    const { links, description } = await getLinksData()
+    const { links, description, profileImage } = await getLinksData()
 
 
     // Vista de solo lectura para usuarios comunes
@@ -17,9 +17,9 @@ export default async function Page() {
         >
             {/* Foto de perfil */}
             <img
-                src="/profile.jpg" // asegúrate de tener esta imagen en /public
+                src={profileImage} // Ahora usa la imagen dinámica
                 alt="Foto de perfil Biomechanics"
-                className="w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg"
+                className="w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
             />
 
             {/* Nombre */}
