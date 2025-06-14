@@ -7,10 +7,13 @@ interface Link {
   label: string
 }
 
+export type ProfileImageType = 'image' | 'video' | 'gif'
+
 interface LinksData {
   links: Link[]
   description: string
   profileImage: string
+  profileImageType: ProfileImageType
 }
 
 export async function getLinksData(): Promise<LinksData> {
@@ -22,14 +25,16 @@ export async function getLinksData(): Promise<LinksData> {
     return {
       links: data.items || [],
       description: data.description || "",
-      profileImage: data.profileImage || "/profile.jpg"
+      profileImage: data.profileImage || "/profile.jpg",
+      profileImageType: data.profileImageType || "image"
     }
   } catch (error) {
     console.error('Error al cargar los enlaces:', error)
     return {
       links: [],
       description: "",
-      profileImage: "/profile.jpg"
+      profileImage: "/profile.jpg",
+      profileImageType: "image"
     }
   }
 }

@@ -1,8 +1,34 @@
 import { getLinksData } from '@/utils/links'
 
 export default async function Page() {
-    const { links, description, profileImage } = await getLinksData()
+    const { links, description, profileImage, profileImageType } = await getLinksData()
 
+    // Función para renderizar el avatar según su tipo
+    const renderAvatar = () => {
+        const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
+        
+        if (profileImageType === 'video') {
+            return (
+                <video 
+                    src={profileImage}
+                    className={commonClasses}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                />
+            )
+        } else {
+            // Para 'image' y 'gif'
+            return (
+                <img
+                    src={profileImage}
+                    alt="Foto de perfil Biomechanics"
+                    className={commonClasses}
+                />
+            )
+        }
+    }
 
     // Vista de solo lectura para usuarios comunes
     return (
@@ -15,12 +41,8 @@ export default async function Page() {
                 backgroundColor: "var(--color-neutral-base)",
             }}
         >
-            {/* Foto de perfil */}
-            <img
-                src={profileImage} // Ahora usa la imagen dinámica
-                alt="Foto de perfil Biomechanics"
-                className="w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
-            />
+            {/* Avatar dinámico */}
+            {renderAvatar()}
 
             {/* Nombre */}
             <h1

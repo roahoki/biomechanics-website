@@ -6,15 +6,18 @@ import { updateAdminLinks } from '@/app/admin/_actions'
 import { useRouter } from 'next/navigation'
 import { useSupabaseClient } from '@/lib/supabase-auth'
 import { useUser } from '@clerk/nextjs'
+import { getFileType, isValidAvatarFile, getFileTypeText, type ProfileImageType } from '@/utils/file-utils'
 
 export function SortableLinksForm({
     links,
     description,
     profileImage,
+    profileImageType,
 }: {
     links: { id: number; url: string; label: string }[]
     description: string
     profileImage: string
+    profileImageType: ProfileImageType
 }) {
     const listRef = useRef<HTMLUListElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -25,7 +28,8 @@ export function SortableLinksForm({
     const [status, setStatus] = useState<{ message?: string; error?: string } | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
-    const [previewImage, setPreviewImage] = useState<string>(profileImage)
+    const [previewUrl, setPreviewUrl] = useState<string>(profileImage)
+    const [previewType, setPreviewType] = useState<ProfileImageType>(profileImageType)
     const [uploadingImage, setUploadingImage] = useState(false)
 
     useEffect(() => {
@@ -41,28 +45,39 @@ export function SortableLinksForm({
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (file) {
+            // Validar archivo
+            if (!isValidAvatarFile(file)) {
+                setStatus({ error: 'Archivo no válido. Formatos soportados: JPG, PNG, WebP, GIF, MP4, WebM. Máximo 50MB.' })
+                return
+            }
+
             setSelectedFile(file)
+            const fileType = getFileType(file)
+            setPreviewType(fileType)
             
-            // Crear preview de la imagen
+            // Crear preview del archivo
             const reader = new FileReader()
             reader.onload = (e) => {
-                setPreviewImage(e.target?.result as string)
+                setPreviewUrl(e.target?.result as string)
             }
             reader.readAsDataURL(file)
+            
+            setStatus(null) // Limpiar errores previos
         }
     }
 
-    // Subir imagen a Supabase
-    const uploadImageToSupabase = async (file: File): Promise<string | null> => {
+    // Subir archivo a Supabase
+    const uploadFileToSupabase = async (file: File): Promise<string | null> => {
         try {
             if (!user) {
                 throw new Error('Usuario no autenticado')
             }
 
             const fileExt = file.name.split('.').pop()
-            const fileName = `profile-${Date.now()}.${fileExt}`
+            const fileType = getFileType(file)
+            const fileName = `${fileType}-${Date.now()}.${fileExt}`
             
-            console.log('🔄 Subiendo imagen de perfil...')
+            console.log(`🔄 Subiendo ${fileType}:`, fileName)
             
             const { data, error } = await supabase.storage
                 .from('avatars')
@@ -73,7 +88,7 @@ export function SortableLinksForm({
                 })
 
             if (error) {
-                console.error('❌ Error subiendo imagen:', error)
+                console.error(`❌ Error subiendo ${fileType}:`, error)
                 throw error
             }
 
@@ -82,11 +97,11 @@ export function SortableLinksForm({
                 .from('avatars')
                 .getPublicUrl(fileName)
 
-            console.log('✅ Imagen subida exitosamente:', publicUrlData.publicUrl)
+            console.log(`✅ ${fileType} subido exitosamente:`, publicUrlData.publicUrl)
             return publicUrlData.publicUrl
 
         } catch (error) {
-            console.error('💥 Error en uploadImageToSupabase:', error)
+            console.error('💥 Error en uploadFileToSupabase:', error)
             throw error
         }
     }
@@ -96,15 +111,18 @@ export function SortableLinksForm({
         setStatus(null)
         
         try {
-            // Si hay una nueva imagen seleccionada, subirla primero
-            let newImageUrl = null
+            // Si hay un nuevo archivo seleccionado, subirlo primero
+            let newFileUrl = null
+            let newFileType = previewType
+            
             if (selectedFile) {
                 setUploadingImage(true)
-                setStatus({ message: 'Subiendo imagen...' })
+                setStatus({ message: `Subiendo ${previewType}...` })
                 
-                newImageUrl = await uploadImageToSupabase(selectedFile)
-                if (newImageUrl) {
-                    formData.append('newProfileImage', newImageUrl)
+                newFileUrl = await uploadFileToSupabase(selectedFile)
+                if (newFileUrl) {
+                    formData.append('newProfileImage', newFileUrl)
+                    formData.append('newProfileImageType', newFileType)
                 }
                 
                 setUploadingImage(false)
@@ -129,6 +147,33 @@ export function SortableLinksForm({
         }
     }
 
+    // Componente para renderizar el avatar según su tipo
+    const renderAvatar = () => {
+        const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
+        
+        if (previewType === 'video') {
+            return (
+                <video 
+                    src={previewUrl}
+                    className={commonClasses}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                />
+            )
+        } else {
+            // Para 'image' y 'gif'
+            return (
+                <img
+                    src={previewUrl}
+                    alt="Avatar"
+                    className={commonClasses}
+                />
+            )
+        }
+    }
+
     return (
         <form
             action={handleSubmit}
@@ -141,29 +186,29 @@ export function SortableLinksForm({
                 backgroundColor: "var(--color-neutral-base)",
             }}
         >
-            {/* Foto de perfil con funcionalidad de cambio */}
+            {/* Avatar con funcionalidad de cambio */}
             <div className="relative group">
-                <img
-                    src={previewImage}
-                    alt="Foto de perfil Biomechanics"
-                    className="w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
-                />
+                {renderAvatar()}
                 
-                {/* Overlay para cambiar imagen */}
+                {/* Overlay para cambiar archivo */}
                 <div 
                     className="absolute inset-0 w-32 h-32 rounded-full bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                     onClick={() => fileInputRef.current?.click()}
                 >
-                    <span className="text-white text-sm font-medium">
+                    <span className="text-white text-sm font-medium text-center">
                         {selectedFile ? 'Cambiar' : 'Editar'}
+                        <br />
+                        <span className="text-xs">
+                            {getFileTypeText(previewType)}
+                        </span>
                     </span>
                 </div>
                 
-                {/* Input de archivo oculto */}
+                {/* Input de archivo oculto - ahora acepta más tipos */}
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/mp4,video/webm,video/quicktime"
                     onChange={handleFileSelect}
                     className="hidden"
                 />
@@ -171,7 +216,14 @@ export function SortableLinksForm({
                 {/* Indicador de cambio pendiente */}
                 {selectedFile && (
                     <div className="absolute -bottom-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
-                        Nuevo
+                        {getFileTypeText(previewType)}
+                    </div>
+                )}
+                
+                {/* Indicador del tipo actual */}
+                {!selectedFile && previewType !== 'image' && (
+                    <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                        {getFileTypeText(previewType)}
                     </div>
                 )}
             </div>
@@ -179,10 +231,11 @@ export function SortableLinksForm({
             {/* Información del archivo seleccionado */}
             {selectedFile && (
                 <div className="w-full max-w-md p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800 text-sm">
-                    <p><strong>Nueva imagen:</strong> {selectedFile.name}</p>
+                    <p><strong>Nuevo {getFileTypeText(previewType).toLowerCase()}:</strong> {selectedFile.name}</p>
                     <p><strong>Tamaño:</strong> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p><strong>Tipo:</strong> {selectedFile.type}</p>
                     <p className="text-xs mt-1">
-                        La imagen se guardará al presionar "Guardar Cambios"
+                        El {getFileTypeText(previewType).toLowerCase()} se guardará al presionar "Guardar Cambios"
                     </p>
                 </div>
             )}
@@ -251,7 +304,7 @@ export function SortableLinksForm({
                 }`}
             >
                 {uploadingImage 
-                    ? 'Subiendo imagen...' 
+                    ? `Subiendo ${getFileTypeText(previewType).toLowerCase()}...` 
                     : isSubmitting 
                         ? 'Guardando...' 
                         : 'Guardar Cambios'
@@ -261,9 +314,12 @@ export function SortableLinksForm({
             {/* Información adicional */}
             <div className="text-sm text-gray-400 max-w-md text-center">
                 {selectedFile && (
-                    <p>Se subirá una nueva imagen de perfil al guardar los cambios.</p>
+                    <p>Se subirá un nuevo {getFileTypeText(previewType).toLowerCase()} al guardar los cambios.</p>
                 )}
-                <p>Formatos soportados: JPG, PNG, WebP. Tamaño máximo: 5MB</p>
+                <p>Formatos soportados: JPG, PNG, WebP, GIF, MP4, WebM. Tamaño máximo: 50MB</p>
+                <p className="mt-1 text-xs">
+                    Los videos se reproducen automáticamente en bucle y sin sonido.
+                </p>
             </div>
         </form>
     )

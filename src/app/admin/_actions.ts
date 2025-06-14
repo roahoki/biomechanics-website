@@ -60,11 +60,16 @@ export async function updateAdminLinks(formData: FormData) {
     // Obtener la descripción del formulario
     const description = formData.get('description')?.toString() || currentData.description || ''
     
-    // Manejar la imagen de perfil si se proporciona una nueva
+    // Manejar la imagen/video de perfil si se proporciona una nueva
     let profileImage = currentData.profileImage
+    let profileImageType = currentData.profileImageType
+    
     const newProfileImage = formData.get('newProfileImage')?.toString()
+    const newProfileImageType = formData.get('newProfileImageType')?.toString()
+    
     if (newProfileImage && newProfileImage.trim() !== '') {
       profileImage = newProfileImage.trim()
+      profileImageType = (newProfileImageType as any) || 'image'
     }
     
     // Procesar los enlaces
@@ -83,6 +88,7 @@ export async function updateAdminLinks(formData: FormData) {
     const newData = {
       description,
       profileImage,
+      profileImageType,
       items: newItems
     }
     

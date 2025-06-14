@@ -361,19 +361,171 @@ try {
 6. **Separación de Responsabilidades**: Frontend UI, Backend persistencia
 7. **Revalidación Automática**: Todos los usuarios ven cambios inmediatos
 
-## 🔧 Troubleshooting
+## 🎬 Extensión: Soporte para Videos y GIFs
 
-### Error: "alg Header Parameter value not allowed"
-- Verificar JWKS endpoint en Supabase
-- Confirmar JWT template en Clerk
-- Asegurar que el template se llame 'supabase'
+### Configuración Adicional del Bucket
 
-### Error: "new row violates row-level security policy"
-- Verificar políticas RLS en Supabase
-- Confirmar que el usuario esté autenticado
-- Revisar configuración del bucket
+#### A. Actualizar Tipos MIME Permitidos
+```bash
+# En Supabase Dashboard
+Storage → Buckets → avatars → Settings
+- Allowed MIME types: image/*, video/mp4, video/webm, video/quicktime
+- File size limit: 50MB (aumentado para videos)
+```
 
-### Error: "Unauthorized"
-- Verificar token JWT en consola
-- Confirmar que Supabase reciba el token
-- Revisar configuración de fetch en cliente
+#### B. Tipos de Archivo Soportados
+```typescript
+export type ProfileImageType = 'image' | 'video' | 'gif'
+
+export function getFileType(file: File): ProfileImageType {
+  const type = file.type.toLowerCase()
+  
+  if (type.startsWith('video/')) {
+    return 'video'
+  } else if (type === 'image/gif') {
+    return 'gif'
+  } else if (type.startsWith('image/')) {
+    return 'image'
+  }
+  
+  // Fallback basado en extensión
+  const extension = file.name.split('.').pop()?.toLowerCase()
+  if (['mp4', 'webm', 'mov', 'avi'].includes(extension || '')) {
+    return 'video'
+  } else if (extension === 'gif') {
+    return 'gif'
+  }
+  
+  return 'image'
+}
+```
+
+#### C. Validación de Archivos
+```typescript
+export function isValidAvatarFile(file: File): boolean {
+  const maxSize = 50 * 1024 * 1024 // 50MB para videos
+  const supportedTypes = [
+    // Imágenes
+    'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+    // Videos
+    'video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'
+  ]
+  
+  return file.size <= maxSize && supportedTypes.includes(file.type.toLowerCase())
+}
+```
+
+### Renderizado Dinámico del Avatar
+
+#### A. Componente Renderizador
+```tsx
+const renderAvatar = () => {
+  const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
+  
+  if (previewType === 'video') {
+    return (
+      <video 
+        src={previewUrl}
+        className={commonClasses}
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+    )
+  } else {
+    // Para 'image' y 'gif'
+    return (
+      <img
+        src={previewUrl}
+        alt="Avatar"
+        className={commonClasses}
+      />
+    )
+  }
+}
+```
+
+#### B. Input de Archivo Extendido
+```tsx
+<input
+  ref={fileInputRef}
+  type="file"
+  accept="image/*,video/mp4,video/webm,video/quicktime"
+  onChange={handleFileSelect}
+  className="hidden"
+/>
+```
+
+#### C. Indicadores Visuales
+```tsx
+{/* Indicador del tipo actual */}
+{!selectedFile && previewType !== 'image' && (
+  <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+    {getFileTypeText(previewType)}
+  </div>
+)}
+
+{/* Indicador de cambio pendiente */}
+{selectedFile && (
+  <div className="absolute -bottom-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
+    {getFileTypeText(previewType)}
+  </div>
+)}
+```
+
+### Estructura de Datos Actualizada
+
+#### JSON con Soporte de Tipos
+```json
+{
+  "description": "Mi descripción",
+  "profileImage": "https://supabase.co/storage/v1/object/public/avatars/video-123456.mp4",
+  "profileImageType": "video",
+  "items": [...]
+}
+```
+
+### Características de Videos
+
+#### A. Reproducción Automática
+- **autoPlay**: Inicia automáticamente
+- **loop**: Se reproduce en bucle continuo
+- **muted**: Sin sonido (requerido para autoplay)
+- **playsInline**: No pantalla completa en móviles
+
+#### B. Optimizaciones
+- **Tamaño**: Máximo 50MB
+- **Formatos**: MP4, WebM, QuickTime
+- **Compresión**: Se recomienda comprimir videos antes de subir
+
+#### C. Consideraciones UX
+- Los videos se muestran como avatars circulares
+- Reproducción silenciosa para no molestar
+- Carga automática al cambiar de página
+- Preview inmediato al seleccionar archivo
+
+### Beneficios de Videos/GIFs como Avatar
+
+1. **Más Expresivo**: Mayor personalidad y dinamismo
+2. **Diferenciación**: Destaca entre perfiles estáticos  
+3. **Engagement**: Capta más atención del usuario
+4. **Modernidad**: Sigue tendencias actuales de redes sociales
+5. **Creatividad**: Permite expresión artística única
+
+### Consideraciones Técnicas
+
+#### A. Rendimiento
+- Videos consumen más ancho de banda
+- Tiempo de carga mayor que imágenes
+- Procesamiento adicional en el navegador
+
+#### B. Accesibilidad
+- Debe funcionar sin JavaScript
+- Fallback a imagen estática
+- Controles de accesibilidad para usuarios con epilepsia
+
+#### C. SEO y Metadatos
+- Videos no indexables como imágenes
+- Considerar imagen de fallback para metadatos
+- Tiempo de carga afecta Core Web Vitals

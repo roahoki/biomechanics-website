@@ -11,17 +11,19 @@ export default async function AdminSortableLinks(params: {
         redirect('/')
     }
 
-    const { links, description, profileImage } = await getLinksData()
+    const { links, description, profileImage, profileImageType } = await getLinksData()
 
     log('links', links)
     log('description', description)
     log('profileImage', profileImage)
+    log('profileImageType', profileImageType)
 
     return (
             <SortableLinksForm 
                 links={links} 
                 description={description} 
                 profileImage={profileImage}
+                profileImageType={profileImageType}
             />
     )
 }
