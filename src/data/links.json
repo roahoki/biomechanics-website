@@ -2,34 +2,34 @@
   "description": "🎶experiencing the alive like never before",
   "profileImage": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/avatars/gif-1749859634497.gif",
   "profileImageType": "gif",
-  "backgroundColor": "#c23b20",
+  "backgroundColor": "#3300ff",
   "backgroundSettings": {
     "type": "color",
-    "color": "#c23b20",
+    "color": "#3300ff",
     "imageUrl": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/avatars/image-1749864437429.jpg",
     "imageOpacity": 0.8
   },
   "styleSettings": {
-    "titleColor": "#ffffff",
-    "linkCardBackgroundColor": "#dfd8d8",
-    "linkCardTextColor": "#000000"
+    "titleColor": "#f5f5f4",
+    "linkCardBackgroundColor": "#5d509f",
+    "linkCardTextColor": "#f5f5f4"
   },
   "socialIcons": {
     "instagram": {
       "url": "https://www.instagram.com/biomechanics.wav",
-      "color": "#000000"
+      "color": "#c23b20"
     },
     "soundcloud": {
       "url": "https://www.soundcloud.com/biomechanics-wav",
-      "color": "#000000"
+      "color": "#c23b20"
     },
     "youtube": {
       "url": "https://youtube.com/@biomechanics-wav",
-      "color": "#000000"
+      "color": "#c23b20"
     },
     "tiktok": {
       "url": "https://www.tiktok.com/@biomechanics.wav",
-      "color": "#000000"
+      "color": "#c23b20"
     }
   },
   "items": [
