@@ -1,7 +1,8 @@
 import { getLinksData } from '@/utils/links'
+import { SocialIcon } from '@/app/components/SocialIcon'
 
 export default async function Page() {
-    const { links, description, profileImage, profileImageType } = await getLinksData()
+    const { links, description, profileImage, profileImageType, socialIcons } = await getLinksData()
 
     // Función para renderizar el avatar según su tipo
     const renderAvatar = () => {
@@ -57,20 +58,36 @@ export default async function Page() {
                 {description}
             </p>
 
-            {/* Redes sociales */}
+            {/* Redes sociales con colores personalizables */}
             <div className="flex gap-6 mb-8">
-                <a href="https://www.instagram.com/biomechanics.wav" target="_blank" rel="noopener noreferrer">
-                    <img src="/icons/instagram.svg" alt="Instagram" className="w-6 h-6 hover:scale-110 transition-transform" />
-                </a>
-                <a href="https://www.soundcloud.com/biomechanics-wav" target="_blank" rel="noopener noreferrer">
-                    <img src="/icons/soundcloud.svg" alt="SoundCloud" className="w-6 h-6 hover:scale-110 transition-transform" />
-                </a>
-                <a href="https://youtube.com/@biomechanics-wav" target="_blank" rel="noopener noreferrer">
-                    <img src="/icons/youtube.svg" alt="YouTube" className="w-6 h-6 hover:scale-110 transition-transform" />
-                </a>
-                <a href="https://www.tiktok.com/@biomechanics.wav" target="_blank" rel="noopener noreferrer">
-                    <img src="/icons/tiktok.svg" alt="TikTok" className="w-6 h-6 hover:scale-110 transition-transform" />
-                </a>
+                {socialIcons.instagram && (
+                    <SocialIcon 
+                        icon="instagram" 
+                        url={socialIcons.instagram.url} 
+                        color={socialIcons.instagram.color} 
+                    />
+                )}
+                {socialIcons.soundcloud && (
+                    <SocialIcon 
+                        icon="soundcloud" 
+                        url={socialIcons.soundcloud.url} 
+                        color={socialIcons.soundcloud.color} 
+                    />
+                )}
+                {socialIcons.youtube && (
+                    <SocialIcon 
+                        icon="youtube" 
+                        url={socialIcons.youtube.url} 
+                        color={socialIcons.youtube.color} 
+                    />
+                )}
+                {socialIcons.tiktok && (
+                    <SocialIcon 
+                        icon="tiktok" 
+                        url={socialIcons.tiktok.url} 
+                        color={socialIcons.tiktok.color} 
+                    />
+                )}
             </div>
 
             {/* Lista de links como tarjetas */}

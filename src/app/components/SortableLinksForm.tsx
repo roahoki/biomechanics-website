@@ -7,17 +7,20 @@ import { useRouter } from 'next/navigation'
 import { useSupabaseClient } from '@/lib/supabase-auth'
 import { useUser } from '@clerk/nextjs'
 import { getFileType, isValidAvatarFile, getFileTypeText, type ProfileImageType } from '@/utils/file-utils'
+import { type SocialIcons } from '@/utils/links'
 
 export function SortableLinksForm({
     links,
     description,
     profileImage,
     profileImageType,
+    socialIcons,
 }: {
     links: { id: number; url: string; label: string }[]
     description: string
     profileImage: string
     profileImageType: ProfileImageType
+    socialIcons: SocialIcons
 }) {
     const listRef = useRef<HTMLUListElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -31,6 +34,12 @@ export function SortableLinksForm({
     const [previewUrl, setPreviewUrl] = useState<string>(profileImage)
     const [previewType, setPreviewType] = useState<ProfileImageType>(profileImageType)
     const [uploadingImage, setUploadingImage] = useState(false)
+    const [socialIconColors, setSocialIconColors] = useState({
+        instagram: socialIcons.instagram?.color || '#E4405F',
+        soundcloud: socialIcons.soundcloud?.color || '#FF5500',
+        youtube: socialIcons.youtube?.color || '#FF0000',
+        tiktok: socialIcons.tiktok?.color || '#000000',
+    })
 
     useEffect(() => {
         if (listRef.current) {
@@ -64,6 +73,19 @@ export function SortableLinksForm({
             
             setStatus(null) // Limpiar errores previos
         }
+    }
+
+    // Validar color hex
+    const isValidHexColor = (color: string): boolean => {
+        return /^#([0-9A-F]{3}){1,2}$/i.test(color)
+    }
+
+    // Manejar cambio de color de icono social
+    const handleSocialIconColorChange = (platform: string, color: string) => {
+        setSocialIconColors(prev => ({
+            ...prev,
+            [platform]: color
+        }))
     }
 
     // Subir archivo a Supabase
@@ -127,6 +149,13 @@ export function SortableLinksForm({
                 
                 setUploadingImage(false)
             }
+            
+            // Agregar colores de iconos sociales al FormData
+            Object.entries(socialIconColors).forEach(([platform, color]) => {
+                if (isValidHexColor(color)) {
+                    formData.append(`socialIcon_${platform}_color`, color)
+                }
+            })
             
             setStatus({ message: 'Guardando cambios...' })
             
@@ -256,6 +285,55 @@ export function SortableLinksForm({
                 placeholder="Escribe una descripción (máximo 300 caracteres)"
                 className="w-full max-w-2xl p-3 text-center text-lg border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-6"
             />
+
+            {/* Configuración de colores de iconos sociales */}
+            <div className="w-full max-w-md bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-6 border border-white/20">
+                <h3 className="text-xl font-semibold text-[var(--color-secondary)] mb-4 text-center">
+                    Colores de Iconos Sociales
+                </h3>
+                <div className="space-y-4">
+                    {Object.entries(socialIconColors).map(([platform, color]) => (
+                        <div key={platform} className="flex items-center space-x-3">
+                            <label className="flex-1 text-sm font-medium text-white capitalize min-w-[80px]">
+                                {platform}:
+                            </label>
+                            <div className="flex items-center space-x-2">
+                                {/* Vista previa del color */}
+                                <div 
+                                    className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                                    style={{ backgroundColor: isValidHexColor(color) ? color : '#000000' }}
+                                />
+                                {/* Input de color hex */}
+                                <input
+                                    type="text"
+                                    value={color}
+                                    onChange={(e) => handleSocialIconColorChange(platform, e.target.value)}
+                                    placeholder="#000000"
+                                    maxLength={7}
+                                    className={`w-24 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 text-black ${
+                                        isValidHexColor(color) 
+                                            ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
+                                            : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                                    }`}
+                                />
+                                {/* Input de color nativo como respaldo */}
+                                <input
+                                    type="color"
+                                    value={isValidHexColor(color) ? color : '#000000'}
+                                    onChange={(e) => handleSocialIconColorChange(platform, e.target.value)}
+                                    className="w-8 h-8 border border-gray-300 rounded cursor-pointer flex-shrink-0"
+                                    title={`Seleccionar color para ${platform}`}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="mt-4 p-3 bg-blue-500/10 rounded-md border border-blue-500/20">
+                    <p className="text-xs text-blue-200 text-center">
+                        💡 Usa formato hex (#000000) o selecciona con el selector de color
+                    </p>
+                </div>
+            </div>
 
             {/* Lista de links como tarjetas editables */}
             <ul ref={listRef} className="w-full max-w-md space-y-4">

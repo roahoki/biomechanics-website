@@ -2,6 +2,24 @@
   "description": "🎶experiencing the alive like never before",
   "profileImage": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/avatars/gif-1749859634497.gif",
   "profileImageType": "gif",
+  "socialIcons": {
+    "instagram": {
+      "url": "https://www.instagram.com/biomechanics.wav",
+      "color": "#FF5500"
+    },
+    "soundcloud": {
+      "url": "https://www.soundcloud.com/biomechanics-wav",
+      "color": "#FF5500"
+    },
+    "youtube": {
+      "url": "https://youtube.com/@biomechanics-wav",
+      "color": "#FF5500"
+    },
+    "tiktok": {
+      "url": "https://www.tiktok.com/@biomechanics.wav",
+      "color": "#FF5500"
+    }
+  },
   "items": [
     {
       "id": 1,

@@ -72,6 +72,27 @@ export async function updateAdminLinks(formData: FormData) {
       profileImageType = (newProfileImageType as any) || 'image'
     }
     
+    // Manejar colores de iconos sociales
+    const socialIcons = {
+      ...currentData.socialIcons,
+      instagram: {
+        ...currentData.socialIcons.instagram,
+        color: formData.get('socialIcon_instagram_color')?.toString() || currentData.socialIcons.instagram?.color || '#E4405F'
+      },
+      soundcloud: {
+        ...currentData.socialIcons.soundcloud,
+        color: formData.get('socialIcon_soundcloud_color')?.toString() || currentData.socialIcons.soundcloud?.color || '#FF5500'
+      },
+      youtube: {
+        ...currentData.socialIcons.youtube,
+        color: formData.get('socialIcon_youtube_color')?.toString() || currentData.socialIcons.youtube?.color || '#FF0000'
+      },
+      tiktok: {
+        ...currentData.socialIcons.tiktok,
+        color: formData.get('socialIcon_tiktok_color')?.toString() || currentData.socialIcons.tiktok?.color || '#000000'
+      }
+    }
+    
     // Procesar los enlaces
     const ids = formData.getAll('id').map(id => Number(id))
     const urls = formData.getAll('url').map(url => url.toString())
@@ -89,6 +110,7 @@ export async function updateAdminLinks(formData: FormData) {
       description,
       profileImage,
       profileImageType,
+      socialIcons,
       items: newItems
     }
     

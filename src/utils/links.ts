@@ -9,11 +9,24 @@ interface Link {
 
 export type ProfileImageType = 'image' | 'video' | 'gif'
 
+export interface SocialIcon {
+  url: string
+  color: string
+}
+
+export interface SocialIcons {
+  instagram?: SocialIcon
+  soundcloud?: SocialIcon
+  youtube?: SocialIcon
+  tiktok?: SocialIcon
+}
+
 interface LinksData {
   links: Link[]
   description: string
   profileImage: string
   profileImageType: ProfileImageType
+  socialIcons: SocialIcons
 }
 
 export async function getLinksData(): Promise<LinksData> {
@@ -26,7 +39,8 @@ export async function getLinksData(): Promise<LinksData> {
       links: data.items || [],
       description: data.description || "",
       profileImage: data.profileImage || "/profile.jpg",
-      profileImageType: data.profileImageType || "image"
+      profileImageType: data.profileImageType || "image",
+      socialIcons: data.socialIcons || {}
     }
   } catch (error) {
     console.error('Error al cargar los enlaces:', error)
@@ -34,7 +48,8 @@ export async function getLinksData(): Promise<LinksData> {
       links: [],
       description: "",
       profileImage: "/profile.jpg",
-      profileImageType: "image"
+      profileImageType: "image",
+      socialIcons: {}
     }
   }
 }
