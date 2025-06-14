@@ -11,7 +11,7 @@ export default async function AdminSortableLinks(params: {
         redirect('/')
     }
 
-    const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings } = await getLinksData()
+    const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings } = await getLinksData()
 
     log('links', links)
     log('description', description)
@@ -20,6 +20,7 @@ export default async function AdminSortableLinks(params: {
     log('socialIcons', socialIcons)
     log('backgroundColor', backgroundColor)
     log('backgroundSettings', backgroundSettings)
+    log('styleSettings', styleSettings)
 
     return (
             <SortableLinksForm 
@@ -30,6 +31,7 @@ export default async function AdminSortableLinks(params: {
                 socialIcons={socialIcons}
                 backgroundColor={backgroundColor || '#1a1a1a'}
                 backgroundSettings={backgroundSettings || { type: 'color', color: backgroundColor || '#1a1a1a', imageOpacity: 0.5 }}
+                styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000' }}
             />
     )
 }

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useSupabaseClient } from '@/lib/supabase-auth'
 import { useUser } from '@clerk/nextjs'
 import { getFileType, isValidAvatarFile, getFileTypeText, type ProfileImageType } from '@/utils/file-utils'
-import { type SocialIcons, type BackgroundSettings } from '@/utils/links'
+import { type SocialIcons, type BackgroundSettings, type StyleSettings } from '@/utils/links'
 
 export function SortableLinksForm({
     links,
@@ -17,6 +17,7 @@ export function SortableLinksForm({
     socialIcons,
     backgroundColor,
     backgroundSettings,
+    styleSettings,
 }: {
     links: { id: number; url: string; label: string }[]
     description: string
@@ -25,6 +26,7 @@ export function SortableLinksForm({
     socialIcons: SocialIcons
     backgroundColor: string
     backgroundSettings: BackgroundSettings
+    styleSettings: StyleSettings
 }) {
     const listRef = useRef<HTMLUListElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -51,6 +53,12 @@ export function SortableLinksForm({
     const [backgroundImageOpacity, setBackgroundImageOpacity] = useState(backgroundSettings.imageOpacity || 0.5)
     const [selectedBackgroundFile, setSelectedBackgroundFile] = useState<File | null>(null)
     const [backgroundPreviewUrl, setBackgroundPreviewUrl] = useState(backgroundSettings.imageUrl || '')
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [linkToDelete, setLinkToDelete] = useState<number | null>(null)
+    const [currentLinks, setCurrentLinks] = useState(links)
+    const [titleColor, setTitleColor] = useState(styleSettings.titleColor || '#ffffff')
+    const [linkCardBackgroundColor, setLinkCardBackgroundColor] = useState(styleSettings.linkCardBackgroundColor || '#ffffff')
+    const [linkCardTextColor, setLinkCardTextColor] = useState(styleSettings.linkCardTextColor || '#000000')
 
     useEffect(() => {
         if (listRef.current) {
@@ -60,6 +68,11 @@ export function SortableLinksForm({
             })
         }
     }, [])
+
+    // Sincronizar currentLinks con los props cuando cambien
+    useEffect(() => {
+        setCurrentLinks(links)
+    }, [links])
 
     // Manejar selección de archivo
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,6 +139,45 @@ export function SortableLinksForm({
             
             setStatus(null) // Limpiar errores previos
         }
+    }
+
+    // Función para agregar un nuevo link
+    const addNewLink = () => {
+        const newId = Math.max(...currentLinks.map(link => link.id), 0) + 1
+        const newLink = {
+            id: newId,
+            url: '',
+            label: ''
+        }
+        setCurrentLinks([...currentLinks, newLink])
+    }
+
+    // Función para eliminar un link
+    const removeLink = (id: number) => {
+        setLinkToDelete(id)
+        setShowDeleteModal(true)
+    }
+
+    // Confirmar eliminación
+    const confirmDelete = () => {
+        if (linkToDelete !== null) {
+            setCurrentLinks(currentLinks.filter(link => link.id !== linkToDelete))
+            setShowDeleteModal(false)
+            setLinkToDelete(null)
+        }
+    }
+
+    // Cancelar eliminación
+    const cancelDelete = () => {
+        setShowDeleteModal(false)
+        setLinkToDelete(null)
+    }
+
+    // Función para actualizar un link específico
+    const updateLink = (id: number, field: 'url' | 'label', value: string) => {
+        setCurrentLinks(currentLinks.map(link => 
+            link.id === id ? { ...link, [field]: value } : link
+        ))
     }
 
     // Subir archivo a Supabase
@@ -219,12 +271,24 @@ export function SortableLinksForm({
                 formData.append('backgroundImageUrl', backgroundImageUrl)
             }
             
+            // Agregar configuración de estilos
+            if (isValidHexColor(titleColor)) {
+                formData.append('titleColor', titleColor)
+            }
+            if (isValidHexColor(linkCardBackgroundColor)) {
+                formData.append('linkCardBackgroundColor', linkCardBackgroundColor)
+            }
+            if (isValidHexColor(linkCardTextColor)) {
+                formData.append('linkCardTextColor', linkCardTextColor)
+            }
+            
             setStatus({ message: 'Guardando cambios...' })
             
             const result = await updateAdminLinks(formData)
             if (result.success) {
                 setStatus({ message: result.message || 'Cambios guardados con éxito' })
                 setSelectedFile(null) // Limpiar archivo seleccionado
+                setSelectedBackgroundFile(null) // Limpiar archivo de fondo seleccionado
                 router.refresh()
             } else {
                 setStatus({ error: result.error || 'Error al guardar los cambios' })
@@ -333,8 +397,11 @@ export function SortableLinksForm({
 
             {/* Nombre */}
             <h1
-                className="text-[var(--color-secondary)] text-4xl font-display tracking-wide mb-2"
-                style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                className="text-4xl font-display tracking-wide mb-2"
+                style={{ 
+                    fontFamily: 'Space Grotesk, sans-serif',
+                    color: titleColor 
+                }}
             >
                 biomechanics.wav
             </h1>
@@ -518,32 +585,175 @@ export function SortableLinksForm({
                 </div>
             </div>
 
+            {/* Configuración de colores de elementos */}
+            <div className="w-full max-w-md bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-6 border border-white/20">
+                <h3 className="text-xl font-semibold text-[var(--color-secondary)] mb-4 text-center">
+                    Colores de Elementos
+                </h3>
+                <div className="space-y-4">
+                    {/* Color del título */}
+                    <div className="flex items-center space-x-3">
+                        <label className="flex-1 text-sm font-medium text-white min-w-[120px]">
+                            Título principal:
+                        </label>
+                        <div className="flex items-center space-x-2">
+                            <div 
+                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                                style={{ backgroundColor: isValidHexColor(titleColor) ? titleColor : '#ffffff' }}
+                            />
+                            <input
+                                type="text"
+                                value={titleColor}
+                                onChange={(e) => setTitleColor(e.target.value)}
+                                placeholder="#ffffff"
+                                maxLength={7}
+                                className={`w-24 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 text-black ${
+                                    isValidHexColor(titleColor) 
+                                        ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
+                                        : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                                }`}
+                            />
+                            <input
+                                type="color"
+                                value={isValidHexColor(titleColor) ? titleColor : '#ffffff'}
+                                onChange={(e) => setTitleColor(e.target.value)}
+                                className="w-8 h-8 border border-gray-300 rounded cursor-pointer flex-shrink-0"
+                                title="Seleccionar color del título"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Color de fondo de tarjetas */}
+                    <div className="flex items-center space-x-3">
+                        <label className="flex-1 text-sm font-medium text-white min-w-[120px]">
+                            Fondo de tarjetas:
+                        </label>
+                        <div className="flex items-center space-x-2">
+                            <div 
+                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                                style={{ backgroundColor: isValidHexColor(linkCardBackgroundColor) ? linkCardBackgroundColor : '#ffffff' }}
+                            />
+                            <input
+                                type="text"
+                                value={linkCardBackgroundColor}
+                                onChange={(e) => setLinkCardBackgroundColor(e.target.value)}
+                                placeholder="#ffffff"
+                                maxLength={7}
+                                className={`w-24 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 text-black ${
+                                    isValidHexColor(linkCardBackgroundColor) 
+                                        ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
+                                        : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                                }`}
+                            />
+                            <input
+                                type="color"
+                                value={isValidHexColor(linkCardBackgroundColor) ? linkCardBackgroundColor : '#ffffff'}
+                                onChange={(e) => setLinkCardBackgroundColor(e.target.value)}
+                                className="w-8 h-8 border border-gray-300 rounded cursor-pointer flex-shrink-0"
+                                title="Seleccionar color de fondo de tarjetas"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Color de texto de tarjetas */}
+                    <div className="flex items-center space-x-3">
+                        <label className="flex-1 text-sm font-medium text-white min-w-[120px]">
+                            Texto de tarjetas:
+                        </label>
+                        <div className="flex items-center space-x-2">
+                            <div 
+                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                                style={{ backgroundColor: isValidHexColor(linkCardTextColor) ? linkCardTextColor : '#000000' }}
+                            />
+                            <input
+                                type="text"
+                                value={linkCardTextColor}
+                                onChange={(e) => setLinkCardTextColor(e.target.value)}
+                                placeholder="#000000"
+                                maxLength={7}
+                                className={`w-24 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 text-black ${
+                                    isValidHexColor(linkCardTextColor) 
+                                        ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
+                                        : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                                }`}
+                            />
+                            <input
+                                type="color"
+                                value={isValidHexColor(linkCardTextColor) ? linkCardTextColor : '#000000'}
+                                onChange={(e) => setLinkCardTextColor(e.target.value)}
+                                className="w-8 h-8 border border-gray-300 rounded cursor-pointer flex-shrink-0"
+                                title="Seleccionar color de texto de tarjetas"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-4 p-3 bg-orange-500/10 rounded-md border border-orange-500/20">
+                    <p className="text-xs text-orange-200 text-center">
+                        🎨 Personaliza los colores del título y las tarjetas de links
+                    </p>
+                </div>
+            </div>
+
             {/* Lista de links como tarjetas editables */}
-            <ul ref={listRef} className="w-full max-w-md space-y-4">
-                {links.map((link, index) => (
-                    <li key={link.id} className="p-4 bg-[var(--color-neutral-light)] text-[var(--color-neutral-base)] rounded-lg shadow-md">
-                        <input
-                            type="hidden"
-                            name="id"
-                            defaultValue={link.id}
-                        />
-                        <input
-                            type="text"
-                            name="url"
-                            defaultValue={link.url}
-                            placeholder="URL"
-                            className="w-full p-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <input
-                            type="text"
-                            name="label"
-                            defaultValue={link.label}
-                            placeholder="Texto visible (ej: TikTok)"
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </li>
-                ))}
-            </ul>
+            <div className="w-full max-w-md">
+                {/* Botón para agregar nuevo link */}
+                <div className="mb-4 flex justify-center">
+                    <button
+                        type="button"
+                        onClick={addNewLink}
+                        className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition-colors"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Agregar Link</span>
+                    </button>
+                </div>
+
+                <ul ref={listRef} className="space-y-4">
+                    {currentLinks.map((link, index) => (
+                        <li key={link.id} className="relative p-4 rounded-lg shadow-md" style={{
+                            backgroundColor: linkCardBackgroundColor,
+                            color: linkCardTextColor
+                        }}>
+                            {/* Botón de eliminar */}
+                            <button
+                                type="button"
+                                onClick={() => removeLink(link.id)}
+                                className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                                title="Eliminar link"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            <input
+                                type="hidden"
+                                name="id"
+                                value={link.id}
+                                readOnly
+                            />
+                            <input
+                                type="text"
+                                name="url"
+                                value={link.url}
+                                onChange={(e) => updateLink(link.id, 'url', e.target.value)}
+                                placeholder="URL"
+                                className="w-full p-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <input
+                                type="text"
+                                name="label"
+                                value={link.label}
+                                onChange={(e) => updateLink(link.id, 'label', e.target.value)}
+                                placeholder="Texto visible (ej: TikTok)"
+                                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </li>
+                    ))}
+                </ul>
+            </div>
 
             {/* Mensaje de estado */}
             {status && (
@@ -582,6 +792,36 @@ export function SortableLinksForm({
                     Los videos se reproducen automáticamente en bucle y sin sonido.
                 </p>
             </div>
+
+            {/* Modal de confirmación de eliminación */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                            ¿Eliminar link?
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                            ¿Estás seguro que quieres eliminar este link? Esta acción no se puede deshacer.
+                        </p>
+                        <div className="flex space-x-3 justify-end">
+                            <button
+                                type="button"
+                                onClick={cancelDelete}
+                                className="px-4 py-2 text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
+                            >
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </form>
     )
 }

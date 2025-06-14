@@ -2,7 +2,7 @@ import { getLinksData } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
 
 export default async function Page() {
-    const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings } = await getLinksData()
+    const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings } = await getLinksData()
 
     // Función para renderizar el avatar según su tipo
     const renderAvatar = () => {
@@ -77,8 +77,11 @@ export default async function Page() {
 
                 {/* Nombre */}
                 <h1
-                    className="text-[var(--color-secondary)] text-4xl font-display tracking-wide mb-2"
-                    style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                    className="text-4xl font-display tracking-wide mb-2"
+                    style={{ 
+                        fontFamily: 'Space Grotesk, sans-serif',
+                        color: styleSettings?.titleColor || '#ffffff'
+                    }}
                 >
                     biomechanics.wav
                 </h1>
@@ -128,7 +131,11 @@ export default async function Page() {
                                 href={link.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="block p-4 bg-[var(--color-neutral-light)] text-[var(--color-neutral-base)] rounded-lg shadow-md hover:bg-[var(--color-secondary)] hover:text-[var(--color-neutral-base)] transition-colors font-body"
+                                className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
+                                style={{
+                                    backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
+                                    color: styleSettings?.linkCardTextColor || '#000000'
+                                }}
                             >
                                 {link.label || link.url}
                             </a>

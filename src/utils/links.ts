@@ -28,6 +28,12 @@ export interface BackgroundSettings {
   imageOpacity?: number
 }
 
+export interface StyleSettings {
+  titleColor?: string
+  linkCardBackgroundColor?: string
+  linkCardTextColor?: string
+}
+
 interface LinksData {
   links: Link[]
   description: string
@@ -36,6 +42,7 @@ interface LinksData {
   socialIcons: SocialIcons
   backgroundColor?: string // Mantener compatibilidad hacia atrás
   backgroundSettings?: BackgroundSettings
+  styleSettings?: StyleSettings
 }
 
 export async function getLinksData(): Promise<LinksData> {
@@ -55,6 +62,11 @@ export async function getLinksData(): Promise<LinksData> {
         type: 'color',
         color: data.backgroundColor || "#1a1a1a",
         imageOpacity: 0.5
+      },
+      styleSettings: data.styleSettings || {
+        titleColor: "#ffffff",
+        linkCardBackgroundColor: "#ffffff",
+        linkCardTextColor: "#000000"
       }
     }
   } catch (error) {
@@ -70,6 +82,11 @@ export async function getLinksData(): Promise<LinksData> {
         type: 'color',
         color: "#1a1a1a",
         imageOpacity: 0.5
+      },
+      styleSettings: {
+        titleColor: "#ffffff",
+        linkCardBackgroundColor: "#ffffff",
+        linkCardTextColor: "#000000"
       }
     }
   }
