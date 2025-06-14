@@ -95,6 +95,18 @@ export async function updateAdminLinks(formData: FormData) {
     // Manejar color de fondo
     const backgroundColor = formData.get('backgroundColor')?.toString() || currentData.backgroundColor || '#1a1a1a'
     
+    // Manejar configuración de fondo
+    const backgroundType = formData.get('backgroundType')?.toString() as 'color' | 'image' || 'color'
+    const backgroundImageUrl = formData.get('backgroundImageUrl')?.toString() || currentData.backgroundSettings?.imageUrl || ''
+    const backgroundImageOpacity = parseFloat(formData.get('backgroundImageOpacity')?.toString() || '0.5')
+    
+    const backgroundSettings = {
+      type: backgroundType,
+      color: backgroundColor,
+      imageUrl: backgroundImageUrl,
+      imageOpacity: backgroundImageOpacity
+    }
+    
     // Procesar los enlaces
     const ids = formData.getAll('id').map(id => Number(id))
     const urls = formData.getAll('url').map(url => url.toString())
@@ -113,6 +125,7 @@ export async function updateAdminLinks(formData: FormData) {
       profileImage,
       profileImageType,
       backgroundColor,
+      backgroundSettings,
       socialIcons,
       items: newItems
     }

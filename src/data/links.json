@@ -3,6 +3,12 @@
   "profileImage": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/avatars/gif-1749859634497.gif",
   "profileImageType": "gif",
   "backgroundColor": "#FF5500",
+  "backgroundSettings": {
+    "type": "image",
+    "color": "#FF5500",
+    "imageUrl": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/avatars/image-1749864437429.jpg",
+    "imageOpacity": 0.8
+  },
   "socialIcons": {
     "instagram": {
       "url": "https://www.instagram.com/biomechanics.wav",

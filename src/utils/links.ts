@@ -21,13 +21,21 @@ export interface SocialIcons {
   tiktok?: SocialIcon
 }
 
+export interface BackgroundSettings {
+  type: 'color' | 'image'
+  color?: string
+  imageUrl?: string
+  imageOpacity?: number
+}
+
 interface LinksData {
   links: Link[]
   description: string
   profileImage: string
   profileImageType: ProfileImageType
   socialIcons: SocialIcons
-  backgroundColor?: string
+  backgroundColor?: string // Mantener compatibilidad hacia atrás
+  backgroundSettings?: BackgroundSettings
 }
 
 export async function getLinksData(): Promise<LinksData> {
@@ -42,7 +50,12 @@ export async function getLinksData(): Promise<LinksData> {
       profileImage: data.profileImage || "/profile.jpg",
       profileImageType: data.profileImageType || "image",
       socialIcons: data.socialIcons || {},
-      backgroundColor: data.backgroundColor || "#1a1a1a"
+      backgroundColor: data.backgroundColor || "#1a1a1a",
+      backgroundSettings: data.backgroundSettings || {
+        type: 'color',
+        color: data.backgroundColor || "#1a1a1a",
+        imageOpacity: 0.5
+      }
     }
   } catch (error) {
     console.error('Error al cargar los enlaces:', error)
@@ -52,7 +65,12 @@ export async function getLinksData(): Promise<LinksData> {
       profileImage: "/profile.jpg",
       profileImageType: "image",
       socialIcons: {},
-      backgroundColor: "#1a1a1a"
+      backgroundColor: "#1a1a1a",
+      backgroundSettings: {
+        type: 'color',
+        color: "#1a1a1a",
+        imageOpacity: 0.5
+      }
     }
   }
 }

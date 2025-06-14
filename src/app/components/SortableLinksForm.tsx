@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useSupabaseClient } from '@/lib/supabase-auth'
 import { useUser } from '@clerk/nextjs'
 import { getFileType, isValidAvatarFile, getFileTypeText, type ProfileImageType } from '@/utils/file-utils'
-import { type SocialIcons } from '@/utils/links'
+import { type SocialIcons, type BackgroundSettings } from '@/utils/links'
 
 export function SortableLinksForm({
     links,
@@ -16,6 +16,7 @@ export function SortableLinksForm({
     profileImageType,
     socialIcons,
     backgroundColor,
+    backgroundSettings,
 }: {
     links: { id: number; url: string; label: string }[]
     description: string
@@ -23,9 +24,11 @@ export function SortableLinksForm({
     profileImageType: ProfileImageType
     socialIcons: SocialIcons
     backgroundColor: string
+    backgroundSettings: BackgroundSettings
 }) {
     const listRef = useRef<HTMLUListElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const backgroundFileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
     const { user } = useUser()
     const supabase = useSupabaseClient()
@@ -43,6 +46,11 @@ export function SortableLinksForm({
         tiktok: socialIcons.tiktok?.color || '#000000',
     })
     const [bgColor, setBgColor] = useState(backgroundColor || '#1a1a1a')
+    const [backgroundType, setBackgroundType] = useState<'color' | 'image'>(backgroundSettings.type || 'color')
+    const [backgroundImageUrl, setBackgroundImageUrl] = useState(backgroundSettings.imageUrl || '')
+    const [backgroundImageOpacity, setBackgroundImageOpacity] = useState(backgroundSettings.imageOpacity || 0.5)
+    const [selectedBackgroundFile, setSelectedBackgroundFile] = useState<File | null>(null)
+    const [backgroundPreviewUrl, setBackgroundPreviewUrl] = useState(backgroundSettings.imageUrl || '')
 
     useEffect(() => {
         if (listRef.current) {
@@ -89,6 +97,35 @@ export function SortableLinksForm({
             ...prev,
             [platform]: color
         }))
+    }
+
+    // Manejar selección de imagen de fondo
+    const handleBackgroundFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (file) {
+            // Validar que sea una imagen
+            if (!file.type.startsWith('image/')) {
+                setStatus({ error: 'Solo se permiten archivos de imagen para el fondo.' })
+                return
+            }
+
+            // Validar tamaño (máximo 10MB para fondo)
+            if (file.size > 10 * 1024 * 1024) {
+                setStatus({ error: 'La imagen de fondo debe ser menor a 10MB.' })
+                return
+            }
+
+            setSelectedBackgroundFile(file)
+            
+            // Crear preview del archivo
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                setBackgroundPreviewUrl(e.target?.result as string)
+            }
+            reader.readAsDataURL(file)
+            
+            setStatus(null) // Limpiar errores previos
+        }
     }
 
     // Subir archivo a Supabase
@@ -163,6 +200,23 @@ export function SortableLinksForm({
             // Agregar color de fondo al FormData
             if (isValidHexColor(bgColor)) {
                 formData.append('backgroundColor', bgColor)
+            }
+            
+            // Agregar configuración de fondo
+            formData.append('backgroundType', backgroundType)
+            formData.append('backgroundImageOpacity', backgroundImageOpacity.toString())
+            
+            // Si hay una nueva imagen de fondo seleccionada, subirla
+            let newBackgroundImageUrl = backgroundImageUrl
+            if (selectedBackgroundFile && backgroundType === 'image') {
+                setStatus({ message: 'Subiendo imagen de fondo...' })
+                const uploadedUrl = await uploadFileToSupabase(selectedBackgroundFile)
+                if (uploadedUrl) {
+                    newBackgroundImageUrl = uploadedUrl
+                    formData.append('backgroundImageUrl', uploadedUrl)
+                }
+            } else if (backgroundType === 'image' && backgroundImageUrl) {
+                formData.append('backgroundImageUrl', backgroundImageUrl)
             }
             
             setStatus({ message: 'Guardando cambios...' })
@@ -343,47 +397,123 @@ export function SortableLinksForm({
                 </div>
             </div>
 
-            {/* Configuración de color de fondo */}
-            <div className="w-full max-w-md bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-6">
+            {/* Configuración de fondo de pantalla */}
+            <div className="w-full max-w-md bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-6 border border-white/20">
                 <h3 className="text-xl font-semibold text-[var(--color-secondary)] mb-4 text-center">
-                    Color de Fondo
+                    Fondo de Pantalla
                 </h3>
-                <div className="flex items-center justify-center space-x-3">
-                    <label className="text-sm font-medium text-white">
-                        Fondo de la página:
+                
+                {/* Selector de tipo de fondo */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-white mb-2">
+                        Tipo de fondo:
                     </label>
-                    <div className="flex items-center space-x-2">
-                        {/* Vista previa del color */}
-                        <div 
-                            className="w-12 h-12 rounded-lg border-2 border-white shadow-sm"
-                            style={{ backgroundColor: bgColor }}
-                        />
-                        {/* Input de color hex */}
-                        <input
-                            type="text"
-                            value={bgColor}
-                            onChange={(e) => setBgColor(e.target.value)}
-                            placeholder="#1a1a1a"
-                            maxLength={7}
-                            className={`w-28 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
-                                isValidHexColor(bgColor) 
-                                    ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
-                                    : 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                            }`}
-                        />
-                        {/* Input de color nativo como respaldo */}
-                        <input
-                            type="color"
-                            value={isValidHexColor(bgColor) ? bgColor : '#1a1a1a'}
-                            onChange={(e) => setBgColor(e.target.value)}
-                            className="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer"
-                            title="Seleccionar color de fondo"
-                        />
+                    <div className="flex space-x-4">
+                        <label className="flex items-center">
+                            <input
+                                type="radio"
+                                value="color"
+                                checked={backgroundType === 'color'}
+                                onChange={(e) => setBackgroundType(e.target.value as 'color' | 'image')}
+                                className="mr-2"
+                            />
+                            <span className="text-white">Color sólido</span>
+                        </label>
+                        <label className="flex items-center">
+                            <input
+                                type="radio"
+                                value="image"
+                                checked={backgroundType === 'image'}
+                                onChange={(e) => setBackgroundType(e.target.value as 'color' | 'image')}
+                                className="mr-2"
+                            />
+                            <span className="text-white">Imagen</span>
+                        </label>
                     </div>
                 </div>
+
+                {/* Configuración de color */}
+                {backgroundType === 'color' && (
+                    <div className="flex items-center justify-center space-x-3">
+                        <label className="text-sm font-medium text-white">
+                            Color:
+                        </label>
+                        <div className="flex items-center space-x-2">
+                            <div 
+                                className="w-12 h-12 rounded-lg border-2 border-white shadow-sm"
+                                style={{ backgroundColor: bgColor }}
+                            />
+                            <input
+                                type="text"
+                                value={bgColor}
+                                onChange={(e) => setBgColor(e.target.value)}
+                                placeholder="#1a1a1a"
+                                maxLength={7}
+                                className={`w-28 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 text-black ${
+                                    isValidHexColor(bgColor) 
+                                        ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
+                                        : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                }`}
+                            />
+                            <input
+                                type="color"
+                                value={isValidHexColor(bgColor) ? bgColor : '#1a1a1a'}
+                                onChange={(e) => setBgColor(e.target.value)}
+                                className="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer"
+                                title="Seleccionar color de fondo"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Configuración de imagen */}
+                {backgroundType === 'image' && (
+                    <div className="space-y-4">
+                        {/* Subir imagen */}
+                        <div>
+                            <label className="block text-sm font-medium text-white mb-2">
+                                Imagen de fondo:
+                            </label>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleBackgroundFileSelect}
+                                    className="text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                                />
+                                {backgroundPreviewUrl && (
+                                    <div 
+                                        className="w-12 h-12 rounded border-2 border-white bg-cover bg-center"
+                                        style={{ backgroundImage: `url(${backgroundPreviewUrl})` }}
+                                        title="Vista previa de la imagen"
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Control de opacidad */}
+                        <div>
+                            <label className="block text-sm font-medium text-white mb-2">
+                                Opacidad: {Math.round(backgroundImageOpacity * 100)}%
+                            </label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.1"
+                                value={backgroundImageOpacity}
+                                onChange={(e) => setBackgroundImageOpacity(parseFloat(e.target.value))}
+                                className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                            />
+                        </div>
+                    </div>
+                )}
+
                 <div className="mt-4 p-3 bg-purple-500/10 rounded-md border border-purple-500/20">
                     <p className="text-xs text-purple-200 text-center">
-                        🎨 Este color se aplicará como fondo de la página pública
+                        🎨 {backgroundType === 'color' 
+                            ? 'Este color se aplicará como fondo de la página pública' 
+                            : 'La imagen se aplicará como fondo con la opacidad seleccionada'}
                     </p>
                 </div>
             </div>
