@@ -27,6 +27,7 @@ interface LinksData {
   profileImage: string
   profileImageType: ProfileImageType
   socialIcons: SocialIcons
+  backgroundColor?: string
 }
 
 export async function getLinksData(): Promise<LinksData> {
@@ -40,7 +41,8 @@ export async function getLinksData(): Promise<LinksData> {
       description: data.description || "",
       profileImage: data.profileImage || "/profile.jpg",
       profileImageType: data.profileImageType || "image",
-      socialIcons: data.socialIcons || {}
+      socialIcons: data.socialIcons || {},
+      backgroundColor: data.backgroundColor || "#1a1a1a"
     }
   } catch (error) {
     console.error('Error al cargar los enlaces:', error)
@@ -49,7 +51,8 @@ export async function getLinksData(): Promise<LinksData> {
       description: "",
       profileImage: "/profile.jpg",
       profileImageType: "image",
-      socialIcons: {}
+      socialIcons: {},
+      backgroundColor: "#1a1a1a"
     }
   }
 }

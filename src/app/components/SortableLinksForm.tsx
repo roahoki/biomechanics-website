@@ -15,12 +15,14 @@ export function SortableLinksForm({
     profileImage,
     profileImageType,
     socialIcons,
+    backgroundColor,
 }: {
     links: { id: number; url: string; label: string }[]
     description: string
     profileImage: string
     profileImageType: ProfileImageType
     socialIcons: SocialIcons
+    backgroundColor: string
 }) {
     const listRef = useRef<HTMLUListElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -40,6 +42,7 @@ export function SortableLinksForm({
         youtube: socialIcons.youtube?.color || '#FF0000',
         tiktok: socialIcons.tiktok?.color || '#000000',
     })
+    const [bgColor, setBgColor] = useState(backgroundColor || '#1a1a1a')
 
     useEffect(() => {
         if (listRef.current) {
@@ -156,6 +159,11 @@ export function SortableLinksForm({
                     formData.append(`socialIcon_${platform}_color`, color)
                 }
             })
+            
+            // Agregar color de fondo al FormData
+            if (isValidHexColor(bgColor)) {
+                formData.append('backgroundColor', bgColor)
+            }
             
             setStatus({ message: 'Guardando cambios...' })
             
@@ -331,6 +339,51 @@ export function SortableLinksForm({
                 <div className="mt-4 p-3 bg-blue-500/10 rounded-md border border-blue-500/20">
                     <p className="text-xs text-blue-200 text-center">
                         💡 Usa formato hex (#000000) o selecciona con el selector de color
+                    </p>
+                </div>
+            </div>
+
+            {/* Configuración de color de fondo */}
+            <div className="w-full max-w-md bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-6">
+                <h3 className="text-xl font-semibold text-[var(--color-secondary)] mb-4 text-center">
+                    Color de Fondo
+                </h3>
+                <div className="flex items-center justify-center space-x-3">
+                    <label className="text-sm font-medium text-white">
+                        Fondo de la página:
+                    </label>
+                    <div className="flex items-center space-x-2">
+                        {/* Vista previa del color */}
+                        <div 
+                            className="w-12 h-12 rounded-lg border-2 border-white shadow-sm"
+                            style={{ backgroundColor: bgColor }}
+                        />
+                        {/* Input de color hex */}
+                        <input
+                            type="text"
+                            value={bgColor}
+                            onChange={(e) => setBgColor(e.target.value)}
+                            placeholder="#1a1a1a"
+                            maxLength={7}
+                            className={`w-28 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
+                                isValidHexColor(bgColor) 
+                                    ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
+                                    : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                            }`}
+                        />
+                        {/* Input de color nativo como respaldo */}
+                        <input
+                            type="color"
+                            value={isValidHexColor(bgColor) ? bgColor : '#1a1a1a'}
+                            onChange={(e) => setBgColor(e.target.value)}
+                            className="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer"
+                            title="Seleccionar color de fondo"
+                        />
+                    </div>
+                </div>
+                <div className="mt-4 p-3 bg-purple-500/10 rounded-md border border-purple-500/20">
+                    <p className="text-xs text-purple-200 text-center">
+                        🎨 Este color se aplicará como fondo de la página pública
                     </p>
                 </div>
             </div>

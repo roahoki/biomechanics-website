@@ -2,7 +2,7 @@ import { getLinksData } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
 
 export default async function Page() {
-    const { links, description, profileImage, profileImageType, socialIcons } = await getLinksData()
+    const { links, description, profileImage, profileImageType, socialIcons, backgroundColor } = await getLinksData()
 
     // Función para renderizar el avatar según su tipo
     const renderAvatar = () => {
@@ -34,14 +34,24 @@ export default async function Page() {
     // Vista de solo lectura para usuarios comunes
     return (
         <div
-            className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body"
+            className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body relative"
             style={{
-                backgroundImage: "url('/bg.png')", // asegúrate de tener esta imagen en /public
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundColor: "var(--color-neutral-base)",
+                backgroundColor: backgroundColor || "#1a1a1a",
             }}
         >
+            {/* Imagen de fondo opcional con overlay */}
+            <div 
+                className="absolute inset-0 opacity-30"
+                style={{
+                    backgroundImage: "url('/bg.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    mixBlendMode: "multiply"
+                }}
+            />
+            
+            {/* Contenido por encima del fondo */}
+            <div className="relative z-10 flex flex-col items-center w-full">
             {/* Avatar dinámico */}
             {renderAvatar()}
 
@@ -105,6 +115,7 @@ export default async function Page() {
                     </li>
                 ))}
             </ul>
+            </div>
         </div>
     );
 }

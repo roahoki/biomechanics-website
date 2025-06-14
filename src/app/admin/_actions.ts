@@ -4,7 +4,6 @@ import { checkRole } from '@/utils/roles'
 import { clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { getLinksData } from '@/utils/links'
-import { useSupabaseClient } from '@/lib/supabase-auth'
 import { createClient } from '@supabase/supabase-js'
 const fs = require('fs/promises')
 const path = require('path')
@@ -93,6 +92,9 @@ export async function updateAdminLinks(formData: FormData) {
       }
     }
     
+    // Manejar color de fondo
+    const backgroundColor = formData.get('backgroundColor')?.toString() || currentData.backgroundColor || '#1a1a1a'
+    
     // Procesar los enlaces
     const ids = formData.getAll('id').map(id => Number(id))
     const urls = formData.getAll('url').map(url => url.toString())
@@ -110,6 +112,7 @@ export async function updateAdminLinks(formData: FormData) {
       description,
       profileImage,
       profileImageType,
+      backgroundColor,
       socialIcons,
       items: newItems
     }
