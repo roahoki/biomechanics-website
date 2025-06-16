@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import { Space_Grotesk } from 'next/font/google';
 import "../styles/globals.css";
 import {
   ClerkProvider,
@@ -8,6 +9,12 @@ import {
   SignInButton,
   UserButton,
 } from '@clerk/nextjs';
+
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-space-grotesk',
+});
 
 export const metadata: Metadata = {
   title: "Biomechanics",
@@ -21,11 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className={spaceGrotesk.variable}>
         <head>
           {/* Aquí puedes agregar meta tags adicionales si es necesario */}
         </head>
-        <body>
+        <body className={`${spaceGrotesk.className} antialiased`}>
           <header className="flex justify-end items-center p-4 gap-4 h-16 bg-primary">
             <SignedOut>
               <SignInButton mode="modal"/>

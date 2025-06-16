@@ -6,7 +6,7 @@ export default async function Page() {
 
     // Función para renderizar el avatar según su tipo
     const renderAvatar = () => {
-        const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
+        const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-neutral-base)] mb-4 shadow-lg object-cover"
         
         if (profileImageType === 'video') {
             return (

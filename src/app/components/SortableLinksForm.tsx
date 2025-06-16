@@ -8,6 +8,7 @@ import { useSupabaseClient } from '@/lib/supabase-auth'
 import { useUser } from '@clerk/nextjs'
 import { getFileType, isValidAvatarFile, getFileTypeText, type ProfileImageType } from '@/utils/file-utils'
 import { type SocialIcons, type BackgroundSettings, type StyleSettings } from '@/utils/links'
+import { SocialIcon } from '@/app/components/SocialIcon'
 
 export function SortableLinksForm({
     links,
@@ -59,6 +60,7 @@ export function SortableLinksForm({
     const [titleColor, setTitleColor] = useState(styleSettings.titleColor || '#ffffff')
     const [linkCardBackgroundColor, setLinkCardBackgroundColor] = useState(styleSettings.linkCardBackgroundColor || '#ffffff')
     const [linkCardTextColor, setLinkCardTextColor] = useState(styleSettings.linkCardTextColor || '#000000')
+    const [showPreviewModal, setShowPreviewModal] = useState(false)
 
     useEffect(() => {
         if (listRef.current) {
@@ -764,23 +766,35 @@ export function SortableLinksForm({
                 </div>
             )}
 
-            {/* Botón para guardar cambios */}
-            <button
-                type="submit"
-                disabled={isSubmitting || uploadingImage}
-                className={`px-6 py-3 text-white rounded-md shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    isSubmitting || uploadingImage 
-                        ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-            >
-                {uploadingImage 
-                    ? `Subiendo ${getFileTypeText(previewType).toLowerCase()}...` 
-                    : isSubmitting 
-                        ? 'Guardando...' 
-                        : 'Guardar Cambios'
-                }
-            </button>
+            {/* Botones de acción */}
+            <div className="flex space-x-4">
+                {/* Botón de vista previa */}
+                <button
+                    type="button"
+                    onClick={() => setShowPreviewModal(true)}
+                    className="px-6 py-3 text-blue-600 bg-white rounded-md shadow hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                >
+                    👁️ Vista Previa
+                </button>
+
+                {/* Botón para guardar cambios */}
+                <button
+                    type="submit"
+                    disabled={isSubmitting || uploadingImage}
+                    className={`px-6 py-3 text-white rounded-md shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                        isSubmitting || uploadingImage 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
+                >
+                    {uploadingImage 
+                        ? `Subiendo ${getFileTypeText(previewType).toLowerCase()}...` 
+                        : isSubmitting 
+                            ? 'Guardando...' 
+                            : 'Guardar Cambios'
+                    }
+                </button>
+            </div>
 
             {/* Información adicional */}
             <div className="text-sm text-gray-400 max-w-md text-center">
@@ -817,6 +831,127 @@ export function SortableLinksForm({
                                 className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
                             >
                                 Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de vista previa */}
+            {showPreviewModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                    <div className="bg-neutral-900 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
+                        {/* Botón de cerrar */}
+                        <button
+                            onClick={() => setShowPreviewModal(false)}
+                            className="absolute top-4 right-4 text-white hover:text-gray-300"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        {/* Título del modal */}
+                        <h2 className="text-white text-2xl font-semibold mb-6 pr-8">Vista Previa</h2>
+
+                        {/* Vista previa simulando la página pública */}
+                        <div 
+                            className="rounded-lg overflow-hidden"
+                            style={backgroundType === 'image' ? {
+                                backgroundImage: `url(${backgroundPreviewUrl || backgroundImageUrl})`,
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                                position: "relative",
+                            } : {
+                                backgroundColor: bgColor,
+                            }}
+                        >
+                            {/* Overlay de opacidad para imagen de fondo */}
+                            {backgroundType === 'image' && (
+                                <div 
+                                    className="absolute inset-0 bg-black"
+                                    style={{ 
+                                        opacity: 1 - backgroundImageOpacity,
+                                        zIndex: 0
+                                    }}
+                                />
+                            )}
+
+                            <div className={`relative ${backgroundType === 'image' ? 'z-10' : ''} flex flex-col items-center p-8`}>
+                                {/* Avatar */}
+                                <div className="relative mb-6">
+                                    {previewType === 'video' ? (
+                                        <video 
+                                            src={previewUrl}
+                                            className="w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] shadow-lg object-cover"
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                        />
+                                    ) : (
+                                        <img
+                                            src={previewUrl}
+                                            alt="Avatar"
+                                            className="w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] shadow-lg object-cover"
+                                        />
+                                    )}
+                                </div>
+
+                                {/* Título */}
+                                <h1
+                                    className="text-4xl font-display tracking-wide mb-4"
+                                    style={{ 
+                                        fontFamily: 'Space Grotesk, sans-serif',
+                                        color: titleColor 
+                                    }}
+                                >
+                                    biomechanics.wav
+                                </h1>
+
+                                {/* Descripción */}
+                                <p className="text-center text-lg mb-6 text-white">
+                                    {description}
+                                </p>
+
+                                {/* Iconos sociales */}
+                                <div className="flex gap-6 mb-8">
+                                    {Object.entries(socialIconColors).map(([platform, color]) => (
+                                        <div key={platform} className="w-8 h-8">
+                                            <SocialIcon 
+                                                icon={platform as any}
+                                                url={socialIcons[platform as keyof typeof socialIcons]?.url || '#'}
+                                                color={color}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Links */}
+                                <div className="w-full max-w-md space-y-4">
+                                    {currentLinks.map((link) => (
+                                        <div
+                                            key={link.id}
+                                            className="p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity cursor-pointer"
+                                            style={{
+                                                backgroundColor: linkCardBackgroundColor,
+                                                color: linkCardTextColor
+                                            }}
+                                        >
+                                            {link.label || link.url}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Pie del modal */}
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={() => setShowPreviewModal(false)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                                Cerrar Vista Previa
                             </button>
                         </div>
                     </div>
