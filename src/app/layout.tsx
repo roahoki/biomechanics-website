@@ -32,15 +32,7 @@ export default function RootLayout({
         <head>
           {/* Aquí puedes agregar meta tags adicionales si es necesario */}
         </head>
-        <body className={`${spaceGrotesk.className} antialiased {}`} suppressHydrationWarning>
-          <header className="flex justify-end items-center p-4 gap-4 h-16 bg-primary">
-            <SignedOut>
-              <SignInButton mode="modal"/>
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header>
+        <body suppressHydrationWarning className={`${spaceGrotesk.className} antialiased`}>
           {children}
         </body>
       </html>
