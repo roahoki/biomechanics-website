@@ -28,11 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={spaceGrotesk.variable}>
+      <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning>
         <head>
           {/* Aquí puedes agregar meta tags adicionales si es necesario */}
         </head>
-        <body className={`${spaceGrotesk.className} antialiased`}>
+        <body className={`${spaceGrotesk.className} antialiased {}`} suppressHydrationWarning>
           <header className="flex justify-end items-center p-4 gap-4 h-16 bg-primary">
             <SignedOut>
               <SignInButton mode="modal"/>
