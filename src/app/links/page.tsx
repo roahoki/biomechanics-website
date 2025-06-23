@@ -1,5 +1,6 @@
 import { getLinksData } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
+import Image from 'next/image'
 
 export default async function Page() {
     const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings } = await getLinksData()
@@ -22,10 +23,12 @@ export default async function Page() {
         } else {
             // Para 'image' y 'gif'
             return (
-                <img
+                <Image
                     src={profileImage}
                     alt="Foto de perfil Biomechanics"
                     className={commonClasses}
+                    width={128}
+                    height={128}
                 />
             )
         }

@@ -6,6 +6,7 @@ import { updateAdminLinks } from '@/app/admin/_actions'
 import { useRouter } from 'next/navigation'
 import { useSupabaseClient } from '@/lib/supabase-auth'
 import { useUser } from '@clerk/nextjs'
+import Image from 'next/image'
 import { getFileType, isValidAvatarFile, getFileTypeText, type ProfileImageType } from '@/utils/file-utils'
 import { type SocialIcons, type BackgroundSettings, type StyleSettings } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
@@ -322,10 +323,12 @@ export function SortableLinksForm({
         } else {
             // Para 'image' y 'gif'
             return (
-                <img
+                <Image
                     src={previewUrl}
                     alt="Avatar"
                     className={commonClasses}
+                    width={128}
+                    height={128}
                 />
             )
         }
@@ -391,7 +394,7 @@ export function SortableLinksForm({
                     <p><strong>Tamaño:</strong> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                     <p><strong>Tipo:</strong> {selectedFile.type}</p>
                     <p className="text-xs mt-1">
-                        El {getFileTypeText(previewType).toLowerCase()} se guardará al presionar "Guardar Cambios"
+                        El {getFileTypeText(previewType).toLowerCase()} se guardará al presionar &ldquo;Guardar Cambios&rdquo;
                     </p>
                 </div>
             )}
@@ -889,10 +892,12 @@ export function SortableLinksForm({
                                             playsInline
                                         />
                                     ) : (
-                                        <img
+                                        <Image
                                             src={previewUrl}
                                             alt="Avatar"
                                             className="w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] shadow-lg object-cover"
+                                            width={128}
+                                            height={128}
                                         />
                                     )}
                                 </div>
