@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /sign-in/
+Disallow: /sign-up/
+
+Sitemap: https://tu-dominio-produccion.com/sitemap.xml

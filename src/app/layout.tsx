@@ -1,6 +1,20 @@
+
 import type { Metadata } from "next";
+import { Space_Grotesk } from 'next/font/google';
 import "../styles/globals.css";
-import AdminBadge from '@/components/AdminBadge'
+import {
+  ClerkProvider,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from '@clerk/nextjs';
+
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-space-grotesk',
+});
 
 export const metadata: Metadata = {
   title: "Biomechanics",
@@ -13,11 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        {children}
-        <AdminBadge />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning>
+        <head>
+          {/* Aquí puedes agregar meta tags adicionales si es necesario */}
+        </head>
+        <body suppressHydrationWarning className={`${spaceGrotesk.className} antialiased`}>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
