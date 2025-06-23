@@ -13,9 +13,9 @@
   --color-accent-energetic: #1F8FFF; /* Azul eléctrico */
 
   /* Fuentes */
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-display: var(--font-space-grotesk);
+  --font-body: var(--font-space-grotesk);
+  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace;
 
   /* Tracking */
   --tracking-headings: 0.5px;

@@ -5,6 +5,7 @@ export default function Home() {
       <a href="/links">links</a>
       <a href="/admin/dashboard">admin dashboard</a>
       <a href="/admin/links">admin sortable links</a>
+      <a href="/admin/links">admin add link</a>
     </div>
   );
 }

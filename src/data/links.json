@@ -1,20 +1,62 @@
 {
-  "description": "kafka is the way",
+  "description": "🎶ya no quiero viviiiiir",
+  "profileImage": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/avatars/video-1750301928812.mp4",
+  "profileImageType": "video",
+  "backgroundColor": "#3300ff",
+  "backgroundSettings": {
+    "type": "image",
+    "color": "#3300ff",
+    "imageUrl": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/avatars/image-1750302646370.jpg",
+    "imageOpacity": 0.1
+  },
+  "styleSettings": {
+    "titleColor": "#dbdb00",
+    "linkCardBackgroundColor": "#0e0c18",
+    "linkCardTextColor": "#cccccc"
+  },
+  "socialIcons": {
+    "instagram": {
+      "url": "https://www.instagram.com/biomechanics.wav",
+      "color": "#ff00f7"
+    },
+    "soundcloud": {
+      "url": "https://www.soundcloud.com/biomechanics-wav",
+      "color": "#ff00f7"
+    },
+    "youtube": {
+      "url": "https://youtube.com/@biomechanics-wav",
+      "color": "#ff00f7"
+    },
+    "tiktok": {
+      "url": "https://www.tiktok.com/@biomechanics.wav",
+      "color": "#ff00f7"
+    }
+  },
   "items": [
     {
-      "id": 1,
+      "id": 5,
       "url": "https://www.instagram.com/biomechanics.wav",
-      "label": "Instagram"
+      "label": "Instagram 📷"
     },
     {
-      "id": 3,
-      "url": "https://dashboard.clerk.com/apps/app_2y4oqWg5QxlkJSohNbinWKbbxI4/instances/ins_2y4oqb8kDngTKLAB1SH94OQZFUu/users/user_2y4pYar998PNWZAhHSUah2KUR0F",
-      "label": "Clerk"
+      "id": 6,
+      "url": "https://www.soundcloud.com/biomechanics-wav",
+      "label": "Soundcloud 🌨️"
     },
     {
-      "id": 4,
-      "url": "hola.com",
-      "label": "WORLD"
+      "id": 7,
+      "url": "https://youtube.com/@biomechanics-wav",
+      "label": "Youtube🎵"
+    },
+    {
+      "id": 8,
+      "url": "https://www.tiktok.com/@biomechanics.wav",
+      "label": "TikTok🕺🏼"
+    },
+    {
+      "id": 9,
+      "url": "https://www.biomechanics.cl/",
+      "label": "Website Oficial🌎"
     }
   ]
 }
