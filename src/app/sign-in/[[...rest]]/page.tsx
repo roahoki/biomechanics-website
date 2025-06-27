@@ -9,8 +9,8 @@ export default function SignInPage() {
   const redirectUrl = searchParams.get("redirect_url");
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-12 bg-gray-50">
-      <div className="w-full max-w-md">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">Biomechanics Admin</h1>
           <p className="mt-2 text-gray-600">Inicia sesión para acceder al panel de administración</p>
