@@ -3,17 +3,11 @@
 import { checkRole } from '@/utils/roles'
 import { clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { getLinksData } from '@/utils/links'
-import { createClient } from '@supabase/supabase-js'
+import { getLinksData, LinksData } from '@/utils/links'
+import { getSupabaseClient } from '@/lib/supabase-db'
 const fs = require('fs/promises')
 const path = require('path')
 const filePath = path.resolve(process.cwd(), 'src/data/links.json')
-
-// Cliente de Supabase para operaciones del servidor
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export async function setRole(formData: FormData): Promise<void> {
     const client = await clerkClient()
@@ -44,6 +38,72 @@ export async function removeRole(formData: FormData): Promise<void> {
         console.error(err)
         throw new Error('Failed to remove role')
     }
+}
+
+// Función para guardar datos en Supabase
+export async function saveLinksToSupabase(linksData: LinksData) {
+  try {
+    // Usar el cliente admin de Supabase para operaciones del servidor
+    const supabase = getSupabaseClient({ admin: true });
+
+    // Verificar si existe un registro
+    const { data: existingData } = await supabase
+      .from('site_settings')
+      .select('id')
+      .eq('id', 'default')
+      .single();
+
+    let result;
+    
+    if (existingData) {
+      // Si existe, actualizar
+      result = await supabase
+        .from('site_settings')
+        .update({ 
+          data: linksData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', 'default');
+    } else {
+      // Si no existe, insertar
+      result = await supabase
+        .from('site_settings')
+        .insert({ 
+          id: 'default',
+          data: linksData,
+          updated_at: new Date().toISOString()
+        });
+    }
+
+    if (result.error) {
+      throw new Error(`Error al actualizar Supabase: ${result.error.message}`);
+    }
+
+    // También actualizar el archivo local como respaldo
+    await fs.writeFile(
+      filePath, 
+      JSON.stringify(convertLinksDataToFileFormat(linksData), null, 2)
+    );
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error guardando datos en Supabase:', error);
+    throw new Error(`Error guardando datos: ${error.message}`);
+  }
+}
+
+// Convertir LinksData al formato del archivo JSON
+function convertLinksDataToFileFormat(data: LinksData) {
+  return {
+    description: data.description,
+    profileImage: data.profileImage,
+    profileImageType: data.profileImageType,
+    backgroundColor: data.backgroundColor,
+    backgroundSettings: data.backgroundSettings,
+    styleSettings: data.styleSettings,
+    socialIcons: data.socialIcons,
+    items: data.links
+  };
 }
 
 export async function updateAdminLinks(formData: FormData) {
@@ -126,8 +186,8 @@ export async function updateAdminLinks(formData: FormData) {
       label: labels[index]
     }))
     
-    // Crear el nuevo objeto de datos
-    const newData = {
+    // Crear el objeto de datos para la base de datos
+    const linksData: LinksData = {
       description,
       profileImage,
       profileImageType,
@@ -135,11 +195,11 @@ export async function updateAdminLinks(formData: FormData) {
       backgroundSettings,
       styleSettings,
       socialIcons,
-      items: newItems
+      links: newItems
     }
     
-    // Guardar los datos
-    await fs.writeFile(filePath, JSON.stringify(newData, null, 2))
+    // Guardar en Supabase y como fallback en el archivo local
+    await saveLinksToSupabase(linksData)
     
     // Revalidar todas las rutas que pueden usar estos datos
     revalidatePath('/links')

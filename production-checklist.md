@@ -24,6 +24,9 @@
 - [ ] Configuración de Clerk correcta en producción
 - [ ] Supabase conectada correctamente
 - [ ] Permisos de CORS configurados (si es necesario)
+- [ ] Tabla de links en Supabase creada y configurada
+- [ ] Migración de datos de links.json a Supabase completada
+- [ ] RLS (Row Level Security) configurado para proteger datos en Supabase
 
 ## Experiencia de usuario
 - [ ] Páginas de error personalizadas funcionando
@@ -31,5 +34,6 @@
 - [ ] Navegación y flujo de usuario probados
 
 ## Monitoreo
-- [] Analytics configurado (opcional)
+- [ ] Analytics configurado (opcional)
 - [ ] Monitoreo de errores configurado (opcional)
+- [ ] Logging de accesos a la base de datos configurado
