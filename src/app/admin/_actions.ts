@@ -3,7 +3,7 @@
 import { checkRole } from '@/utils/roles'
 import { clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { getLinksData, LinksData } from '@/utils/links'
+import { getLinksData, LinksData, SocialIcons } from '@/utils/links'
 import { getSupabaseClient } from '@/lib/supabase-db'
 const fs = require('fs/promises')
 const path = require('path')
@@ -132,22 +132,22 @@ export async function updateAdminLinks(formData: FormData) {
     }
     
     // Manejar colores de iconos sociales
-    const socialIcons = {
+    const socialIcons: SocialIcons = {
       ...currentData.socialIcons,
       instagram: {
-        ...currentData.socialIcons.instagram,
+        url: currentData.socialIcons.instagram?.url,
         color: formData.get('socialIcon_instagram_color')?.toString() || currentData.socialIcons.instagram?.color || '#E4405F'
       },
       soundcloud: {
-        ...currentData.socialIcons.soundcloud,
+        url: currentData.socialIcons.soundcloud?.url,
         color: formData.get('socialIcon_soundcloud_color')?.toString() || currentData.socialIcons.soundcloud?.color || '#FF5500'
       },
       youtube: {
-        ...currentData.socialIcons.youtube,
+        url: currentData.socialIcons.youtube?.url,
         color: formData.get('socialIcon_youtube_color')?.toString() || currentData.socialIcons.youtube?.color || '#FF0000'
       },
       tiktok: {
-        ...currentData.socialIcons.tiktok,
+        url: currentData.socialIcons.tiktok?.url,
         color: formData.get('socialIcon_tiktok_color')?.toString() || currentData.socialIcons.tiktok?.color || '#000000'
       }
     }

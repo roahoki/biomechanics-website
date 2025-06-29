@@ -86,7 +86,7 @@ export default function MigrationPage() {
             <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
             <li><code>SUPABASE_SERVICE_KEY</code> (para operaciones del servidor)</li>
           </ul>
-          <li className="mb-2">Haz clic en "Iniciar migración" para transferir los datos.</li>
+          <li className="mb-2">Haz clic en &ldquo;Iniciar migración&rdquo; para transferir los datos.</li>
           <li>Después de la migración, los datos se leerán primero desde Supabase y, solo en caso de error, se usará el archivo local.</li>
         </ol>
       </div>

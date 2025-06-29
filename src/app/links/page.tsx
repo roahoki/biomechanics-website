@@ -99,28 +99,28 @@ export default async function Page() {
                     {socialIcons.instagram && (
                         <SocialIcon 
                             icon="instagram" 
-                            url={socialIcons.instagram.url} 
+                            url={socialIcons.instagram.url || '#'} 
                             color={socialIcons.instagram.color} 
                         />
                     )}
                     {socialIcons.soundcloud && (
                         <SocialIcon 
                             icon="soundcloud" 
-                            url={socialIcons.soundcloud.url} 
+                            url={socialIcons.soundcloud.url || '#'} 
                             color={socialIcons.soundcloud.color} 
                         />
                     )}
                     {socialIcons.youtube && (
                         <SocialIcon 
                             icon="youtube" 
-                            url={socialIcons.youtube.url} 
+                            url={socialIcons.youtube.url || '#'} 
                             color={socialIcons.youtube.color} 
                         />
                     )}
                     {socialIcons.tiktok && (
                         <SocialIcon 
                             icon="tiktok" 
-                            url={socialIcons.tiktok.url} 
+                            url={socialIcons.tiktok.url || '#'} 
                             color={socialIcons.tiktok.color} 
                         />
                     )}

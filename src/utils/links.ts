@@ -11,7 +11,7 @@ export interface Link {
 export type ProfileImageType = 'image' | 'video' | 'gif'
 
 export interface SocialIcon {
-  url: string
+  url?: string
   color: string
 }
 
