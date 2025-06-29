@@ -79,11 +79,18 @@ export async function saveLinksToSupabase(linksData: LinksData) {
       throw new Error(`Error al actualizar Supabase: ${result.error.message}`);
     }
 
-    // También actualizar el archivo local como respaldo
-    await fs.writeFile(
-      filePath, 
-      JSON.stringify(convertLinksDataToFileFormat(linksData), null, 2)
-    );
+    // Solo intentar escribir en el archivo local si estamos en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        await fs.writeFile(
+          filePath, 
+          JSON.stringify(convertLinksDataToFileFormat(linksData), null, 2)
+        );
+      } catch (fileError) {
+        console.warn('No se pudo escribir en el archivo local:', fileError);
+        // No fallar si no podemos escribir en el archivo local
+      }
+    }
 
     return { success: true };
   } catch (error: any) {

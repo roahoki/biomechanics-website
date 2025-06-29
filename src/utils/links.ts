@@ -77,10 +77,18 @@ export async function getLinksData(): Promise<LinksData> {
     
     // Si encontramos datos en Supabase, usarlos
     if (data && !error) {
+      console.log('Datos cargados desde Supabase correctamente');
       return transformDataFromSupabase(data.data);
     }
     
-    // Fallback: Si no hay datos en Supabase o hay error, usar el archivo local
+    // En producción, solo intentar usar Supabase
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('Error al obtener datos de Supabase en producción:', error?.message);
+      // Si no hay datos en Supabase en producción, usar valores por defecto
+      return DEFAULT_LINKS_DATA;
+    }
+    
+    // En desarrollo, intentar el archivo local como fallback
     console.log('Usando archivo local como fallback:', error?.message);
     return await getLinksFromFile();
   } catch (error) {
