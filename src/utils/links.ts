@@ -1,5 +1,3 @@
-import fs from 'fs/promises'
-import path from 'path'
 import { getSupabaseClient } from '@/lib/supabase-db'
 
 export interface Link {
@@ -67,7 +65,7 @@ const DEFAULT_LINKS_DATA: LinksData = {
 
 export async function getLinksData(): Promise<LinksData> {
   try {
-    // Intentar obtener datos desde Supabase primero
+    // Obtener datos únicamente desde Supabase
     const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('site_settings')
@@ -81,68 +79,38 @@ export async function getLinksData(): Promise<LinksData> {
       return transformDataFromSupabase(data.data);
     }
     
-    // En producción, solo intentar usar Supabase
-    if (process.env.NODE_ENV === 'production') {
-      console.warn('Error al obtener datos de Supabase en producción:', error?.message);
-      // Si no hay datos en Supabase en producción, usar valores por defecto
-      return DEFAULT_LINKS_DATA;
-    }
-    
-    // En desarrollo, intentar el archivo local como fallback
-    console.log('Usando archivo local como fallback:', error?.message);
-    return await getLinksFromFile();
+    // Si no hay datos, retornar valores por defecto
+    console.warn('No se encontraron datos en Supabase:', error?.message);
+    return DEFAULT_LINKS_DATA;
   } catch (error) {
-    console.error('Error al cargar los enlaces:', error);
+    console.error('Error al cargar los enlaces desde Supabase:', error);
     return DEFAULT_LINKS_DATA;
   }
-}
-
-// Función auxiliar para obtener datos del archivo JSON local
-async function getLinksFromFile(): Promise<LinksData> {
-  try {
-    const filePath = path.resolve(process.cwd(), 'src/data/links.json');
-    const file = await fs.readFile(filePath, 'utf-8');
-    const data = JSON.parse(file);
-    
-    return transformDataFromFile(data);
-  } catch (error) {
-    console.error('Error al cargar el archivo local:', error);
-    return DEFAULT_LINKS_DATA;
-  }
-}
-
-// Función para transformar datos desde el formato del archivo JSON
-function transformDataFromFile(data: any): LinksData {
-  return {
-    links: data.items || [],
-    description: data.description || "",
-    profileImage: data.profileImage || "/profile.jpg",
-    profileImageType: data.profileImageType || "image",
-    socialIcons: data.socialIcons || {},
-    backgroundColor: data.backgroundColor || "#1a1a1a",
-    backgroundSettings: data.backgroundSettings || {
-      type: 'color',
-      color: data.backgroundColor || "#1a1a1a",
-      imageOpacity: 0.5
-    },
-    styleSettings: data.styleSettings || {
-      titleColor: "#ffffff",
-      linkCardBackgroundColor: "#ffffff",
-      linkCardTextColor: "#000000"
-    }
-  };
 }
 
 // Función para transformar datos desde el formato de Supabase
 function transformDataFromSupabase(data: any): LinksData {
-  // Si los datos ya están en el formato correcto, solo devuelve
-  if (data && typeof data === 'object' && 'links' in data) {
+  if (!data) {
+    return DEFAULT_LINKS_DATA;
+  }
+  
+  // Si los datos ya están en el formato correcto
+  if (typeof data === 'object' && 'links' in data) {
     return {
       ...DEFAULT_LINKS_DATA,
       ...data,
     };
   }
   
-  // Si no, intenta convertir al formato esperado
-  return transformDataFromFile(data);
+  // Si los datos están en el formato antiguo (items en lugar de links)
+  return {
+    links: data.items || [],
+    description: data.description || DEFAULT_LINKS_DATA.description,
+    profileImage: data.profileImage || DEFAULT_LINKS_DATA.profileImage,
+    profileImageType: data.profileImageType || DEFAULT_LINKS_DATA.profileImageType,
+    socialIcons: data.socialIcons || DEFAULT_LINKS_DATA.socialIcons,
+    backgroundColor: data.backgroundColor || DEFAULT_LINKS_DATA.backgroundColor,
+    backgroundSettings: data.backgroundSettings || DEFAULT_LINKS_DATA.backgroundSettings,
+    styleSettings: data.styleSettings || DEFAULT_LINKS_DATA.styleSettings
+  };
 }
