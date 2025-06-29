@@ -5,9 +5,6 @@ import { clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { getLinksData, LinksData, SocialIcons } from '@/utils/links'
 import { getSupabaseClient } from '@/lib/supabase-db'
-const fs = require('fs/promises')
-const path = require('path')
-const filePath = path.resolve(process.cwd(), 'src/data/links.json')
 
 export async function setRole(formData: FormData): Promise<void> {
     const client = await clerkClient()
@@ -79,38 +76,11 @@ export async function saveLinksToSupabase(linksData: LinksData) {
       throw new Error(`Error al actualizar Supabase: ${result.error.message}`);
     }
 
-    // Solo intentar escribir en el archivo local si estamos en desarrollo
-    if (process.env.NODE_ENV === 'development') {
-      try {
-        await fs.writeFile(
-          filePath, 
-          JSON.stringify(convertLinksDataToFileFormat(linksData), null, 2)
-        );
-      } catch (fileError) {
-        console.warn('No se pudo escribir en el archivo local:', fileError);
-        // No fallar si no podemos escribir en el archivo local
-      }
-    }
-
     return { success: true };
   } catch (error: any) {
     console.error('Error guardando datos en Supabase:', error);
     throw new Error(`Error guardando datos: ${error.message}`);
   }
-}
-
-// Convertir LinksData al formato del archivo JSON
-function convertLinksDataToFileFormat(data: LinksData) {
-  return {
-    description: data.description,
-    profileImage: data.profileImage,
-    profileImageType: data.profileImageType,
-    backgroundColor: data.backgroundColor,
-    backgroundSettings: data.backgroundSettings,
-    styleSettings: data.styleSettings,
-    socialIcons: data.socialIcons,
-    items: data.links
-  };
 }
 
 export async function updateAdminLinks(formData: FormData) {

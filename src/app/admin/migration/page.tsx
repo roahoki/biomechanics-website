@@ -47,10 +47,10 @@ export default function MigrationPage() {
       
       <div className="mb-6">
         <p className="mb-2">
-          Esta herramienta migrará todos los datos del archivo local <code>links.json</code> a la base de datos Supabase.
+          Esta herramienta inicializará la base de datos Supabase con la configuración inicial para tus enlaces.
         </p>
         <p className="mb-4 text-yellow-600">
-          Nota: Es recomendable hacer una copia de seguridad de tus datos antes de realizar esta operación.
+          Nota: Esta operación solo es necesaria la primera vez que configuras la base de datos.
         </p>
         
         <button
@@ -86,8 +86,8 @@ export default function MigrationPage() {
             <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
             <li><code>SUPABASE_SERVICE_KEY</code> (para operaciones del servidor)</li>
           </ul>
-          <li className="mb-2">Haz clic en &ldquo;Iniciar migración&rdquo; para transferir los datos.</li>
-          <li>Después de la migración, los datos se leerán primero desde Supabase y, solo en caso de error, se usará el archivo local.</li>
+          <li className="mb-2">Haz clic en &ldquo;Iniciar migración&rdquo; para crear la configuración inicial.</li>
+          <li>Después de la inicialización, todos los datos se leerán y escribirán directamente desde Supabase.</li>
         </ol>
       </div>
     </div>
