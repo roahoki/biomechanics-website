@@ -16,6 +16,11 @@ export function SocialIcon({ icon, url, color, className = '' }: SocialIconProps
     tiktok: 'TikTok'
   }
 
+  // Si la URL no es válida, no renderizar el ícono
+  if (!url || url === '#') {
+    return null;
+  }
+
   return (
     <a 
       href={url} 

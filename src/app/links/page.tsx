@@ -3,13 +3,37 @@ import { SocialIcon } from '@/app/components/SocialIcon'
 import Image from 'next/image'
 
 export default async function Page() {
-    const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings } = await getLinksData()
+    // Intentar obtener los datos y capturar cualquier error para mostrar una página básica en caso de fallo
+    let linksData;
+    try {
+        linksData = await getLinksData();
+    } catch (error) {
+        console.error("Error al cargar datos de enlaces:", error);
+        // Proporcionar datos mínimos para que la página se renderice
+        linksData = {
+            links: [],
+            description: "biomechanics.wav",
+            profileImage: "", // Eliminamos referencia a archivos que no existen
+            profileImageType: "image",
+            socialIcons: {},
+            backgroundColor: "#1a1a1a",
+            backgroundSettings: { type: 'color', color: "#1a1a1a", imageOpacity: 0.5 },
+            styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" }
+        };
+    }
+    
+    const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings } = linksData;
 
     // Función para renderizar el avatar según su tipo
     const renderAvatar = () => {
         const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-neutral-base)] mb-4 shadow-lg object-cover"
         
-        if (profileImageType === 'video') {
+        // Si no hay imagen de perfil, no renderizar nada
+        if (!profileImage) {
+            return null;
+        }
+        
+        if (profileImageType === 'video' && profileImage) {
             return (
                 <video 
                     src={profileImage}
@@ -21,24 +45,39 @@ export default async function Page() {
                 />
             )
         } else {
-            // Para 'image' y 'gif'
-            return (
-                <Image
-                    src={profileImage}
-                    alt="Foto de perfil Biomechanics"
-                    className={commonClasses}
-                    width={128}
-                    height={128}
-                />
-            )
+            // Para 'image' y 'gif', o cuando no hay información de tipo
+            try {
+                return (
+                    <Image
+                        src={profileImage}
+                        alt="Foto de perfil Biomechanics"
+                        className={commonClasses}
+                        width={128}
+                        height={128}
+                        onError={(e) => {
+                            // Si hay error al cargar la imagen, ocultar el elemento
+                            e.currentTarget.style.display = 'none';
+                        }}
+                    />
+                )
+            } catch (error) {
+                console.error("Error al renderizar la imagen de perfil:", error);
+                return null;
+            }
         }
     }
 
     // Configurar el estilo de fondo basado en la configuración
     const getBackgroundStyle = () => {
-        const settings = backgroundSettings || { type: 'color', color: backgroundColor }
+        // Garantizar que backgroundSettings tenga un valor por defecto compatible con el tipo BackgroundSettings
+        const settings = backgroundSettings || { 
+            type: 'color' as const, 
+            color: backgroundColor || "#1a1a1a", 
+            imageOpacity: 0.5 
+        };
         
-        if (settings.type === 'image' && settings.imageUrl) {
+        // Verificar si es una imagen y tiene URL
+        if (settings.type === 'image' && 'imageUrl' in settings && settings.imageUrl) {
             return {
                 backgroundImage: `url(${settings.imageUrl})`,
                 backgroundSize: "cover",
@@ -48,13 +87,15 @@ export default async function Page() {
             }
         } else {
             return {
-                backgroundColor: settings.color || backgroundColor || "var(--color-neutral-base)",
+                backgroundColor: (settings.color || backgroundColor || "var(--color-neutral-base)"),
             }
         }
     }
 
     const backgroundStyle = getBackgroundStyle()
-    const hasImageBackground = backgroundSettings?.type === 'image' && backgroundSettings.imageUrl
+    const hasImageBackground = backgroundSettings?.type === 'image' && 
+                            'imageUrl' in (backgroundSettings || {}) && 
+                            !!backgroundSettings.imageUrl
 
     // Vista de solo lectura para usuarios comunes
     return (
@@ -95,56 +136,60 @@ export default async function Page() {
                 </p>
 
                 {/* Redes sociales con colores personalizables */}
-                <div className="flex gap-6 mb-8">
-                    {socialIcons.instagram && (
-                        <SocialIcon 
-                            icon="instagram" 
-                            url={socialIcons.instagram.url || '#'} 
-                            color={socialIcons.instagram.color} 
-                        />
-                    )}
-                    {socialIcons.soundcloud && (
-                        <SocialIcon 
-                            icon="soundcloud" 
-                            url={socialIcons.soundcloud.url || '#'} 
-                            color={socialIcons.soundcloud.color} 
-                        />
-                    )}
-                    {socialIcons.youtube && (
-                        <SocialIcon 
-                            icon="youtube" 
-                            url={socialIcons.youtube.url || '#'} 
-                            color={socialIcons.youtube.color} 
-                        />
-                    )}
-                    {socialIcons.tiktok && (
-                        <SocialIcon 
-                            icon="tiktok" 
-                            url={socialIcons.tiktok.url || '#'} 
-                            color={socialIcons.tiktok.color} 
-                        />
-                    )}
-                </div>
+                {socialIcons && Object.keys(socialIcons).length > 0 && (
+                    <div className="flex gap-6 mb-8">
+                        {socialIcons.instagram && socialIcons.instagram.url && (
+                            <SocialIcon 
+                                icon="instagram" 
+                                url={socialIcons.instagram.url} 
+                                color={socialIcons.instagram.color || '#E4405F'} 
+                            />
+                        )}
+                        {socialIcons.soundcloud && socialIcons.soundcloud.url && (
+                            <SocialIcon 
+                                icon="soundcloud" 
+                                url={socialIcons.soundcloud.url} 
+                                color={socialIcons.soundcloud.color || '#FF5500'} 
+                            />
+                        )}
+                        {socialIcons.youtube && socialIcons.youtube.url && (
+                            <SocialIcon 
+                                icon="youtube" 
+                                url={socialIcons.youtube.url} 
+                                color={socialIcons.youtube.color || '#FF0000'} 
+                            />
+                        )}
+                        {socialIcons.tiktok && socialIcons.tiktok.url && (
+                            <SocialIcon 
+                                icon="tiktok" 
+                                url={socialIcons.tiktok.url} 
+                                color={socialIcons.tiktok.color || '#000000'} 
+                            />
+                        )}
+                    </div>
+                )}
 
                 {/* Lista de links como tarjetas */}
-                <ul className="w-full max-w-md space-y-4">
-                    {links.map((link: { id: number; url: string; label: string }) => (
-                        <li key={link.id}>
-                            <a
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
-                                style={{
-                                    backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
-                                    color: styleSettings?.linkCardTextColor || '#000000'
-                                }}
-                            >
-                                {link.label || link.url}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
+                {Array.isArray(links) && links.length > 0 && (
+                    <ul className="w-full max-w-md space-y-4">
+                        {links.map((link: { id: number; url: string; label: string }) => (
+                            <li key={link.id}>
+                                <a
+                                    href={link.url || '#'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
+                                    style={{
+                                        backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
+                                        color: styleSettings?.linkCardTextColor || '#000000'
+                                    }}
+                                >
+                                    {link.label || link.url || 'Sin título'}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </div>
         </div>
     );

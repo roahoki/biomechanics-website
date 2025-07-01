@@ -46,8 +46,8 @@ export interface LinksData {
 
 const DEFAULT_LINKS_DATA: LinksData = {
   links: [],
-  description: "",
-  profileImage: "/profile.jpg",
+  description: "biomechanics.wav",
+  profileImage: "", // Ya no hacemos referencia a un archivo que no existe
   profileImageType: "image",
   socialIcons: {},
   backgroundColor: "#1a1a1a",
@@ -74,13 +74,21 @@ export async function getLinksData(): Promise<LinksData> {
       .single();
     
     // Si encontramos datos en Supabase, usarlos
-    if (data && !error) {
+    if (data && !error && data.data) {
       console.log('Datos cargados desde Supabase correctamente');
       return transformDataFromSupabase(data.data);
     }
     
-    // Si no hay datos, retornar valores por defecto
-    console.warn('No se encontraron datos en Supabase:', error?.message);
+    // Si hay un error o no hay datos, registrarlo y usar valores por defecto
+    if (error) {
+      console.warn('Error al obtener datos de Supabase:', error.message);
+    } else if (!data) {
+      console.warn('No se encontraron datos en Supabase');
+    } else if (!data.data) {
+      console.warn('El formato de datos en Supabase es incorrecto');
+    }
+    
+    // Devolver valores por defecto
     return DEFAULT_LINKS_DATA;
   } catch (error) {
     console.error('Error al cargar los enlaces desde Supabase:', error);
