@@ -309,6 +309,17 @@ export function SortableLinksForm({
     const renderAvatar = () => {
         const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
         
+        // Si no hay URL o está vacía, mostrar un placeholder
+        if (!previewUrl) {
+            return (
+                <div className={commonClasses + " bg-gray-300 flex items-center justify-center"}>
+                    <span className="text-gray-500 text-xs text-center">
+                        Sin imagen<br/>disponible
+                    </span>
+                </div>
+            )
+        }
+        
         if (previewType === 'video') {
             return (
                 <video 

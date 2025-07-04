@@ -47,7 +47,7 @@ export interface LinksData {
 const DEFAULT_LINKS_DATA: LinksData = {
   links: [],
   description: "biomechanics.wav",
-  profileImage: "", // Ya no hacemos referencia a un archivo que no existe
+  profileImage: "/icons/default-avatar.png", // URL a una imagen por defecto
   profileImageType: "image",
   socialIcons: {},
   backgroundColor: "#1a1a1a",

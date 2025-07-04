@@ -3,7 +3,20 @@ import { auth } from '@clerk/nextjs/server'
 
 export const checkRole = async (role: Roles) => {
     const { sessionClaims } = await auth()
-    return sessionClaims?.metadata.role === role
+    
+    // Buscar el rol tanto en metadata como en publicMetadata
+    const userRole = 
+        sessionClaims?.metadata?.role || 
+        (sessionClaims?.publicMetadata as any)?.role;
+    
+    console.log('checkRole - verificando rol:', { 
+        requestedRole: role, 
+        userRole,
+        metadata: sessionClaims?.metadata,
+        publicMetadata: sessionClaims?.publicMetadata
+    });
+    
+    return userRole === role
 }
 
 export const checkRoles = async (roles: Roles[]) => {

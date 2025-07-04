@@ -13,21 +13,38 @@ export default clerkMiddleware(async (auth, req) => {
     // Protect all routes starting with `/admin`
     if (isAdminRoute(req)) {
         const { userId, sessionClaims } = await auth();
+        
+        console.log('Middleware - Auth check:', { 
+            userId, 
+            path: req.nextUrl.pathname,
+            hasSessionClaims: !!sessionClaims,
+            publicMetadata: sessionClaims?.publicMetadata,
+            userMetadata: sessionClaims?.metadata
+        });
 
         // Si el usuario no está autenticado, redirigir a la página de login
         // guardando la URL de destino para redirigir después del login
         if (!userId) {
+            console.log('Middleware - Usuario no autenticado, redirigiendo a /sign-in');
             const signInUrl = new URL('/sign-in', req.url);
             // Guardar la URL original como parámetro para redirigir después del login
             signInUrl.searchParams.set('redirect_url', req.url);
             return NextResponse.redirect(signInUrl);
         }
 
+        // Verificamos el rol en ambas ubicaciones posibles
+        const isAdmin = 
+            (sessionClaims?.publicMetadata as any)?.role === 'admin' || 
+            sessionClaims?.metadata?.role === 'admin';
+            
         // Si está autenticado pero no es admin, redirigir a la página principal
-        if (sessionClaims?.metadata?.role !== 'admin') {
+        if (!isAdmin) {
+            console.log('Middleware - Usuario autenticado pero no es admin, redirigiendo a /');
             const url = new URL('/', req.url);
             return NextResponse.redirect(url);
         }
+        
+        console.log('Middleware - Acceso permitido a ruta admin');
     }
 })
 

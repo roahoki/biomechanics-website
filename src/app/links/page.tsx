@@ -13,7 +13,7 @@ export default async function Page() {
         linksData = {
             links: [],
             description: "biomechanics.wav",
-            profileImage: "", // Eliminamos referencia a archivos que no existen
+            profileImage: "", 
             profileImageType: "image",
             socialIcons: {},
             backgroundColor: "#1a1a1a",
