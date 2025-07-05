@@ -1,8 +1,8 @@
-import { SortableLinksForm } from "@/app/components/SortableLinksForm"
 import { checkRole } from "@/utils/roles"
 import { redirect } from 'next/navigation'
 import { getLinksData } from '@/utils/links'
 import { log } from "console"
+import { LinksSiteSettings } from "@/app/components/LinksSiteSettings"
 
 export default async function AdminSortableLinks(params: {
     searchParams: Promise<{ search?: string }>
@@ -22,16 +22,19 @@ export default async function AdminSortableLinks(params: {
     log('backgroundSettings', backgroundSettings)
     log('styleSettings', styleSettings)
 
+
+    // <SortableLinksForm 
+    //             links={links} 
+    //             description={description} 
+    //             profileImage={profileImage}
+    //             profileImageType={profileImageType}
+    //             socialIcons={socialIcons}
+    //             backgroundColor={backgroundColor || '#1a1a1a'}
+    //             backgroundSettings={backgroundSettings || { type: 'color', color: backgroundColor || '#1a1a1a', imageOpacity: 0.5 }}
+    //             styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000' }}
+    //         />
+
     return (
-            <SortableLinksForm 
-                links={links} 
-                description={description} 
-                profileImage={profileImage}
-                profileImageType={profileImageType}
-                socialIcons={socialIcons}
-                backgroundColor={backgroundColor || '#1a1a1a'}
-                backgroundSettings={backgroundSettings || { type: 'color', color: backgroundColor || '#1a1a1a', imageOpacity: 0.5 }}
-                styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000' }}
-            />
+            <LinksSiteSettings/>
     )
 }

@@ -37,7 +37,6 @@ export async function removeRole(formData: FormData): Promise<void> {
     }
 }
 
-// Función para guardar datos en Supabase
 export async function saveLinksToSupabase(linksData: LinksData) {
   try {
     // Usar el cliente admin de Supabase para operaciones del servidor

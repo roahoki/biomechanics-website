@@ -11,7 +11,7 @@ import { getFileType, isValidAvatarFile, getFileTypeText, type ProfileImageType 
 import { type SocialIcons, type BackgroundSettings, type StyleSettings } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
 
-export function SortableLinksForm({
+export function SortableLinksFormDEPRECATED({
     links,
     description,
     profileImage,

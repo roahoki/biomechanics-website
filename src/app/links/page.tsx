@@ -3,7 +3,6 @@ import { SocialIcon } from '@/app/components/SocialIcon'
 import Image from 'next/image'
 
 export default async function Page() {
-    // Intentar obtener los datos y capturar cualquier error para mostrar una página básica en caso de fallo
     let linksData;
     try {
         linksData = await getLinksData();
