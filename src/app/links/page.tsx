@@ -13,7 +13,7 @@ export default async function Page() {
         linksData = {
             links: [],
             description: "biomechanics.wav",
-            profileImage: "", 
+            profileImage: "/ghost.jpg", 
             profileImageType: "image",
             socialIcons: {},
             backgroundColor: "#1a1a1a",
@@ -28,9 +28,18 @@ export default async function Page() {
     const renderAvatar = () => {
         const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-neutral-base)] mb-4 shadow-lg object-cover"
         
-        // Si no hay imagen de perfil, no renderizar nada
+        // Si no hay imagen de perfil, mostrar una imagen por defecto
         if (!profileImage) {
-            return null;
+            return (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                    src="/icons/default-avatar.png"
+                    alt="Avatar por defecto"
+                    className={commonClasses}
+                    width={128}
+                    height={128}
+                />
+            );
         }
         
         if (profileImageType === 'video' && profileImage) {
@@ -46,24 +55,19 @@ export default async function Page() {
             )
         } else {
             // Para 'image' y 'gif', o cuando no hay información de tipo
-            try {
-                return (
-                    <Image
-                        src={profileImage}
-                        alt="Foto de perfil Biomechanics"
-                        className={commonClasses}
-                        width={128}
-                        height={128}
-                        onError={(e) => {
-                            // Si hay error al cargar la imagen, ocultar el elemento
-                            e.currentTarget.style.display = 'none';
-                        }}
-                    />
-                )
-            } catch (error) {
-                console.error("Error al renderizar la imagen de perfil:", error);
-                return null;
-            }
+            // Usamos una etiqueta img nativa en lugar de Next Image para evitar problemas de serialización
+            return (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                    src={profileImage}
+                    alt="Foto de perfil Biomechanics"
+                    className={commonClasses}
+                    width={128}
+                    height={128}
+                    // No podemos usar onError en un componente de servidor
+                    // Dejamos que Next.js maneje los errores de imagen automáticamente
+                />
+            )
         }
     }
 
