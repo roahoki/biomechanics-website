@@ -332,9 +332,10 @@ export function SortableLinksForm({
                 />
             )
         } else {
-            // Para 'image' y 'gif'
+            // Para 'image' y 'gif', usamos img estándar para evitar problemas de serialización
             return (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                     src={previewUrl}
                     alt="Avatar"
                     className={commonClasses}
