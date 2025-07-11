@@ -19,9 +19,13 @@ import { SocialIconsConfig } from '@/components/SocialIconsConfig'
 import { BackgroundConfig } from '@/components/BackgroundConfig'
 import { StyleConfig } from '@/components/StyleConfig'
 import { LinksList } from '@/components/SortableLinksForm/LinksList'
+import { ProductItem } from '@/components/ProductItem'
 import { DeleteModal } from '@/components/SortableLinksForm/DeleteModal'
 import { ActionButtons } from '@/components/SortableLinksForm/ActionButtons'
 import { PreviewModal } from '@/components/SortableLinksForm/PreviewModal'
+
+// Tipos
+import { LinkItem } from '@/types/product'
 
 export function SortableLinksFormRefactored({
     links,

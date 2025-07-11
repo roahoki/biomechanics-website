@@ -1,28 +1,39 @@
 import { useState } from 'react'
+import { LinkItem, Link, Product } from '@/types/product'
 
-interface Link {
-    id: number
-    url: string
-    label: string
-}
-
-export function useLinksManagement(initialLinks: Link[]) {
-    const [currentLinks, setCurrentLinks] = useState<Link[]>(initialLinks)
+export function useLinksManagement(initialLinks: LinkItem[]) {
+    const [currentLinks, setCurrentLinks] = useState<LinkItem[]>(initialLinks)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [linkToDelete, setLinkToDelete] = useState<number | null>(null)
 
     // Función para agregar un nuevo link
     const addNewLink = () => {
-        const newId = Math.max(...currentLinks.map(link => link.id), 0) + 1
-        const newLink = {
+        const newId = Math.max(...currentLinks.map(item => item.id), 0) + 1
+        const newLink: Link = {
             id: newId,
+            type: 'link',
             url: '',
             label: ''
         }
         setCurrentLinks([...currentLinks, newLink])
     }
 
-    // Función para eliminar un link
+    // Función para agregar un nuevo producto
+    const addNewProduct = () => {
+        const newId = Math.max(...currentLinks.map(item => item.id), 0) + 1
+        const newProduct: Product = {
+            id: newId,
+            type: 'product',
+            title: '',
+            price: 0,
+            paymentLink: '',
+            description: '',
+            images: []
+        }
+        setCurrentLinks([...currentLinks, newProduct])
+    }
+
+    // Función para eliminar un item
     const removeLink = (id: number) => {
         setLinkToDelete(id)
         setShowDeleteModal(true)
@@ -45,8 +56,15 @@ export function useLinksManagement(initialLinks: Link[]) {
 
     // Función para actualizar un link específico
     const updateLink = (id: number, field: 'url' | 'label', value: string) => {
-        setCurrentLinks(currentLinks.map(link => 
-            link.id === id ? { ...link, [field]: value } : link
+        setCurrentLinks(currentLinks.map(item => 
+            item.id === id && item.type !== 'product' ? { ...item, [field]: value } : item
+        ))
+    }
+
+    // Función para actualizar un producto específico
+    const updateProduct = (id: number, updatedProduct: Partial<Product>) => {
+        setCurrentLinks(currentLinks.map(item => 
+            item.id === id && item.type === 'product' ? { ...item, ...updatedProduct } : item
         ))
     }
 
@@ -54,10 +72,12 @@ export function useLinksManagement(initialLinks: Link[]) {
         currentLinks,
         setCurrentLinks,
         addNewLink,
+        addNewProduct,
         removeLink,
         confirmDelete,
         cancelDelete,
         updateLink,
+        updateProduct,
         showDeleteModal,
         linkToDelete
     }
