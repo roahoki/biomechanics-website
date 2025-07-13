@@ -1,4 +1,4 @@
-import { SortableLinksFormRefactored as SortableLinksForm } from "@/components/SortableLinksFormRefactored"
+import { SortableLinksFormWithProducts as SortableLinksForm } from "@/components/SortableLinksFormWithProducts"
 import { checkRole } from "@/utils/roles"
 import { redirect } from 'next/navigation'
 import { getLinksData } from '@/utils/links'

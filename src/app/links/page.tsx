@@ -1,25 +1,56 @@
+'use client'
+
 import { getLinksData } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
+import { LinkItem, Product } from '@/types/product'
 import Image from 'next/image'
+import { ProductModal } from '@/components/ProductModal'
+import { useState, useEffect } from 'react'
 
-export default async function Page() {
-    // Intentar obtener los datos y capturar cualquier error para mostrar una página básica en caso de fallo
-    let linksData;
-    try {
-        linksData = await getLinksData();
-    } catch (error) {
-        console.error("Error al cargar datos de enlaces:", error);
-        // Proporcionar datos mínimos para que la página se renderice
-        linksData = {
-            links: [],
-            description: "biomechanics.wav",
-            profileImage: "/ghost.jpg", 
-            profileImageType: "image",
-            socialIcons: {},
-            backgroundColor: "#1a1a1a",
-            backgroundSettings: { type: 'color', color: "#1a1a1a", imageOpacity: 0.5 },
-            styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" }
-        };
+export default function Page() {
+    const [linksData, setLinksData] = useState<any>(null)
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const data = await getLinksData()
+                setLinksData(data)
+            } catch (error) {
+                console.error("Error al cargar datos de enlaces:", error)
+                // Proporcionar datos mínimos para que la página se renderice
+                setLinksData({
+                    links: [],
+                    description: "biomechanics.wav",
+                    profileImage: "/ghost.jpg", 
+                    profileImageType: "image",
+                    socialIcons: {},
+                    backgroundColor: "#1a1a1a",
+                    backgroundSettings: { type: 'color', color: "#1a1a1a", imageOpacity: 0.5 },
+                    styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" }
+                })
+            } finally {
+                setLoading(false)
+            }
+        }
+        loadData()
+    }, [])
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-white">Cargando...</div>
+            </div>
+        )
+    }
+
+    if (!linksData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-white">Error al cargar datos</div>
+            </div>
+        )
     }
     
     const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings } = linksData;
@@ -176,25 +207,77 @@ export default async function Page() {
                 {/* Lista de links como tarjetas */}
                 {Array.isArray(links) && links.length > 0 && (
                     <ul className="w-full max-w-md space-y-4">
-                        {links.map((link: { id: number; url: string; label: string }) => (
-                            <li key={link.id}>
-                                <a
-                                    href={link.url || '#'}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
-                                    style={{
-                                        backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
-                                        color: styleSettings?.linkCardTextColor || '#000000'
-                                    }}
-                                >
-                                    {link.label || link.url || 'Sin título'}
-                                </a>
+                        {links.map((item: LinkItem) => (
+                            <li key={item.id}>
+                                {item.type === 'product' ? (
+                                    <div 
+                                        className="block p-4 rounded-lg shadow-md cursor-pointer font-body transition-transform hover:scale-105"
+                                        style={{
+                                            backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
+                                            color: styleSettings?.linkCardTextColor || '#000000'
+                                        }}
+                                        onClick={() => setSelectedProduct(item as Product)}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            {/* Imagen del producto */}
+                                            {item.images && item.images.length > 0 ? (
+                                                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <Image
+                                                        src={item.images[0]}
+                                                        alt={item.title || 'Producto'}
+                                                        width={48}
+                                                        height={48}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0">
+                                                    🛍️
+                                                </div>
+                                            )}
+                                            
+                                            {/* Información del producto */}
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-semibold truncate">{item.title || 'Producto'}</h3>
+                                                <p className="text-sm opacity-75">
+                                                    ${item.price?.toLocaleString('es-CL') || '0'}
+                                                </p>
+                                            </div>
+                                            
+                                            {/* Indicador de producto */}
+                                            <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                                Producto
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <a
+                                        href={item.url || '#'}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
+                                        style={{
+                                            backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
+                                            color: styleSettings?.linkCardTextColor || '#000000'
+                                        }}
+                                    >
+                                        {item.label || item.url || 'Sin título'}
+                                    </a>
+                                )}
                             </li>
                         ))}
                     </ul>
                 )}
             </div>
+
+            {/* Modal de producto */}
+            {selectedProduct && (
+                <ProductModal
+                    product={selectedProduct}
+                    isOpen={!!selectedProduct}
+                    onClose={() => setSelectedProduct(null)}
+                />
+            )}
         </div>
     );
 }

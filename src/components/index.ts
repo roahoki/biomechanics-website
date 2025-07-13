@@ -12,5 +12,10 @@ export { DeleteModal } from './SortableLinksForm/DeleteModal'
 export { ActionButtons } from './SortableLinksForm/ActionButtons'
 export { PreviewModal } from './SortableLinksForm/PreviewModal'
 
-// Componente principal refactorizado
-export { SortableLinksFormRefactored } from './SortableLinksFormRefactored'
+// Componentes de productos
+export { ProductForm } from './ProductForm'
+export { ProductModal } from './ProductModal'
+export { ImageCarousel } from './ImageCarousel'
+
+// Componente principal con productos
+export { SortableLinksFormWithProducts } from './SortableLinksFormWithProducts'

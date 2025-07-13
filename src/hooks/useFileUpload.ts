@@ -106,8 +106,65 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
         onStatusChange(null) // Limpiar errores previos
     }
 
+    const uploadMultipleProductImages = async (dataUrls: string[], productId?: number): Promise<string[]> => {
+        try {
+            // Convertir data URLs a archivos
+            const files = await Promise.all(
+                dataUrls.map(async (dataUrl, index) => {
+                    try {
+                        const response = await fetch(dataUrl)
+                        if (!response.ok) {
+                            throw new Error(`Error al procesar imagen ${index + 1}: ${response.statusText}`)
+                        }
+                        
+                        const blob = await response.blob()
+                        return new File([blob], `product-image-${Date.now()}-${index}.jpg`, { 
+                            type: 'image/jpeg' 
+                        })
+                    } catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+                        console.error(`Error procesando imagen ${index + 1}:`, errorMessage)
+                        throw error
+                    }
+                })
+            )
+
+            // Crear FormData para enviar a la API
+            const formData = new FormData()
+            files.forEach((file) => {
+                formData.append('images', file)
+            })
+            if (productId) {
+                formData.append('productId', productId.toString())
+            }
+
+            console.log(`🔄 Enviando ${files.length} imágenes a la API de subida...`)
+
+            // Llamar a la API de subida
+            const response = await fetch('/api/upload-product-images', {
+                method: 'POST',
+                body: formData
+            })
+
+            const result = await response.json()
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Error en la API de subida')
+            }
+
+            console.log(`✅ ${result.urls.length} imágenes subidas exitosamente`)
+            return result.urls
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+            console.error('Error uploading multiple product images:', errorMessage)
+            throw error
+        }
+    }
+
     return {
         uploadFileToSupabase,
+        uploadMultipleProductImages,
         handleFileSelect,
         handleBackgroundFileSelect,
         uploadingImage,

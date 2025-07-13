@@ -1,9 +1,11 @@
 import { getSupabaseClient } from '@/lib/supabase-db'
+import { LinkItem } from '@/types/product'
 
 export interface Link {
   id: number
   url: string
   label: string
+  type?: 'link'
 }
 
 export type ProfileImageType = 'image' | 'video' | 'gif'
@@ -34,7 +36,7 @@ export interface StyleSettings {
 }
 
 export interface LinksData {
-  links: Link[]
+  links: LinkItem[]
   description: string
   profileImage: string
   profileImageType: ProfileImageType
