@@ -17,8 +17,8 @@ export function AvatarUpload({ previewUrl, previewType, selectedFile, onFileSele
         // Si no hay URL o está vacía, mostrar un placeholder
         if (!previewUrl) {
             return (
-                <div className={commonClasses + " bg-gray-300 flex items-center justify-center"}>
-                    <span className="text-gray-500 text-xs text-center">
+                <div className={commonClasses + " bg-gray-600 flex items-center justify-center border-2 border-gray-500"}>
+                    <span className="text-gray-300 text-xs text-center">
                         Sin imagen<br/>disponible
                     </span>
                 </div>

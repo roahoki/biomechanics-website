@@ -29,12 +29,12 @@ export function StyleConfig({
         placeholder: string
     }) => (
         <div className="flex items-center space-x-3">
-            <label className="flex-1 text-sm font-medium text-white min-w-[120px]">
+            <label className="flex-1 text-sm font-medium text-gray-200 min-w-[120px]">
                 {label}:
             </label>
             <div className="flex items-center space-x-2">
                 <div 
-                    className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                    className="w-8 h-8 rounded-full border-2 border-gray-400 shadow-sm flex-shrink-0"
                     style={{ backgroundColor: isValidHexColor(value) ? value : placeholder }}
                 />
                 <input
@@ -43,10 +43,10 @@ export function StyleConfig({
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
                     maxLength={7}
-                    className={`w-24 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 text-black ${
+                    className={`w-24 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 bg-gray-700 text-white placeholder-gray-400 ${
                         isValidHexColor(value) 
-                            ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
-                            : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                            ? 'border-gray-600 focus:ring-blue-500 focus:border-blue-500' 
+                            : 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-900'
                     }`}
                 />
                 <input
@@ -61,8 +61,8 @@ export function StyleConfig({
     )
 
     return (
-        <div className="w-full max-w-md bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-6 border border-white/20">
-            <h3 className="text-xl font-semibold text-[var(--color-secondary)] mb-4 text-center">
+        <div className="w-full max-w-md bg-gray-800 bg-opacity-80 backdrop-blur-sm rounded-lg p-6 mb-6 border border-gray-600">
+            <h3 className="text-xl font-semibold text-orange-400 mb-4 text-center">
                 Colores de Elementos
             </h3>
             <div className="space-y-4">
@@ -85,8 +85,8 @@ export function StyleConfig({
                     placeholder="#000000"
                 />
             </div>
-            <div className="mt-4 p-3 bg-orange-500/10 rounded-md border border-orange-500/20">
-                <p className="text-xs text-orange-200 text-center">
+            <div className="mt-4 p-3 bg-orange-900 bg-opacity-30 rounded-md border border-orange-600">
+                <p className="text-xs text-orange-300 text-center">
                     🎨 Personaliza los colores del título y las tarjetas de links
                 </p>
             </div>

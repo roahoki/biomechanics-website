@@ -22,14 +22,14 @@ export function BackgroundConfig({
     isValidHexColor
 }: BackgroundConfigProps) {
     return (
-        <div className="w-full max-w-md bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-6 border border-white/20">
-            <h3 className="text-xl font-semibold text-[var(--color-secondary)] mb-4 text-center">
+        <div className="w-full max-w-md bg-gray-800 bg-opacity-80 backdrop-blur-sm rounded-lg p-6 mb-6 border border-gray-600">
+            <h3 className="text-xl font-semibold text-green-400 mb-4 text-center">
                 Fondo de Pantalla
             </h3>
             
             {/* Selector de tipo de fondo */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-white mb-2">
+                <label className="block text-sm font-medium text-gray-200 mb-2">
                     Tipo de fondo:
                 </label>
                 <div className="flex space-x-4">
@@ -41,7 +41,7 @@ export function BackgroundConfig({
                             onChange={(e) => setBackgroundType(e.target.value as 'color' | 'image')}
                             className="mr-2"
                         />
-                        <span className="text-white">Color sólido</span>
+                        <span className="text-gray-200">Color sólido</span>
                     </label>
                     <label className="flex items-center">
                         <input
@@ -51,7 +51,7 @@ export function BackgroundConfig({
                             onChange={(e) => setBackgroundType(e.target.value as 'color' | 'image')}
                             className="mr-2"
                         />
-                        <span className="text-white">Imagen</span>
+                        <span className="text-gray-200">Imagen</span>
                     </label>
                 </div>
             </div>
@@ -59,12 +59,12 @@ export function BackgroundConfig({
             {/* Configuración de color */}
             {backgroundType === 'color' && (
                 <div className="flex items-center justify-center space-x-3">
-                    <label className="text-sm font-medium text-white">
+                    <label className="text-sm font-medium text-gray-200">
                         Color:
                     </label>
                     <div className="flex items-center space-x-2">
                         <div 
-                            className="w-12 h-12 rounded-lg border-2 border-white shadow-sm"
+                            className="w-12 h-12 rounded-lg border-2 border-gray-400 shadow-sm"
                             style={{ backgroundColor: bgColor }}
                         />
                         <input
@@ -73,10 +73,10 @@ export function BackgroundConfig({
                             onChange={(e) => setBgColor(e.target.value)}
                             placeholder="#1a1a1a"
                             maxLength={7}
-                            className={`w-28 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 text-black ${
+                            className={`w-28 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 bg-gray-700 text-white placeholder-gray-400 ${
                                 isValidHexColor(bgColor) 
-                                    ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500' 
-                                    : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                    ? 'border-gray-600 focus:ring-blue-500 focus:border-blue-500' 
+                                    : 'border-red-500 focus:ring-red-500 focus:border-red-500'
                             }`}
                         />
                         <input
