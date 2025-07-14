@@ -2,9 +2,10 @@
 
 import { getLinksData } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
-import { LinkItem, Product } from '@/types/product'
+import { LinkItem, Product, Link } from '@/types/product'
 import Image from 'next/image'
 import { ProductModal } from '@/components/ProductModal'
+import { ProductCard } from '@/components/ProductCardSimple'
 import { useState, useEffect } from 'react'
 
 export default function Page() {
@@ -16,6 +17,8 @@ export default function Page() {
         async function loadData() {
             try {
                 const data = await getLinksData()
+                console.log('Datos cargados:', data)
+                console.log('Productos encontrados:', data.links.filter(item => item.type === 'product'))
                 setLinksData(data)
             } catch (error) {
                 console.error("Error al cargar datos de enlaces:", error)
@@ -206,67 +209,57 @@ export default function Page() {
 
                 {/* Lista de links como tarjetas */}
                 {Array.isArray(links) && links.length > 0 && (
-                    <ul className="w-full max-w-md space-y-4">
-                        {links.map((item: LinkItem) => (
-                            <li key={item.id}>
-                                {item.type === 'product' ? (
-                                    <div 
-                                        className="block p-4 rounded-lg shadow-md cursor-pointer font-body transition-transform hover:scale-105"
-                                        style={{
-                                            backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
-                                            color: styleSettings?.linkCardTextColor || '#000000'
-                                        }}
-                                        onClick={() => setSelectedProduct(item as Product)}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            {/* Imagen del producto */}
-                                            {item.images && item.images.length > 0 ? (
-                                                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                                                    <Image
-                                                        src={item.images[0]}
-                                                        alt={item.title || 'Producto'}
-                                                        width={48}
-                                                        height={48}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                                    🛍️
-                                                </div>
-                                            )}
-                                            
-                                            {/* Información del producto */}
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-semibold truncate">{item.title || 'Producto'}</h3>
-                                                <p className="text-sm opacity-75">
-                                                    ${item.price?.toLocaleString('es-CL') || '0'}
-                                                </p>
-                                            </div>
-                                            
-                                            {/* Indicador de producto */}
-                                            <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                                Producto
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <a
-                                        href={item.url || '#'}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
-                                        style={{
-                                            backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
-                                            color: styleSettings?.linkCardTextColor || '#000000'
-                                        }}
-                                    >
-                                        {item.label || item.url || 'Sin título'}
-                                    </a>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="w-full max-w-md">
+                        {/* Productos */}
+                        {links.filter(item => item.type === 'product').length > 0 && (
+                            <div className="mb-8">
+                                <h2 className="text-xl font-semibold mb-4 text-center">Productos</h2>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {links
+                                        .filter(item => item.type === 'product')
+                                        .map((product: Product) => (
+                                            <ProductCard
+                                                key={product.id}
+                                                product={product}
+                                                onClick={(p) => setSelectedProduct(p)}
+                                                linkCardBackgroundColor={styleSettings?.linkCardBackgroundColor}
+                                                linkCardTextColor={styleSettings?.linkCardTextColor}
+                                            />
+                                        ))
+                                    }
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Enlaces regulares */}
+                        {links.filter(item => item.type !== 'product').length > 0 && (
+                            <div className="space-y-4">
+                                {links
+                                    .filter(item => item.type !== 'product')
+                                    .map((item: LinkItem) => {
+                                        // Type guard para asegurar que es un Link
+                                        if (item.type === 'product') return null
+                                        const link = item as Link
+                                        return (
+                                            <a
+                                                key={link.id}
+                                                href={link.url || '#'}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
+                                                style={{
+                                                    backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
+                                                    color: styleSettings?.linkCardTextColor || '#000000'
+                                                }}
+                                            >
+                                                {link.label || link.url || 'Sin título'}
+                                            </a>
+                                        )
+                                    })
+                                }
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
 

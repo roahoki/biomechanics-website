@@ -1,17 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ImageCarousel } from './ImageCarousel'
-
-interface Product {
-    id: number
-    type: 'product'
-    title: string
-    price: number
-    paymentLink: string
-    description: string
-    images: string[]
-}
+import { motion, AnimatePresence } from 'framer-motion'
+import { Product } from '@/types/product'
 
 interface ProductModalProps {
     product: Product | null
@@ -48,178 +39,150 @@ export function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
 
     // Formatear precio
     const formatPrice = (price: number) => {
-        return `$${price.toLocaleString('es-CL')}`
+        return new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(price).replace('CLP', '').trim()
     }
 
-    // Manejar clic en comprar
-    const handlePurchase = () => {
-        if (product?.paymentLink) {
-            window.open(product.paymentLink, '_blank', 'noopener,noreferrer')
-        }
-    }
-
-    if (!isOpen || !product) return null
+    if (!product) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Overlay */}
-            <div 
-                className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
-                onClick={onClose}
-            />
-
-            {/* Modal */}
-            <div className="relative bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-xl">
-                    <h2 className="text-xl font-bold text-gray-900">
-                        Producto
-                    </h2>
-                    <button
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    {/* Backdrop */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                        className="fixed inset-0 bg-black bg-opacity-50 z-50"
+                    />
+
+                    {/* Modal que se desliza desde abajo */}
+                    <motion.div
+                        initial={{ y: '100%' }}
+                        animate={{ y: 0 }}
+                        exit={{ y: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 500 }}
+                        className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl max-h-[90vh] overflow-hidden"
                     >
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+                        <div className="flex flex-col h-full">
+                            {/* Header con botón de cerrar */}
+                            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                                <button
+                                    onClick={onClose}
+                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                                <div className="flex-1" />
+                            </div>
 
-                {/* Content */}
-                <div className="p-6">
-                    {/* Carrusel de imágenes - Solo lectura */}
-                    <div className="mb-6">
-                        <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
-                            {product.images.length > 0 ? (
-                                <div className="relative w-full h-full">
-                                    <img
-                                        src={product.images[currentImageIndex]}
-                                        alt={`${product.title} - Imagen ${currentImageIndex + 1}`}
-                                        className="w-full h-full object-cover"
-                                    />
-
-                                    {/* Navegación */}
-                                    {product.images.length > 1 && (
-                                        <>
-                                            <button
-                                                onClick={() => setCurrentImageIndex(prev => 
-                                                    prev > 0 ? prev - 1 : product.images.length - 1
-                                                )}
-                                                className="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                                </svg>
-                                            </button>
-                                            <button
-                                                onClick={() => setCurrentImageIndex(prev => 
-                                                    prev < product.images.length - 1 ? prev + 1 : 0
-                                                )}
-                                                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                </svg>
-                                            </button>
-
-                                            {/* Indicadores */}
-                                            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                                                {product.images.map((_, index) => (
-                                                    <button
-                                                        key={index}
-                                                        onClick={() => setCurrentImageIndex(index)}
-                                                        className={`w-3 h-3 rounded-full transition-all ${
-                                                            index === currentImageIndex 
-                                                                ? 'bg-white' 
-                                                                : 'bg-white bg-opacity-50'
-                                                        }`}
-                                                    />
-                                                ))}
+                            {/* Contenido scrolleable */}
+                            <div className="flex-1 overflow-y-auto px-4 pb-4">
+                                {/* Carrusel de imágenes */}
+                                <div className="mb-6">
+                                    {product.images.length > 0 ? (
+                                        <div className="relative">
+                                            {/* Imagen principal */}
+                                            <div className="w-full h-64 rounded-lg overflow-hidden bg-gray-100">
+                                                <img
+                                                    src={product.images[currentImageIndex]}
+                                                    alt={product.title}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
-                                        </>
+
+                                            {/* Navegación del carrusel */}
+                                            {product.images.length > 1 && (
+                                                <>
+                                                    {/* Botones de navegación */}
+                                                    <button
+                                                        onClick={() => setCurrentImageIndex(
+                                                            currentImageIndex === 0 ? product.images.length - 1 : currentImageIndex - 1
+                                                        )}
+                                                        className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                        </svg>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setCurrentImageIndex(
+                                                            currentImageIndex === product.images.length - 1 ? 0 : currentImageIndex + 1
+                                                        )}
+                                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </button>
+
+                                                    {/* Indicadores de página */}
+                                                    <div className="flex justify-center mt-4 space-x-2">
+                                                        {product.images.map((_, index) => (
+                                                            <button
+                                                                key={index}
+                                                                onClick={() => setCurrentImageIndex(index)}
+                                                                className={`w-2 h-2 rounded-full transition-all ${
+                                                                    index === currentImageIndex 
+                                                                        ? 'bg-gray-800' 
+                                                                        : 'bg-gray-300'
+                                                                }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="w-full h-64 rounded-lg bg-gray-200 flex items-center justify-center">
+                                            <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                            </svg>
+                                        </div>
                                     )}
                                 </div>
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                    <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                    </svg>
-                                </div>
-                            )}
-                        </div>
 
-                        {/* Thumbnails */}
-                        {product.images.length > 1 && (
-                            <div className="flex space-x-2 mt-3 overflow-x-auto pb-2">
-                                {product.images.map((image, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setCurrentImageIndex(index)}
-                                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                                            index === currentImageIndex 
-                                                ? 'border-blue-500' 
-                                                : 'border-gray-300'
-                                        }`}
-                                    >
-                                        <img
-                                            src={image}
-                                            alt={`Miniatura ${index + 1}`}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                                {/* Título del producto */}
+                                <h2 className="text-xl font-bold text-gray-900 mb-2 text-center">
+                                    {product.title || 'Producto sin título'}
+                                </h2>
 
-                    {/* Información del producto */}
-                    <div className="space-y-4">
-                        {/* Título y precio */}
-                        <div className="space-y-2">
-                            <h3 className="text-2xl font-bold text-gray-900">
-                                {product.title}
-                            </h3>
-                            <div className="text-3xl font-bold text-green-600">
-                                {formatPrice(product.price)}
-                            </div>
-                        </div>
-
-                        {/* Descripción */}
-                        <div className="space-y-2">
-                            <h4 className="font-semibold text-gray-900">Descripción</h4>
-                            <p className="text-gray-600 leading-relaxed">
-                                {product.description}
-                            </p>
-                        </div>
-
-                        {/* Botón de compra */}
-                        <div className="pt-4">
-                            <button
-                                onClick={handlePurchase}
-                                disabled={!product.paymentLink}
-                                className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all ${
-                                    product.paymentLink 
-                                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]' 
-                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
-                            >
-                                {product.paymentLink ? 'Comprar Ahora' : 'Link de pago no disponible'}
-                            </button>
-                        </div>
-
-                        {/* Información adicional */}
-                        <div className="pt-4 border-t border-gray-200">
-                            <div className="text-xs text-gray-500 space-y-1">
-                                <p>• Al hacer clic en "Comprar Ahora" serás redirigido a la plataforma de pago</p>
-                                <p>• Transacción segura y protegida</p>
-                                {product.images.length > 1 && (
-                                    <p>• Usa las flechas o toca las miniaturas para ver más imágenes</p>
+                                {/* Descripción */}
+                                {product.description && (
+                                    <p className="text-gray-600 text-center mb-6 leading-relaxed">
+                                        {product.description}
+                                    </p>
                                 )}
+
+                                {/* Precio y botón de compra */}
+                                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                                    <div className="text-left">
+                                        <span className="text-2xl font-bold text-gray-900">
+                                            ${formatPrice(product.price)}
+                                        </span>
+                                    </div>
+                                    <a
+                                        href={product.paymentLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                                    >
+                                        COMPRAR
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
     )
 }
