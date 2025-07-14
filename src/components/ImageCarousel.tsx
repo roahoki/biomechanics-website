@@ -177,6 +177,7 @@ export function ImageCarousel({
 
                         {/* Botón eliminar */}
                         <button
+                            type="button"
                             onClick={() => removeImage(currentIndex)}
                             className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
                         >
@@ -189,6 +190,7 @@ export function ImageCarousel({
                         {images.length > 1 && (
                             <>
                                 <button
+                                    type="button"
                                     onClick={goToPrevious}
                                     className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
                                 >
@@ -197,6 +199,7 @@ export function ImageCarousel({
                                     </svg>
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={goToNext}
                                     className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
                                 >
@@ -213,6 +216,7 @@ export function ImageCarousel({
                                 {images.map((_, index) => (
                                     <button
                                         key={index}
+                                        type="button"
                                         onClick={() => setCurrentIndex(index)}
                                         className={`w-2 h-2 rounded-full transition-all ${
                                             index === currentIndex 
@@ -230,6 +234,7 @@ export function ImageCarousel({
             {/* Botón agregar más imágenes */}
             {images.length > 0 && images.length < maxImages && (
                 <button
+                    type="button"
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors mb-4"
                 >

@@ -153,6 +153,7 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
                     </h3>
                 </div>
                 <button
+                    type="button"
                     onClick={onRemove}
                     className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
                     title="Eliminar producto"

@@ -36,6 +36,7 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
                     <h3 className="font-semibold text-gray-900">Producto</h3>
                 </div>
                 <button
+                    type="button"
                     onClick={() => onRemove(product.id)}
                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-100 text-red-500 transition-colors"
                     title="Eliminar producto"
