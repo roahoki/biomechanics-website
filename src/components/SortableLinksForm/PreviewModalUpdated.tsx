@@ -5,6 +5,8 @@ import { ProductModal } from '@/components/ProductModal'
 import { type ProfileImageType } from '@/utils/file-utils'
 import { LinkItem, Product } from '@/types/product'
 
+type ViewMode = 'mobile' | 'desktop'
+
 interface PreviewModalProps {
     isOpen: boolean
     onClose: () => void
@@ -48,6 +50,7 @@ export function PreviewModalUpdated({
     bgColor
 }: PreviewModalProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+    const [viewMode, setViewMode] = useState<ViewMode>('mobile')
     const [isProductModalOpen, setIsProductModalOpen] = useState(false)
 
     if (!isOpen) return null
@@ -62,9 +65,39 @@ export function PreviewModalUpdated({
         setSelectedProduct(null)
     }
 
-    const formatPrice = (price: number) => {
-        return `$${price.toLocaleString('es-CL')}`
+    const formatPrice = (price: number): string => {
+        return new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(price).replace('CLP', '').trim()
     }
+
+    // Configuración de estilos según el modo de vista
+    const getViewportStyles = () => {
+        if (viewMode === 'desktop') {
+            return {
+                container: 'max-w-4xl w-full h-[80vh]',
+                viewport: 'max-w-md mx-auto h-full',
+                avatarSize: 'w-32 h-32',
+                titleSize: 'text-4xl',
+                linksWidth: 'max-w-md',
+                spacing: 'space-y-4'
+            }
+        } else {
+            return {
+                container: 'max-w-sm w-full h-[80vh]',
+                viewport: 'w-full h-full',
+                avatarSize: 'w-24 h-24',
+                titleSize: 'text-xl',
+                linksWidth: 'max-w-xs',
+                spacing: 'space-y-3'
+            }
+        }
+    }
+
+    const styles = getViewportStyles()
 
     const backgroundImageStyle = backgroundType === 'image' && backgroundImageUrl
         ? {
@@ -86,13 +119,46 @@ export function PreviewModalUpdated({
     return (
         <>
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg max-w-sm mx-auto max-h-[90vh] overflow-hidden shadow-2xl">
-                    {/* Header */}
-                    <div className="flex justify-between items-center p-4 border-b">
-                        <h2 className="text-lg font-semibold">Vista Previa</h2>
+                <div className={`bg-white rounded-lg ${styles.container} shadow-2xl flex flex-col`}>
+                    {/* Header con selector de vista */}
+                    <div className="flex justify-between items-center p-4 border-b bg-white rounded-t-lg flex-shrink-0">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-lg font-semibold">Vista Previa</h2>
+                            
+                            {/* Selector de vista */}
+                            <div className="flex bg-gray-100 rounded-lg p-1">
+                                <button
+                                    onClick={() => setViewMode('mobile')}
+                                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
+                                        viewMode === 'mobile'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a1 1 0 001-1V4a1 1 0 00-1-1H8a1 1 0 00-1 1v16a1 1 0 001 1z" />
+                                    </svg>
+                                    Móvil
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('desktop')}
+                                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
+                                        viewMode === 'desktop'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    PC
+                                </button>
+                            </div>
+                        </div>
+                        
                         <button
                             onClick={onClose}
-                            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -100,152 +166,175 @@ export function PreviewModalUpdated({
                         </button>
                     </div>
 
-                    {/* Preview Content */}
-                    <div 
-                        className="relative min-h-[600px] flex flex-col items-center p-6 overflow-y-auto"
-                        style={backgroundImageStyle}
-                    >
-                        {/* Overlay si hay imagen de fondo */}
-                        <div 
-                            className="absolute inset-0"
-                            style={overlayStyle}
-                        />
-
-                        {/* Content */}
-                        <div className="relative z-10 flex flex-col items-center w-full">
-                            {/* Avatar */}
-                            <div className="mb-4">
-                                {previewType === 'video' ? (
-                                    <video
-                                        src={previewUrl}
-                                        className="w-24 h-24 rounded-full object-cover"
-                                        autoPlay
-                                        muted
-                                        loop
-                                    />
-                                ) : (
-                                    <Image
-                                        src={previewUrl}
-                                        alt="Profile"
-                                        width={96}
-                                        height={96}
-                                        className="w-24 h-24 rounded-full object-cover"
-                                    />
-                                )}
-                            </div>
-
-                            {/* Title */}
-                            <h1 
-                                className="text-xl font-bold mb-6 text-center"
-                                style={{ color: titleColor }}
+                    {/* Preview Content con scroll */}
+                    <div className="flex-1 overflow-hidden bg-gray-50 rounded-b-lg">
+                        <div className={`${styles.viewport} overflow-y-auto h-full`}>
+                            <div 
+                                className="min-h-full flex flex-col items-center p-6 relative"
+                                style={backgroundImageStyle}
                             >
-                                {description}
-                            </h1>
+                                {/* Overlay si hay imagen de fondo */}
+                                <div 
+                                    className="absolute inset-0 pointer-events-none"
+                                    style={overlayStyle}
+                                />
 
-                            {/* Social Icons */}
-                            <div className="flex space-x-4 mb-6">
-                                {socialIcons.instagram?.url && (
-                                    <SocialIcon
-                                        icon="instagram"
-                                        url={socialIcons.instagram.url}
-                                        color={socialIconColors.instagram}
-                                    />
-                                )}
-                                {socialIcons.soundcloud?.url && (
-                                    <SocialIcon
-                                        icon="soundcloud"
-                                        url={socialIcons.soundcloud.url}
-                                        color={socialIconColors.soundcloud}
-                                    />
-                                )}
-                                {socialIcons.youtube?.url && (
-                                    <SocialIcon
-                                        icon="youtube"
-                                        url={socialIcons.youtube.url}
-                                        color={socialIconColors.youtube}
-                                    />
-                                )}
-                                {socialIcons.tiktok?.url && (
-                                    <SocialIcon
-                                        icon="tiktok"
-                                        url={socialIcons.tiktok.url}
-                                        color={socialIconColors.tiktok}
-                                    />
-                                )}
-                            </div>
-
-                            {/* Links and Products */}
-                            <div className="w-full max-w-xs space-y-3">
-                                {currentLinks.map((item) => (
-                                    <div key={item.id}>
-                                        {item.type === 'product' ? (
-                                            /* Product Card */
-                                            <div
-                                                onClick={() => handleProductClick(item)}
-                                                className="cursor-pointer transform hover:scale-[1.02] transition-all"
-                                                style={{
-                                                    backgroundColor: linkCardBackgroundColor,
-                                                    color: linkCardTextColor
-                                                }}
-                                            >
-                                                <div className="relative rounded-lg overflow-hidden shadow-md">
-                                                    {/* Product Image */}
-                                                    {item.images.length > 0 ? (
-                                                        <div className="h-32 bg-gray-200">
-                                                            <img
-                                                                src={item.images[0]}
-                                                                alt={item.title}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="h-32 bg-gray-200 flex items-center justify-center">
-                                                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                                            </svg>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Product Info */}
-                                                    <div className="p-3">
-                                                        <div className="flex justify-between items-start mb-1">
-                                                            <h3 className="font-semibold text-sm line-clamp-1">
-                                                                {item.title || 'Producto sin título'}
-                                                            </h3>
-                                                            <span className="text-green-600 font-bold text-sm ml-2">
-                                                                {formatPrice(item.price)}
-                                                            </span>
-                                                        </div>
-                                                        {item.description && (
-                                                            <p className="text-xs opacity-80 line-clamp-2">
-                                                                {item.description}
-                                                            </p>
-                                                        )}
-                                                        <div className="mt-2">
-                                                            <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                                                                PRODUCTO
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                {/* Content */}
+                                <div className="relative z-10 flex flex-col items-center w-full">
+                                    {/* Avatar */}
+                                    <div className="mb-4">
+                                        {previewType === 'video' ? (
+                                            <video
+                                                src={previewUrl}
+                                                className={`${styles.avatarSize} rounded-full object-cover border-4 border-gray-200`}
+                                                autoPlay
+                                                muted
+                                                loop
+                                            />
                                         ) : (
-                                            /* Link Card */
-                                            <a
-                                                href={item.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="block w-full py-3 px-4 rounded-lg text-center font-medium transition-all hover:scale-[1.02] shadow-md"
-                                                style={{
-                                                    backgroundColor: linkCardBackgroundColor,
-                                                    color: linkCardTextColor
-                                                }}
-                                            >
-                                                {item.label || 'Link sin etiqueta'}
-                                            </a>
+                                            <Image
+                                                src={previewUrl}
+                                                alt="Profile"
+                                                width={viewMode === 'desktop' ? 128 : 96}
+                                                height={viewMode === 'desktop' ? 128 : 96}
+                                                className={`${styles.avatarSize} rounded-full object-cover border-4 border-gray-200`}
+                                            />
                                         )}
                                     </div>
-                                ))}
+
+                                    {/* Title */}
+                                    <h1 
+                                        className={`${styles.titleSize} font-bold mb-6 text-center font-display tracking-wide`}
+                                        style={{ 
+                                            color: titleColor,
+                                            fontFamily: 'Space Grotesk, sans-serif'
+                                        }}
+                                    >
+                                        biomechanics.wav
+                                    </h1>
+
+                                    {/* Description */}
+                                    <p className={`text-center ${viewMode === 'desktop' ? 'text-lg mb-8' : 'text-base mb-6'} max-w-2xl`}>
+                                        {description}
+                                    </p>
+
+                                    {/* Social Icons */}
+                                    {(socialIcons.instagram?.url || socialIcons.soundcloud?.url || socialIcons.youtube?.url || socialIcons.tiktok?.url) && (
+                                        <div className={`flex ${viewMode === 'desktop' ? 'gap-6 mb-8' : 'gap-4 mb-6'}`}>
+                                            {socialIcons.instagram?.url && (
+                                                <SocialIcon
+                                                    icon="instagram"
+                                                    url={socialIcons.instagram.url}
+                                                    color={socialIconColors.instagram}
+                                                />
+                                            )}
+                                            {socialIcons.soundcloud?.url && (
+                                                <SocialIcon
+                                                    icon="soundcloud"
+                                                    url={socialIcons.soundcloud.url}
+                                                    color={socialIconColors.soundcloud}
+                                                />
+                                            )}
+                                            {socialIcons.youtube?.url && (
+                                                <SocialIcon
+                                                    icon="youtube"
+                                                    url={socialIcons.youtube.url}
+                                                    color={socialIconColors.youtube}
+                                                />
+                                            )}
+                                            {socialIcons.tiktok?.url && (
+                                                <SocialIcon
+                                                    icon="tiktok"
+                                                    url={socialIcons.tiktok.url}
+                                                    color={socialIconColors.tiktok}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Links and Products */}
+                                    <div className={`w-full ${styles.linksWidth} ${styles.spacing}`}>
+                                        {currentLinks.map((item) => (
+                                            <div key={item.id}>
+                                                {item.type === 'product' ? (
+                                                    /* Product Card */
+                                                    <div
+                                                        onClick={() => handleProductClick(item)}
+                                                        className="cursor-pointer transform hover:scale-[1.02] transition-all duration-200"
+                                                        style={{
+                                                            backgroundColor: linkCardBackgroundColor,
+                                                            color: linkCardTextColor
+                                                        }}
+                                                    >
+                                                        <div className="relative rounded-lg overflow-hidden shadow-md">
+                                                            {/* Product Image */}
+                                                            {item.images.length > 0 ? (
+                                                                <div className={viewMode === 'desktop' ? 'h-40' : 'h-32'}>
+                                                                    <img
+                                                                        src={item.images[0]}
+                                                                        alt={item.title}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                </div>
+                                                            ) : (
+                                                                <div className={`${viewMode === 'desktop' ? 'h-40' : 'h-32'} bg-gray-200 flex items-center justify-center`}>
+                                                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                                                    </svg>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Product Info */}
+                                                            <div className={viewMode === 'desktop' ? 'p-4' : 'p-3'}>
+                                                                <div className="flex justify-between items-start mb-1">
+                                                                    <h3 className={`font-semibold ${viewMode === 'desktop' ? 'text-base' : 'text-sm'} line-clamp-1`}>
+                                                                        {item.title || 'Producto sin título'}
+                                                                    </h3>
+                                                                    <span className={`text-green-600 font-bold ${viewMode === 'desktop' ? 'text-base' : 'text-sm'} ml-2`}>
+                                                                        {formatPrice(item.price)}
+                                                                    </span>
+                                                                </div>
+                                                                {item.description && (
+                                                                    <p className={`${viewMode === 'desktop' ? 'text-sm' : 'text-xs'} opacity-80 line-clamp-2`}>
+                                                                        {item.description}
+                                                                    </p>
+                                                                )}
+                                                                <div className="mt-2">
+                                                                    <span className={`inline-block bg-green-500 text-white ${viewMode === 'desktop' ? 'text-sm px-3 py-1' : 'text-xs px-2 py-1'} rounded-full`}>
+                                                                        PRODUCTO
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    /* Link Card */
+                                                    <a
+                                                        href={item.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className={`block w-full ${viewMode === 'desktop' ? 'py-4 px-6 text-lg' : 'py-3 px-4 text-base'} rounded-lg text-center font-medium transition-all duration-200 hover:scale-[1.02] shadow-md`}
+                                                        style={{
+                                                            backgroundColor: linkCardBackgroundColor,
+                                                            color: linkCardTextColor
+                                                        }}
+                                                    >
+                                                        {item.label || 'Link sin etiqueta'}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Indicador de scroll si hay muchos elementos */}
+                                    {currentLinks.length > 6 && (
+                                        <div className="mt-6 text-center">
+                                            <p className="text-xs text-gray-500 opacity-60">
+                                                Desplázate para ver más elementos
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
