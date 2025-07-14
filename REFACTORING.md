@@ -19,15 +19,48 @@ El componente `SortableLinksForm` ha sido refactorizado exitosamente en múltipl
 - `BackgroundConfig.tsx` - Configuración de fondo (color/imagen)
 - `StyleConfig.tsx` - Configuración de colores de elementos
 
+# Refactorización y Evolución del Sistema de Links
+
+## ✅ Proceso Completado
+
+El sistema de links ha evolucionado desde un componente `SortableLinksForm` básico hasta un sistema completo de gestión de contenido que incluye:
+- **Links tradicionales** 
+- **Productos con imágenes** (presionables)
+- **Sistema de previsualización avanzado** con vistas móvil/PC
+- **Gestión de archivos** con Supabase Storage
+- **Autenticación** con Clerk
+
+## 📁 Estructura de archivos
+
+### Hooks Personalizados (`/src/hooks/`)
+- `useFileUpload.ts` - Manejo de subida de archivos a Supabase (avatares y productos)
+- `useLinksManagement.ts` - CRUD de links y productos con funcionalidad de drag & drop  
+- `useColorConfig.ts` - Gestión de colores (iconos sociales, fondo, elementos)
+- `useFormState.ts` - Estado general del formulario
+
+### Componentes Modulares (`/src/components/`)
+- `AvatarUpload.tsx` - Subida y vista previa del avatar/video
+- `FileInfo.tsx` - Información del archivo seleccionado
+- `SocialIconsConfig.tsx` - Configuración de colores de iconos sociales
+- `BackgroundConfig.tsx` - Configuración de fondo (color/imagen)
+- `StyleConfig.tsx` - Configuración de colores de elementos
+
 ### Componentes del Formulario (`/src/components/SortableLinksForm/`)
-- `LinkCard.tsx` - Componente individual para cada link
-- `LinksList.tsx` - Lista con funcionalidad sortable
+- `LinkCard.tsx` - Componente individual para cada link/producto
+- `LinksListUpdated.tsx` - Lista con funcionalidad sortable para links y productos
 - `DeleteModal.tsx` - Modal de confirmación de eliminación
 - `ActionButtons.tsx` - Botones de acción (guardar, vista previa)
-- `PreviewModal.tsx` - Modal de vista previa
+- `PreviewModalUpdated.tsx` - Modal de vista previa con selector móvil/PC y scroll
+
+### Componentes de Productos (`/src/components/`)
+- `ProductForm.tsx` - Formulario para crear/editar productos
+- `ProductItem.tsx` - Componente individual para mostrar productos en admin
+- `ProductPreview.tsx` - Vista previa de productos
+- `ProductModal.tsx` - Modal para mostrar productos en página pública
+- `ImageCarousel.tsx` - Carrusel de imágenes con drag & drop y gestos táctiles
 
 ### Componente Principal
-- `SortableLinksFormRefactored.tsx` - Orquesta todos los componentes
+- `SortableLinksFormWithProducts.tsx` - Sistema completo de gestión de links y productos
 
 ## 🔄 Beneficios de la Refactorización
 
