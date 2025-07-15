@@ -12,7 +12,7 @@ interface ImageCarouselProps {
 export function ImageCarousel({ 
     images, 
     onImagesChange, 
-    maxImages = 3, 
+    maxImages = 10, 
     maxSizeInMB = 2 
 }: ImageCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0)

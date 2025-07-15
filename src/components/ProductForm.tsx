@@ -172,7 +172,7 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
                 <ImageCarousel
                     images={images}
                     onImagesChange={handleImagesChange}
-                    maxImages={3}
+                    maxImages={10}
                     maxSizeInMB={2}
                 />
                 {errors.images && (

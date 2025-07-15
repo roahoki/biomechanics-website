@@ -55,7 +55,7 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
                 <ImageCarousel
                     images={product.images}
                     onImagesChange={(images) => onUpdate(product.id, { images })}
-                    maxImages={3}
+                    maxImages={10}
                     maxSizeInMB={2}
                 />
             </div>
