@@ -1,9 +1,11 @@
 import { getSupabaseClient } from '@/lib/supabase-db'
+import { LinkItem } from '@/types/product'
 
 export interface Link {
   id: number
   url: string
   label: string
+  type?: 'link'
 }
 
 export type ProfileImageType = 'image' | 'video' | 'gif'
@@ -31,10 +33,11 @@ export interface StyleSettings {
   titleColor?: string
   linkCardBackgroundColor?: string
   linkCardTextColor?: string
+  productBuyButtonColor?: string
 }
 
 export interface LinksData {
-  links: Link[]
+  links: LinkItem[]
   description: string
   profileImage: string
   profileImageType: ProfileImageType
@@ -59,7 +62,8 @@ const DEFAULT_LINKS_DATA: LinksData = {
   styleSettings: {
     titleColor: "#ffffff",
     linkCardBackgroundColor: "#ffffff",
-    linkCardTextColor: "#000000"
+    linkCardTextColor: "#000000",
+    productBuyButtonColor: "#ff6b35"
   }
 };
 
