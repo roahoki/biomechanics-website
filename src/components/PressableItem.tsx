@@ -29,6 +29,7 @@ export function PressableItem({
     // Si es un producto
     if (item.type === 'product') {
         const product = item as Product
+        
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -38,54 +39,29 @@ export function PressableItem({
             >
                 <button
                     onClick={() => onProductClick?.(product)}
-                    className="w-full p-4 rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                    className={`relative w-full h-32 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
+                        product.images?.length > 0 ? '' : 'bg-gray-200'
+                    }`}
                     style={{
-                        backgroundColor: styleSettings.linkCardBackgroundColor || '#ffffff',
-                        color: styleSettings.linkCardTextColor || '#000000'
+                        backgroundImage: product.images?.length > 0 
+                            ? `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${product.images[0]})` 
+                            : undefined
                     }}
                 >
-                    <div className="flex items-center space-x-4">
-                        {/* Imagen del producto */}
-                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                            {product.images && product.images.length > 0 ? (
-                                <img
-                                    src={product.images[0]}
-                                    alt={product.title}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                    </svg>
-                                </div>
-                            )}
+                    {/* Fallback para productos sin imagen */}
+                    {(!product.images || product.images.length === 0) && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
                         </div>
+                    )}
 
-                        {/* Información del producto */}
-                        <div className="flex-1 text-left">
-                            <h3 className="font-semibold text-lg mb-1">
-                                {product.title}
-                            </h3>
-                            {product.subtitle && (
-                                <p className="text-sm opacity-75 mb-2">
-                                    {product.subtitle}
-                                </p>
-                            )}
-                            <div className="flex items-center justify-between">
-                                <span className="text-xl font-bold">
-                                    {formatPrice(product.price)}
-                                </span>
-                                <div 
-                                    className="px-3 py-1 rounded-full text-sm font-medium text-white"
-                                    style={{
-                                        backgroundColor: styleSettings.productBuyButtonColor || '#ff6b35'
-                                    }}
-                                >
-                                    Ver producto
-                                </div>
-                            </div>
-                        </div>
+                    {/* Título centrado */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <h3 className="text-white font-bold text-xl text-center px-4 drop-shadow-lg">
+                            {product.title}
+                        </h3>
                     </div>
                 </button>
             </motion.div>
@@ -105,13 +81,13 @@ export function PressableItem({
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full p-4 rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                className="block w-full h-16 p-4 rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
                 style={{
                     backgroundColor: styleSettings.linkCardBackgroundColor || '#ffffff',
                     color: styleSettings.linkCardTextColor || '#000000'
                 }}
             >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between h-full">
                     <span className="font-medium text-lg">
                         {link.label}
                     </span>
