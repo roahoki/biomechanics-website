@@ -124,16 +124,16 @@ export function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
                                                         </svg>
                                                     </button>
 
-                                                    {/* Indicadores de página */}
-                                                    <div className="flex justify-center mt-4 space-x-2">
+                                                    {/* Indicadores de página - líneas horizontales */}
+                                                    <div className="flex justify-center mt-4 space-x-1">
                                                         {product.images.map((_, index) => (
                                                             <button
                                                                 key={index}
                                                                 onClick={() => setCurrentImageIndex(index)}
-                                                                className={`w-2 h-2 rounded-full transition-all ${
+                                                                className={`h-1 rounded-full transition-all duration-300 ${
                                                                     index === currentImageIndex 
-                                                                        ? 'bg-gray-800' 
-                                                                        : 'bg-gray-300'
+                                                                        ? 'w-8 bg-gray-800' 
+                                                                        : 'w-6 bg-gray-300'
                                                                 }`}
                                                             />
                                                         ))}
