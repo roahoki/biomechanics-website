@@ -2,10 +2,10 @@
 
 import { getLinksData } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
-import { LinkItem, Product, Link } from '@/types/product'
+import { LinkItem, Product } from '@/types/product'
 import Image from 'next/image'
 import { ProductModal } from '@/components/ProductModal'
-import { ProductCard } from '@/components/ProductCardSimple'
+import { PressablesList } from '@/components/PressablesList'
 import { useState, useEffect } from 'react'
 
 export default function Page() {
@@ -207,59 +207,18 @@ export default function Page() {
                     </div>
                 )}
 
-                {/* Lista de links como tarjetas */}
+                {/* Lista unificada de presionables (links + productos) */}
                 {Array.isArray(links) && links.length > 0 && (
-                    <div className="w-full max-w-md">
-                        {/* Productos */}
-                        {links.filter(item => item.type === 'product').length > 0 && (
-                            <div className="mb-8">
-                                <h2 className="text-xl font-semibold mb-4 text-center">Productos</h2>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {links
-                                        .filter(item => item.type === 'product')
-                                        .map((product: Product) => (
-                                            <ProductCard
-                                                key={product.id}
-                                                product={product}
-                                                onClick={(p) => setSelectedProduct(p)}
-                                                linkCardBackgroundColor={styleSettings?.linkCardBackgroundColor}
-                                                linkCardTextColor={styleSettings?.linkCardTextColor}
-                                            />
-                                        ))
-                                    }
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Enlaces regulares */}
-                        {links.filter(item => item.type !== 'product').length > 0 && (
-                            <div className="space-y-4">
-                                {links
-                                    .filter(item => item.type !== 'product')
-                                    .map((item: LinkItem) => {
-                                        // Type guard para asegurar que es un Link
-                                        if (item.type === 'product') return null
-                                        const link = item as Link
-                                        return (
-                                            <a
-                                                key={link.id}
-                                                href={link.url || '#'}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
-                                                style={{
-                                                    backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
-                                                    color: styleSettings?.linkCardTextColor || '#000000'
-                                                }}
-                                            >
-                                                {link.label || link.url || 'Sin título'}
-                                            </a>
-                                        )
-                                    })
-                                }
-                            </div>
-                        )}
-                    </div>
+                    <PressablesList
+                        items={links}
+                        styleSettings={styleSettings || { 
+                            titleColor: '#ffffff', 
+                            linkCardBackgroundColor: '#ffffff', 
+                            linkCardTextColor: '#000000',
+                            productBuyButtonColor: '#ff6b35'
+                        }}
+                        onProductClick={(product) => setSelectedProduct(product)}
+                    />
                 )}
             </div>
 

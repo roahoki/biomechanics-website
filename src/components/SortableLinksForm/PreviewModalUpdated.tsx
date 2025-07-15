@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { SocialIcon } from '@/app/components/SocialIcon'
 import { ProductModal } from '@/components/ProductModal'
+import { PressablesList } from '@/components/PressablesList'
 import { type ProfileImageType } from '@/utils/file-utils'
 import { LinkItem, Product } from '@/types/product'
 import { StyleSettings } from '@/utils/links'
@@ -255,78 +256,13 @@ export function PreviewModalUpdated({
                                         </div>
                                     )}
 
-                                    {/* Links and Products */}
+                                    {/* Lista unificada de presionables */}
                                     <div className={`w-full ${styles.linksWidth} ${styles.spacing}`}>
-                                        {currentLinks.map((item) => (
-                                            <div key={item.id}>
-                                                {item.type === 'product' ? (
-                                                    /* Product Card */
-                                                    <div
-                                                        onClick={() => handleProductClick(item)}
-                                                        className="cursor-pointer transform hover:scale-[1.02] transition-all duration-200"
-                                                        style={{
-                                                            backgroundColor: linkCardBackgroundColor,
-                                                            color: linkCardTextColor
-                                                        }}
-                                                    >
-                                                        <div className="relative rounded-lg overflow-hidden shadow-md">
-                                                            {/* Product Image */}
-                                                            {item.images.length > 0 ? (
-                                                                <div className={viewMode === 'desktop' ? 'h-40' : 'h-32'}>
-                                                                    <img
-                                                                        src={item.images[0]}
-                                                                        alt={item.title}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                </div>
-                                                            ) : (
-                                                                <div className={`${viewMode === 'desktop' ? 'h-40' : 'h-32'} bg-gray-200 flex items-center justify-center`}>
-                                                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                                                    </svg>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Product Info */}
-                                                            <div className={viewMode === 'desktop' ? 'p-4' : 'p-3'}>
-                                                                <div className="flex justify-between items-start mb-1">
-                                                                    <h3 className={`font-semibold ${viewMode === 'desktop' ? 'text-base' : 'text-sm'} line-clamp-1`}>
-                                                                        {item.title || 'Producto sin título'}
-                                                                    </h3>
-                                                                    <span className={`text-green-600 font-bold ${viewMode === 'desktop' ? 'text-base' : 'text-sm'} ml-2`}>
-                                                                        {formatPrice(item.price)}
-                                                                    </span>
-                                                                </div>
-                                                                {item.description && (
-                                                                    <p className={`${viewMode === 'desktop' ? 'text-sm' : 'text-xs'} opacity-80 line-clamp-2`}>
-                                                                        {item.description}
-                                                                    </p>
-                                                                )}
-                                                                <div className="mt-2">
-                                                                    <span className={`inline-block bg-green-500 text-white ${viewMode === 'desktop' ? 'text-sm px-3 py-1' : 'text-xs px-2 py-1'} rounded-full`}>
-                                                                        PRODUCTO
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    /* Link Card */
-                                                    <a
-                                                        href={item.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className={`block w-full ${viewMode === 'desktop' ? 'py-4 px-6 text-lg' : 'py-3 px-4 text-base'} rounded-lg text-center font-medium transition-all duration-200 hover:scale-[1.02] shadow-md`}
-                                                        style={{
-                                                            backgroundColor: linkCardBackgroundColor,
-                                                            color: linkCardTextColor
-                                                        }}
-                                                    >
-                                                        {item.label || 'Link sin etiqueta'}
-                                                    </a>
-                                                )}
-                                            </div>
-                                        ))}
+                                        <PressablesList
+                                            items={currentLinks}
+                                            styleSettings={styleSettings}
+                                            onProductClick={handleProductClick}
+                                        />
                                     </div>
 
                                     {/* Indicador de scroll si hay muchos elementos */}
