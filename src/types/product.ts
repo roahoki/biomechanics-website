@@ -2,6 +2,7 @@ export interface Product {
     id: number
     type: 'product'
     title: string
+    subtitle?: string
     price: number
     paymentLink: string
     description: string

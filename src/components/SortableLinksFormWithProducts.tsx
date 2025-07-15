@@ -98,6 +98,8 @@ export function SortableLinksFormWithProducts({
         setLinkCardBackgroundColor,
         linkCardTextColor,
         setLinkCardTextColor,
+        productBuyButtonColor,
+        setProductBuyButtonColor,
         isValidHexColor,
         handleSocialIconColorChange
     } = useColorConfig({
@@ -110,7 +112,8 @@ export function SortableLinksFormWithProducts({
         initialBgColor: backgroundColor,
         initialTitleColor: styleSettings.titleColor || '#ffffff',
         initialLinkCardBackgroundColor: styleSettings.linkCardBackgroundColor || '#ffffff',
-        initialLinkCardTextColor: styleSettings.linkCardTextColor || '#000000'
+        initialLinkCardTextColor: styleSettings.linkCardTextColor || '#000000',
+        initialProductBuyButtonColor: styleSettings.productBuyButtonColor || '#ff6b35'
     })
 
     // Estados adicionales para el fondo
@@ -211,7 +214,8 @@ export function SortableLinksFormWithProducts({
                 styleSettings: {
                     titleColor,
                     linkCardBackgroundColor,
-                    linkCardTextColor
+                    linkCardTextColor,
+                    productBuyButtonColor
                 }
             }
 
@@ -316,6 +320,8 @@ export function SortableLinksFormWithProducts({
                                     setLinkCardBackgroundColor={setLinkCardBackgroundColor}
                                     linkCardTextColor={linkCardTextColor}
                                     setLinkCardTextColor={setLinkCardTextColor}
+                                    productBuyButtonColor={productBuyButtonColor}
+                                    setProductBuyButtonColor={setProductBuyButtonColor}
                                     isValidHexColor={isValidHexColor}
                                 />
                             </div>
@@ -377,6 +383,12 @@ export function SortableLinksFormWithProducts({
                     backgroundImageUrl={backgroundImageUrl}
                     backgroundImageOpacity={backgroundImageOpacity}
                     bgColor={bgColor}
+                    styleSettings={{
+                        titleColor,
+                        linkCardBackgroundColor,
+                        linkCardTextColor,
+                        productBuyButtonColor
+                    }}
                 />
             </div>
         </div>

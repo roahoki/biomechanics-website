@@ -269,6 +269,7 @@ export default function Page() {
                     product={selectedProduct}
                     isOpen={!!selectedProduct}
                     onClose={() => setSelectedProduct(null)}
+                    styleSettings={styleSettings}
                 />
             )}
         </div>

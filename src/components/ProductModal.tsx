@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Product } from '@/types/product'
+import { StyleSettings } from '@/utils/links'
 
 interface ProductModalProps {
     product: Product | null
     isOpen: boolean
     onClose: () => void
+    styleSettings?: StyleSettings
 }
 
-export function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
+export function ProductModal({ product, isOpen, onClose, styleSettings }: ProductModalProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
     // Resetear index al cambiar producto
@@ -155,6 +157,13 @@ export function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
                                     {product.title || 'Producto sin título'}
                                 </h2>
 
+                                {}{/* Subtítulo del producto */}
+                                {product.subtitle && (
+                                    <p className="text-gray-600 text-center mb-4">
+                                        {product.subtitle}
+                                    </p>
+                                )}
+
                                 {/* Descripción */}
                                 {product.description && (
                                     <p className="text-gray-600 text-center mb-6 leading-relaxed">
@@ -166,14 +175,24 @@ export function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
                                 <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
                                     <div className="text-left">
                                         <span className="text-2xl font-bold text-gray-900">
-                                            ${formatPrice(product.price)}
+                                            {formatPrice(product.price)}
                                         </span>
                                     </div>
                                     <a
                                         href={product.paymentLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                                        className="px-6 py-3 rounded-lg font-medium transition-colors text-white"
+                                        style={{ 
+                                            backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35',
+                                            filter: 'hover:brightness(110%)'
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.filter = 'brightness(110%)'
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.filter = 'brightness(100%)'
+                                        }}
                                     >
                                         COMPRAR
                                     </a>

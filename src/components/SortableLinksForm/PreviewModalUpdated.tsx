@@ -4,6 +4,7 @@ import { SocialIcon } from '@/app/components/SocialIcon'
 import { ProductModal } from '@/components/ProductModal'
 import { type ProfileImageType } from '@/utils/file-utils'
 import { LinkItem, Product } from '@/types/product'
+import { StyleSettings } from '@/utils/links'
 
 type ViewMode = 'mobile' | 'desktop'
 
@@ -29,6 +30,7 @@ interface PreviewModalProps {
     backgroundImageUrl: string
     backgroundImageOpacity: number
     bgColor: string
+    styleSettings: StyleSettings
 }
 
 export function PreviewModalUpdated({
@@ -47,7 +49,8 @@ export function PreviewModalUpdated({
     backgroundPreviewUrl,
     backgroundImageUrl,
     backgroundImageOpacity,
-    bgColor
+    bgColor,
+    styleSettings
 }: PreviewModalProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
     const [viewMode, setViewMode] = useState<ViewMode>('mobile')
@@ -346,6 +349,7 @@ export function PreviewModalUpdated({
                 product={selectedProduct}
                 isOpen={isProductModalOpen}
                 onClose={closeProductModal}
+                styleSettings={styleSettings}
             />
         </>
     )

@@ -33,6 +33,7 @@ export interface StyleSettings {
   titleColor?: string
   linkCardBackgroundColor?: string
   linkCardTextColor?: string
+  productBuyButtonColor?: string
 }
 
 export interface LinksData {
@@ -61,7 +62,8 @@ const DEFAULT_LINKS_DATA: LinksData = {
   styleSettings: {
     titleColor: "#ffffff",
     linkCardBackgroundColor: "#ffffff",
-    linkCardTextColor: "#000000"
+    linkCardTextColor: "#000000",
+    productBuyButtonColor: "#ff6b35"
   }
 };
 

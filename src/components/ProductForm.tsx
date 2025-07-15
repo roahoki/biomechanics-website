@@ -2,16 +2,7 @@
 
 import { useState } from 'react'
 import { ImageCarousel } from '@/components/ImageCarousel'
-
-interface Product {
-    id: number
-    type: 'product'
-    title: string
-    price: number // En CLP, solo números
-    paymentLink: string
-    description: string // Máximo 150 caracteres
-    images: string[] // 1-3 URLs
-}
+import { Product } from '@/types/product'
 
 interface ProductFormProps {
     product?: Product
@@ -24,6 +15,7 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
 
     // Estados locales para los campos
     const [title, setTitle] = useState(product?.title || '')
+    const [subtitle, setSubtitle] = useState(product?.subtitle || '')
     const [price, setPrice] = useState(product?.price?.toString() || '')
     const [paymentLink, setPaymentLink] = useState(product?.paymentLink || '')
     const [description, setDescription] = useState(product?.description || '')
@@ -41,6 +33,14 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
                     newErrors.title = 'El título debe tener máximo 50 caracteres'
                 } else {
                     delete newErrors.title
+                }
+                break
+
+            case 'subtitle':
+                if (value.length > 150) {
+                    newErrors.subtitle = 'El subtítulo debe tener máximo 150 caracteres'
+                } else {
+                    delete newErrors.subtitle
                 }
                 break
 
@@ -69,8 +69,8 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
             case 'description':
                 if (!value.trim()) {
                     newErrors.description = 'La descripción es obligatoria'
-                } else if (value.length > 150) {
-                    newErrors.description = 'La descripción debe tener máximo 150 caracteres'
+                } else if (value.length > 1000) {
+                    newErrors.description = 'La descripción debe tener máximo 1000 caracteres'
                 } else {
                     delete newErrors.description
                 }
@@ -79,6 +79,8 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
             case 'images':
                 if (!value || value.length === 0) {
                     newErrors.images = 'Debes agregar al menos 1 imagen'
+                } else if (value.length > 10) {
+                    newErrors.images = 'No puedes tener más de 10 imágenes'
                 } else {
                     delete newErrors.images
                 }
@@ -102,6 +104,12 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
         setTitle(value)
         validateField('title', value)
         onUpdate({ title: value })
+    }
+
+    const handleSubtitleChange = (value: string) => {
+        setSubtitle(value)
+        validateField('subtitle', value)
+        onUpdate({ subtitle: value })
     }
 
     const handlePriceChange = (value: string) => {
@@ -205,6 +213,29 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
                     </div>
                 </div>
 
+                {/* Subtítulo */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Subtítulo
+                    </label>
+                    <input
+                        type="text"
+                        value={subtitle}
+                        onChange={(e) => handleSubtitleChange(e.target.value)}
+                        placeholder="Ej: Edición especial con logo bordado"
+                        maxLength={150}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors.subtitle ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                        }`}
+                    />
+                    <div className="flex justify-between mt-1">
+                        {errors.subtitle && (
+                            <p className="text-sm text-red-600">{errors.subtitle}</p>
+                        )}
+                        <p className="text-xs text-gray-500 ml-auto">{subtitle.length}/150</p>
+                    </div>
+                </div>
+
                 {/* Precio */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -259,9 +290,9 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
                     <textarea
                         value={description}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder="Describe tu producto..."
-                        maxLength={150}
-                        rows={3}
+                        placeholder="Describe tu producto en detalle..."
+                        maxLength={1000}
+                        rows={5}
                         className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
                             errors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                         }`}
@@ -270,7 +301,7 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
                         {errors.description && (
                             <p className="text-sm text-red-600">{errors.description}</p>
                         )}
-                        <p className="text-xs text-gray-500 ml-auto">{description.length}/150</p>
+                        <p className="text-xs text-gray-500 ml-auto">{description.length}/1000</p>
                     </div>
                 </div>
             </div>

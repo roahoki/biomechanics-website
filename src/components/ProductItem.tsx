@@ -74,6 +74,24 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
                 />
             </div>
 
+            {/* Subtítulo */}
+            <div>
+                <label className="block text-sm font-medium text-gray-200 mb-1">
+                    Subtítulo *
+                </label>
+                <textarea
+                    value={product.subtitle || ''}
+                    onChange={(e) => onUpdate(product.id, { subtitle: e.target.value.slice(0, 150) })}
+                    placeholder="Descripción breve del producto..."
+                    rows={2}
+                    maxLength={150}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                />
+                <div className="text-xs text-gray-400 mt-1">
+                    {(product.subtitle || '').length}/150 caracteres
+                </div>
+            </div>
+
             {/* Precio */}
             <div>
                 <label className="block text-sm font-medium text-gray-200 mb-1">
@@ -110,18 +128,18 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
             {/* Descripción */}
             <div>
                 <label className="block text-sm font-medium text-gray-200 mb-1">
-                    Descripción
+                    Descripción completa
                 </label>
                 <textarea
                     value={product.description}
-                    onChange={(e) => onUpdate(product.id, { description: e.target.value.slice(0, 150) })}
-                    placeholder="Descripción breve del producto..."
-                    rows={3}
-                    maxLength={150}
+                    onChange={(e) => onUpdate(product.id, { description: e.target.value.slice(0, 1000) })}
+                    placeholder="Descripción detallada del producto..."
+                    rows={4}
+                    maxLength={1000}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 />
                 <div className="text-xs text-gray-400 mt-1">
-                    {product.description.length}/150 caracteres
+                    {product.description.length}/1000 caracteres
                 </div>
             </div>
 
@@ -129,6 +147,7 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
             <div className="pt-2 border-t border-gray-600">
                 <div className="text-xs text-gray-400">
                     {!product.title && <span className="text-red-400">• Título requerido</span>}
+                    {!(product.subtitle || '').trim() && <span className="text-red-400 block">• Subtítulo requerido</span>}
                     {product.price === 0 && <span className="text-red-400 block">• Precio requerido</span>}
                     {!product.paymentLink && <span className="text-red-400 block">• Link de pago requerido</span>}
                     {product.images.length === 0 && <span className="text-amber-400 block">• Se recomienda al menos 1 imagen</span>}

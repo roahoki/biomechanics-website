@@ -11,6 +11,7 @@ interface ColorConfig {
     titleColor: string
     linkCardBackgroundColor: string
     linkCardTextColor: string
+    productBuyButtonColor: string
 }
 
 interface UseColorConfigProps {
@@ -19,6 +20,7 @@ interface UseColorConfigProps {
     initialTitleColor: string
     initialLinkCardBackgroundColor: string
     initialLinkCardTextColor: string
+    initialProductBuyButtonColor: string
 }
 
 export function useColorConfig({
@@ -26,13 +28,15 @@ export function useColorConfig({
     initialBgColor,
     initialTitleColor,
     initialLinkCardBackgroundColor,
-    initialLinkCardTextColor
+    initialLinkCardTextColor,
+    initialProductBuyButtonColor
 }: UseColorConfigProps) {
     const [socialIconColors, setSocialIconColors] = useState(initialSocialIconColors)
     const [bgColor, setBgColor] = useState(initialBgColor)
     const [titleColor, setTitleColor] = useState(initialTitleColor)
     const [linkCardBackgroundColor, setLinkCardBackgroundColor] = useState(initialLinkCardBackgroundColor)
     const [linkCardTextColor, setLinkCardTextColor] = useState(initialLinkCardTextColor)
+    const [productBuyButtonColor, setProductBuyButtonColor] = useState(initialProductBuyButtonColor)
 
     // Validar color hex
     const isValidHexColor = (color: string): boolean => {
@@ -58,6 +62,8 @@ export function useColorConfig({
         setLinkCardBackgroundColor,
         linkCardTextColor,
         setLinkCardTextColor,
+        productBuyButtonColor,
+        setProductBuyButtonColor,
         isValidHexColor,
         handleSocialIconColorChange
     }
