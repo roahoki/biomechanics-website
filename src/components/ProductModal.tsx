@@ -20,7 +20,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
         setCurrentImageIndex(0)
     }, [product?.id])
 
-    // Cerrar modal con ESC
+    // Cerrar modal con ESC y prevenir scroll del body
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -64,36 +64,38 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                         className="fixed inset-0 bg-black bg-opacity-50 z-50"
                     />
 
-                    {/* Modal que se desliza desde abajo */}
+                    {/* Modal */}
                     <motion.div
                         initial={{ y: '100%' }}
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 500 }}
-                        className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl max-h-[90vh] overflow-hidden"
+                        className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col"
                     >
-                        <div className="flex flex-col h-full">
-                            {/* Header con botón de cerrar */}
-                            <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                                <button
-                                    onClick={onClose}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                                <div className="flex-1" />
-                            </div>
+                        {/* Header con botón de cerrar */}
+                        <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-200">
+                            <div className="w-8" />
+                            {/* Handle visual */}
+                            <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
+                            <button
+                                onClick={onClose}
+                                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
 
-                            {/* Contenido scrolleable */}
-                            <div className="flex-1 overflow-y-auto px-4 pb-4">
+                        {/* Contenido scrolleable */}
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="px-4 py-6 space-y-6">
                                 {/* Carrusel de imágenes */}
-                                <div className="mb-6">
-                                    {product.images.length > 0 ? (
+                                <div>
+                                    {product.images && product.images.length > 0 ? (
                                         <div className="relative">
                                             {/* Imagen principal */}
-                                            <div className="w-full h-64 rounded-lg overflow-hidden bg-gray-100">
+                                            <div className="w-full aspect-square max-h-80 rounded-lg overflow-hidden bg-gray-100">
                                                 <img
                                                     src={product.images[currentImageIndex]}
                                                     alt={product.title}
@@ -104,7 +106,6 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                             {/* Navegación del carrusel */}
                                             {product.images.length > 1 && (
                                                 <>
-                                                    {/* Botones de navegación */}
                                                     <button
                                                         onClick={() => setCurrentImageIndex(
                                                             currentImageIndex === 0 ? product.images.length - 1 : currentImageIndex - 1
@@ -126,7 +127,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                                         </svg>
                                                     </button>
 
-                                                    {/* Indicadores de página - líneas horizontales */}
+                                                    {/* Indicadores */}
                                                     <div className="flex justify-center mt-4 space-x-1">
                                                         {product.images.map((_, index) => (
                                                             <button
@@ -144,7 +145,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="w-full h-64 rounded-lg bg-gray-200 flex items-center justify-center">
+                                        <div className="w-full aspect-square max-h-80 rounded-lg bg-gray-200 flex items-center justify-center">
                                             <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                             </svg>
@@ -152,51 +153,57 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                     )}
                                 </div>
 
-                                {/* Título del producto */}
-                                <h2 className="text-xl font-bold text-gray-900 mb-2 text-center">
-                                    {product.title || 'Producto sin título'}
-                                </h2>
+                                {/* Información del producto */}
+                                <div className="text-center space-y-4">
+                                    {/* Título */}
+                                    <h2 className="text-2xl font-bold text-gray-900">
+                                        {product.title || 'Producto sin título'}
+                                    </h2>
 
-                                {}{/* Subtítulo del producto */}
-                                {product.subtitle && (
-                                    <p className="text-gray-600 text-center mb-4">
-                                        {product.subtitle}
-                                    </p>
-                                )}
+                                    {/* Subtítulo */}
+                                    {product.subtitle && (
+                                        <p className="text-lg text-gray-600">
+                                            {product.subtitle}
+                                        </p>
+                                    )}
 
-                                {/* Descripción */}
-                                {product.description && (
-                                    <p className="text-gray-600 text-center mb-6 leading-relaxed">
-                                        {product.description}
-                                    </p>
-                                )}
-
-                                {/* Precio y botón de compra */}
-                                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-                                    <div className="text-left">
-                                        <span className="text-2xl font-bold text-gray-900">
-                                            {formatPrice(product.price)}
-                                        </span>
-                                    </div>
-                                    <a
-                                        href={product.paymentLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-6 py-3 rounded-lg font-medium transition-colors text-white"
-                                        style={{ 
-                                            backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35',
-                                            filter: 'hover:brightness(110%)'
-                                        }}
-                                        onMouseOver={(e) => {
-                                            e.currentTarget.style.filter = 'brightness(110%)'
-                                        }}
-                                        onMouseOut={(e) => {
-                                            e.currentTarget.style.filter = 'brightness(100%)'
-                                        }}
-                                    >
-                                        COMPRAR
-                                    </a>
+                                    {/* Descripción */}
+                                    {product.description && (
+                                        <div className="text-gray-600 text-left">
+                                            <p className="leading-relaxed whitespace-pre-wrap">
+                                                {product.description}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
+                            </div>
+                        </div>
+                        
+                        {/* Footer fijo con precio y botón */}
+                        <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-white">
+                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                                <div className="text-left">
+                                    <span className="text-2xl font-bold text-gray-900">
+                                        {formatPrice(product.price)}
+                                    </span>
+                                </div>
+                                <a
+                                    href={product.paymentLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white shadow-lg hover:shadow-xl"
+                                    style={{ 
+                                        backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.filter = 'brightness(110%)'
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.filter = 'brightness(100%)'
+                                    }}
+                                >
+                                    COMPRAR
+                                </a>
                             </div>
                         </div>
                     </motion.div>
