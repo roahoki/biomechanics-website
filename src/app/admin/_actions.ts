@@ -5,6 +5,7 @@ import { clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { getLinksData, LinksData, SocialIcons } from '@/utils/links'
 import { getSupabaseClient } from '@/lib/supabase-db'
+import { LinkItem, Product } from '@/types/product'
 
 export async function setRole(formData: FormData): Promise<void> {
     const client = await clerkClient()
@@ -185,6 +186,37 @@ export async function updateAdminLinks(formData: FormData) {
     return { success: true, message: 'Enlaces actualizados con éxito' }
   } catch (error) {
     console.error('Error al actualizar enlaces:', error)
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+export async function updateAdminLinksWithProducts(items: LinkItem[], otherData: Partial<LinksData>) {
+  try {
+    // Verificar permisos
+    if (!checkRole('admin')) {
+      throw new Error('No tienes autorización para esta acción')
+    }
+    
+    // Obtener los datos actuales para mantener la estructura
+    const currentData = await getLinksData()
+    
+    // Crear el objeto de datos para la base de datos
+    const linksData: LinksData = {
+      ...currentData,
+      ...otherData,
+      links: items
+    }
+    
+    // Guardar en Supabase
+    await saveLinksToSupabase(linksData)
+    
+    // Revalidar todas las rutas que pueden usar estos datos
+    revalidatePath('/links')
+    revalidatePath('/admin/links')
+    
+    return { success: true, message: 'Enlaces y productos actualizados con éxito' }
+  } catch (error) {
+    console.error('Error al actualizar enlaces y productos:', error)
     return { success: false, error: (error as Error).message }
   }
 }

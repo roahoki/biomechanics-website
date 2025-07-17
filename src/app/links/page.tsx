@@ -1,25 +1,59 @@
+'use client'
+
 import { getLinksData } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
+import { LinkItem, Product } from '@/types/product'
 import Image from 'next/image'
+import { ProductModal } from '@/components/ProductModal'
+import { PressablesList } from '@/components/PressablesList'
+import { useState, useEffect } from 'react'
 
-export default async function Page() {
-    // Intentar obtener los datos y capturar cualquier error para mostrar una página básica en caso de fallo
-    let linksData;
-    try {
-        linksData = await getLinksData();
-    } catch (error) {
-        console.error("Error al cargar datos de enlaces:", error);
-        // Proporcionar datos mínimos para que la página se renderice
-        linksData = {
-            links: [],
-            description: "biomechanics.wav",
-            profileImage: "/ghost.jpg", 
-            profileImageType: "image",
-            socialIcons: {},
-            backgroundColor: "#1a1a1a",
-            backgroundSettings: { type: 'color', color: "#1a1a1a", imageOpacity: 0.5 },
-            styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" }
-        };
+export default function Page() {
+    const [linksData, setLinksData] = useState<any>(null)
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const data = await getLinksData()
+                console.log('Datos cargados:', data)
+                console.log('Productos encontrados:', data.links.filter(item => item.type === 'product'))
+                setLinksData(data)
+            } catch (error) {
+                console.error("Error al cargar datos de enlaces:", error)
+                // Proporcionar datos mínimos para que la página se renderice
+                setLinksData({
+                    links: [],
+                    description: "biomechanics.wav",
+                    profileImage: "/ghost.jpg", 
+                    profileImageType: "image",
+                    socialIcons: {},
+                    backgroundColor: "#1a1a1a",
+                    backgroundSettings: { type: 'color', color: "#1a1a1a", imageOpacity: 0.5 },
+                    styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" }
+                })
+            } finally {
+                setLoading(false)
+            }
+        }
+        loadData()
+    }, [])
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-white">Cargando...</div>
+            </div>
+        )
+    }
+
+    if (!linksData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-white">Error al cargar datos</div>
+            </div>
+        )
     }
     
     const { links, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings } = linksData;
@@ -173,28 +207,30 @@ export default async function Page() {
                     </div>
                 )}
 
-                {/* Lista de links como tarjetas */}
+                {/* Lista unificada de presionables (links + productos) */}
                 {Array.isArray(links) && links.length > 0 && (
-                    <ul className="w-full max-w-md space-y-4">
-                        {links.map((link: { id: number; url: string; label: string }) => (
-                            <li key={link.id}>
-                                <a
-                                    href={link.url || '#'}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block p-4 rounded-lg shadow-md hover:opacity-80 transition-opacity font-body"
-                                    style={{
-                                        backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
-                                        color: styleSettings?.linkCardTextColor || '#000000'
-                                    }}
-                                >
-                                    {link.label || link.url || 'Sin título'}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
+                    <PressablesList
+                        items={links}
+                        styleSettings={styleSettings || { 
+                            titleColor: '#ffffff', 
+                            linkCardBackgroundColor: '#ffffff', 
+                            linkCardTextColor: '#000000',
+                            productBuyButtonColor: '#ff6b35'
+                        }}
+                        onProductClick={(product) => setSelectedProduct(product)}
+                    />
                 )}
             </div>
+
+            {/* Modal de producto */}
+            {selectedProduct && (
+                <ProductModal
+                    product={selectedProduct}
+                    isOpen={!!selectedProduct}
+                    onClose={() => setSelectedProduct(null)}
+                    styleSettings={styleSettings}
+                />
+            )}
         </div>
     );
 }

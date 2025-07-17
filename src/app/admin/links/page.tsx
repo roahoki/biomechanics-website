@@ -1,4 +1,4 @@
-import { SortableLinksForm } from "@/app/components/SortableLinksForm"
+import { SortableLinksFormWithProducts as SortableLinksForm } from "@/components/SortableLinksFormWithProducts"
 import { checkRole } from "@/utils/roles"
 import { redirect } from 'next/navigation'
 import { getLinksData } from '@/utils/links'
@@ -31,7 +31,7 @@ export default async function AdminSortableLinks(params: {
                 socialIcons={socialIcons}
                 backgroundColor={backgroundColor || '#1a1a1a'}
                 backgroundSettings={backgroundSettings || { type: 'color', color: backgroundColor || '#1a1a1a', imageOpacity: 0.5 }}
-                styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000' }}
+                styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000', productBuyButtonColor: '#ff6b35' }}
             />
     )
 }
