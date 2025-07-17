@@ -244,29 +244,37 @@ export function ImageCarousel({
 
             {/* Thumbnails para reordenar */}
             {images.length > 1 && (
-                <div className="flex space-x-2 overflow-x-auto pb-2">
-                    {images.map((image, index) => (
-                        <div
-                            key={index}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, index)}
-                            onDragOver={handleDragOver}
-                            onDrop={(e) => handleDrop(e, index)}
-                            className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-move border-2 transition-all ${
-                                index === currentIndex 
-                                    ? 'border-blue-500' 
-                                    : 'border-gray-300'
-                            } ${draggedIndex === index ? 'opacity-50' : ''}`}
-                            onClick={() => setCurrentIndex(index)}
-                        >
-                            <img
-                                src={image}
-                                alt={`Miniatura ${index + 1}`}
-                                className="w-full h-full object-cover"
-                                draggable={false}
-                            />
-                        </div>
-                    ))}
+                <div className="w-full">
+                    <div 
+                        className="flex space-x-2 overflow-x-auto pb-2 min-h-[4rem] scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300" 
+                        style={{ 
+                            scrollbarWidth: 'thin',
+                            msOverflowStyle: 'none'
+                        }}
+                    >
+                        {images.map((image, index) => (
+                            <div
+                                key={index}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, index)}
+                                className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-move border-2 transition-all ${
+                                    index === currentIndex 
+                                        ? 'border-blue-500' 
+                                        : 'border-gray-300'
+                                } ${draggedIndex === index ? 'opacity-50' : ''}`}
+                                onClick={() => setCurrentIndex(index)}
+                            >
+                                <img
+                                    src={image}
+                                    alt={`Miniatura ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                    draggable={false}
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 

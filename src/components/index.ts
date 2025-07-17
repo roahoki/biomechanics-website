@@ -4,6 +4,7 @@ export { FileInfo } from './FileInfo'
 export { SocialIconsConfig } from './SocialIconsConfig'
 export { BackgroundConfig } from './BackgroundConfig'
 export { StyleConfig } from './StyleConfig'
+export { UnsavedChangesIndicator } from './UnsavedChangesIndicator'
 
 // Componentes del formulario
 export { LinkCard } from './SortableLinksForm/LinkCard'
