@@ -19,13 +19,13 @@ export function ActionButtons({
 }: ActionButtonsProps) {
     return (
         <>
-            {/* Botones de acción */}
-            <div className="flex space-x-4">
+            {/* Botones de acción centrados */}
+            <div className="flex justify-center space-x-4 mt-8">
                 {/* Botón de vista previa */}
                 <button
                     type="button"
                     onClick={onPreview}
-                    className="px-6 py-3 text-blue-600 bg-white rounded-md shadow hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                    className="px-6 py-3 text-blue-600 bg-white border border-blue-600 rounded-lg shadow hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium"
                 >
                     👁️ Vista Previa
                 </button>
@@ -34,10 +34,10 @@ export function ActionButtons({
                 <button
                     type="submit"
                     disabled={isSubmitting || uploadingImage}
-                    className={`px-6 py-3 text-white rounded-md shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    className={`px-6 py-3 text-white rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium transition-all duration-200 ${
                         isSubmitting || uploadingImage 
                             ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-blue-600 hover:bg-blue-700'
+                            : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:scale-105'
                     }`}
                 >
                     {uploadingImage 
@@ -49,8 +49,8 @@ export function ActionButtons({
                 </button>
             </div>
 
-            {/* Información adicional */}
-            <div className="text-sm text-gray-400 max-w-md text-center">
+            {/* Información adicional centrada */}
+            <div className="text-sm text-gray-400 max-w-md mx-auto text-center mt-4">
                 {selectedFile && (
                     <p>Se subirá un nuevo {getFileTypeText(previewType).toLowerCase()} al guardar los cambios.</p>
                 )}

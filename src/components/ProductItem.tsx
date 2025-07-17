@@ -28,7 +28,7 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
     }
 
     return (
-        <div className="bg-gray-800 rounded-lg border border-gray-600 p-4 space-y-4">
+        <div className="bg-gray-800 rounded-lg border border-gray-600 p-4 space-y-4 w-full max-w-full overflow-hidden">
             {/* Header del producto */}
             <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
@@ -48,16 +48,18 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
             </div>
 
             {/* Carrusel de imágenes */}
-            <div>
+            <div className="w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     Imágenes del producto
                 </label>
-                <ImageCarousel
-                    images={product.images}
-                    onImagesChange={(images) => onUpdate(product.id, { images })}
-                    maxImages={10}
-                    maxSizeInMB={2}
-                />
+                <div className="w-full overflow-hidden">
+                    <ImageCarousel
+                        images={product.images}
+                        onImagesChange={(images) => onUpdate(product.id, { images })}
+                        maxImages={10}
+                        maxSizeInMB={2}
+                    />
+                </div>
             </div>
 
             {/* Título */}

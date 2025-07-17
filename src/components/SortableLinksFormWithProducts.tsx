@@ -132,6 +132,7 @@ export function SortableLinksFormWithProducts({
         cancelDelete,
         updateLink,
         updateProduct,
+        reorderLinks,
         showDeleteModal
     } = useLinksManagement(convertedLinks)
 
@@ -247,7 +248,7 @@ export function SortableLinksFormWithProducts({
 
     return (
         <div className="min-h-screen bg-gray-900">
-            <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700">
                     {/* Header */}
                     <div className="border-b border-gray-700 px-6 py-4">
@@ -260,9 +261,9 @@ export function SortableLinksFormWithProducts({
                     </div>
 
                     <form onSubmit={handleSubmit} className="p-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {/* Columna izquierda */}
-                            <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                            {/* Primera columna: Perfil y descripción */}
+                            <div className="space-y-6 md:col-span-1 lg:col-span-1">
                                 {/* Avatar Upload */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-200 mb-3">
@@ -298,7 +299,10 @@ export function SortableLinksFormWithProducts({
                                     onColorChange={handleSocialIconColorChange}
                                     isValidHexColor={isValidHexColor}
                                 />
+                            </div>
 
+                            {/* Segunda columna: Configuración de estilo */}
+                            <div className="space-y-6 md:col-span-1 lg:col-span-1">
                                 {/* Configuración de Fondo */}
                                 <BackgroundConfig
                                     backgroundType={backgroundType}
@@ -326,23 +330,26 @@ export function SortableLinksFormWithProducts({
                                 />
                             </div>
 
-                            {/* Columna derecha */}
-                            <div className="space-y-6">
+                            {/* Tercera columna: Lista de Links y Productos */}
+                            <div className="space-y-6 md:col-span-2 lg:col-span-1 w-full max-w-full overflow-hidden">
                                 {/* Lista de Links y Productos */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                                <div className="w-full">
+                                    <label className="block text-sm font-medium text-gray-200 mb-3">
                                         Enlaces y Productos
                                     </label>
-                                    <LinksListUpdated
-                                        currentLinks={currentLinks}
-                                        onAddNewLink={addNewLink}
-                                        onAddNewProduct={addNewProduct}
-                                        onRemoveLink={removeLink}
-                                        onUpdateLink={updateLink}
-                                        onUpdateProduct={updateProduct}
-                                        linkCardBackgroundColor={linkCardBackgroundColor}
-                                        linkCardTextColor={linkCardTextColor}
-                                    />
+                                    <div className="w-full max-w-full overflow-hidden">
+                                        <LinksListUpdated
+                                            currentLinks={currentLinks}
+                                            onAddNewLink={addNewLink}
+                                            onAddNewProduct={addNewProduct}
+                                            onRemoveLink={removeLink}
+                                            onUpdateLink={updateLink}
+                                            onUpdateProduct={updateProduct}
+                                            onReorderLinks={reorderLinks}
+                                            linkCardBackgroundColor={linkCardBackgroundColor}
+                                            linkCardTextColor={linkCardTextColor}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>

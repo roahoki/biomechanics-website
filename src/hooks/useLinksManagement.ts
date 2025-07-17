@@ -6,7 +6,7 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [linkToDelete, setLinkToDelete] = useState<number | null>(null)
 
-    // Función para agregar un nuevo link
+    // Función para agregar un nuevo link al principio
     const addNewLink = () => {
         const newId = Math.max(...currentLinks.map(item => item.id), 0) + 1
         const newLink: Link = {
@@ -15,10 +15,10 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
             url: '',
             label: ''
         }
-        setCurrentLinks([...currentLinks, newLink])
+        setCurrentLinks([newLink, ...currentLinks])
     }
 
-    // Función para agregar un nuevo producto
+    // Función para agregar un nuevo producto al principio
     const addNewProduct = () => {
         const newId = Math.max(...currentLinks.map(item => item.id), 0) + 1
         const newProduct: Product = {
@@ -30,7 +30,7 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
             description: '',
             images: []
         }
-        setCurrentLinks([...currentLinks, newProduct])
+        setCurrentLinks([newProduct, ...currentLinks])
     }
 
     // Función para eliminar un item
@@ -68,6 +68,11 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
         ))
     }
 
+    // Función para reordenar los elementos
+    const reorderLinks = (newOrder: LinkItem[]) => {
+        setCurrentLinks(newOrder)
+    }
+
     return {
         currentLinks,
         setCurrentLinks,
@@ -78,6 +83,7 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
         cancelDelete,
         updateLink,
         updateProduct,
+        reorderLinks,
         showDeleteModal,
         linkToDelete
     }
