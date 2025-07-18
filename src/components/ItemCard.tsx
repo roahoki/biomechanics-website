@@ -69,23 +69,11 @@ export function ItemCard({
                 </div>
             )}
 
-            {/* Contenido superpuesto */}
-            <div className="relative z-20 h-full flex flex-col justify-between p-3">
-                {/* Título centrado */}
-                <div className="flex-1 flex items-center justify-center">
-                    <h3 className="text-white font-bold text-center text-sm leading-tight drop-shadow-lg">
-                        {item.title || 'Item sin título'}
-                    </h3>
-                </div>
-
-                {/* Tres puntos en la esquina inferior derecha */}
-                <div className="flex justify-end">
-                    <div className="text-white opacity-80">
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                        </svg>
-                    </div>
-                </div>
+            {/* Contenido superpuesto - Solo título */}
+            <div className="relative z-20 h-full flex items-center justify-center p-3">
+                <h3 className="text-white font-bold text-center text-sm leading-tight drop-shadow-lg">
+                    {item.title || 'Item sin título'}
+                </h3>
             </div>
         </motion.div>
     )

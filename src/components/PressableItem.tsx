@@ -101,11 +101,14 @@ export function PressableItem({
                         </div>
                     )}
 
-                    {/* Título centrado */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <h3 className="text-white font-bold text-xl text-center px-4 drop-shadow-lg">
-                            {itemData.title}
-                        </h3>
+                    {/* Contenido superpuesto */}
+                    <div className="absolute inset-0 flex flex-col justify-between p-3">
+                        {/* Título y precio centrados en la parte superior */}
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            <h3 className="text-white font-bold text-xl text-center drop-shadow-lg">
+                                {itemData.title}
+                            </h3>
+                        </div>
                     </div>
                 </button>
             </motion.div>
