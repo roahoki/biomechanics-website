@@ -2,9 +2,10 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { SocialIcon } from '@/app/components/SocialIcon'
 import { ProductModal } from '@/components/ProductModal'
+import { ItemModal } from '@/components/ItemModal'
 import { PressablesList } from '@/components/PressablesList'
 import { type ProfileImageType } from '@/utils/file-utils'
-import { LinkItem, Product } from '@/types/product'
+import { LinkItem, Product, Item } from '@/types/product'
 import { StyleSettings } from '@/utils/links'
 
 type ViewMode = 'mobile' | 'desktop'
@@ -54,8 +55,10 @@ export function PreviewModalUpdated({
     styleSettings
 }: PreviewModalProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
     const [viewMode, setViewMode] = useState<ViewMode>('mobile')
     const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+    const [isItemModalOpen, setIsItemModalOpen] = useState(false)
 
     if (!isOpen) return null
 
@@ -64,9 +67,19 @@ export function PreviewModalUpdated({
         setIsProductModalOpen(true)
     }
 
+    const handleItemClick = (item: Item) => {
+        setSelectedItem(item)
+        setIsItemModalOpen(true)
+    }
+
     const closeProductModal = () => {
         setIsProductModalOpen(false)
         setSelectedProduct(null)
+    }
+
+    const closeItemModal = () => {
+        setIsItemModalOpen(false)
+        setSelectedItem(null)
     }
 
     const formatPrice = (price: number): string => {
@@ -262,6 +275,7 @@ export function PreviewModalUpdated({
                                             items={currentLinks}
                                             styleSettings={styleSettings}
                                             onProductClick={handleProductClick}
+                                            onItemClick={handleItemClick}
                                         />
                                     </div>
 
@@ -285,6 +299,14 @@ export function PreviewModalUpdated({
                 product={selectedProduct}
                 isOpen={isProductModalOpen}
                 onClose={closeProductModal}
+                styleSettings={styleSettings}
+            />
+
+            {/* Item Modal */}
+            <ItemModal
+                item={selectedItem}
+                isOpen={isItemModalOpen}
+                onClose={closeItemModal}
                 styleSettings={styleSettings}
             />
         </>

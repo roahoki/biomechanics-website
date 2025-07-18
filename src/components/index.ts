@@ -16,5 +16,10 @@ export { ProductForm } from './ProductForm'
 export { ProductModal } from './ProductModal'
 export { ImageCarousel } from './ImageCarousel'
 
+// Componentes de items
+export { ItemForm } from './ItemForm'
+export { ItemCard } from './ItemCard'
+export { ItemModal } from './ItemModal'
+
 // Componente principal con productos
 export { SortableLinksFormWithProducts } from './SortableLinksFormWithProducts'

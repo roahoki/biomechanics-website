@@ -1,6 +1,6 @@
 'use client'
 
-import { LinkItem, Product } from '@/types/product'
+import { LinkItem, Product, Item } from '@/types/product'
 import { StyleSettings } from '@/utils/links'
 import { PressableItem } from './PressableItem'
 
@@ -8,12 +8,14 @@ interface PressablesListProps {
     items: LinkItem[]
     styleSettings: StyleSettings
     onProductClick?: (product: Product) => void
+    onItemClick?: (item: Item) => void
 }
 
 export function PressablesList({ 
     items, 
     styleSettings, 
-    onProductClick 
+    onProductClick,
+    onItemClick 
 }: PressablesListProps) {
     return (
         <div className="w-full max-w-md mx-auto">
@@ -23,6 +25,7 @@ export function PressablesList({
                     item={item}
                     styleSettings={styleSettings}
                     onProductClick={onProductClick}
+                    onItemClick={onItemClick}
                     index={index}
                 />
             ))}

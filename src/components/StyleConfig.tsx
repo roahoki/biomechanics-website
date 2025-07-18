@@ -7,6 +7,8 @@ interface StyleConfigProps {
     setLinkCardTextColor: (color: string) => void
     productBuyButtonColor: string
     setProductBuyButtonColor: (color: string) => void
+    itemButtonColor: string
+    setItemButtonColor: (color: string) => void
     isValidHexColor: (color: string) => boolean
 }
 
@@ -19,6 +21,8 @@ export function StyleConfig({
     setLinkCardTextColor,
     productBuyButtonColor,
     setProductBuyButtonColor,
+    itemButtonColor,
+    setItemButtonColor,
     isValidHexColor
 }: StyleConfigProps) {
     const ColorInput = ({ 
@@ -93,6 +97,12 @@ export function StyleConfig({
                     value={productBuyButtonColor}
                     onChange={setProductBuyButtonColor}
                     placeholder="#ff6b35"
+                />
+                <ColorInput
+                    label="Botón de items"
+                    value={itemButtonColor}
+                    onChange={setItemButtonColor}
+                    placeholder="#3b82f6"
                 />
             </div>
             <div className="mt-4 p-3 bg-orange-900 bg-opacity-30 rounded-md border border-orange-600">
