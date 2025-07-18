@@ -34,6 +34,7 @@ export interface StyleSettings {
   linkCardBackgroundColor?: string
   linkCardTextColor?: string
   productBuyButtonColor?: string
+  itemButtonColor?: string
 }
 
 export interface LinksData {

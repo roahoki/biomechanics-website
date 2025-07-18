@@ -1,14 +1,17 @@
 import { LinkCard } from './LinkCard'
 import { ProductItem } from '../ProductItem'
-import { LinkItem, Product, Link } from '@/types/product'
+import { ItemForm } from '../ItemForm'
+import { LinkItem, Product, Item, Link } from '@/types/product'
 
 interface LinksListProps {
     currentLinks: LinkItem[]
     onAddNewLink: () => void
     onAddNewProduct: () => void
+    onAddNewItem: () => void
     onRemoveLink: (id: number) => void
     onUpdateLink: (id: number, field: 'url' | 'label', value: string) => void
     onUpdateProduct: (id: number, updatedProduct: Partial<Product>) => void
+    onUpdateItem: (id: number, updatedItem: Partial<Item>) => void
     onReorderLinks: (newOrder: LinkItem[]) => void
     linkCardBackgroundColor: string
     linkCardTextColor: string
@@ -18,9 +21,11 @@ export function LinksListUpdated({
     currentLinks,
     onAddNewLink,
     onAddNewProduct,
+    onAddNewItem,
     onRemoveLink,
     onUpdateLink,
     onUpdateProduct,
+    onUpdateItem,
     onReorderLinks,
     linkCardBackgroundColor,
     linkCardTextColor
@@ -48,7 +53,7 @@ export function LinksListUpdated({
     return (
         <div className="space-y-4">
             {/* Botones para agregar nuevos elementos */}
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap gap-3 mb-6">
                 <button
                     type="button"
                     onClick={onAddNewLink}
@@ -64,6 +69,14 @@ export function LinksListUpdated({
                 >
                     <span>🛍️</span>
                     <span>Agregar Producto</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={onAddNewItem}
+                    className="flex items-center space-x-2 px-4 py-2 text-purple-600 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
+                >
+                    <span>📦</span>
+                    <span>Agregar Item</span>
                 </button>
             </div>
 
@@ -115,22 +128,29 @@ export function LinksListUpdated({
                                     linkCardBackgroundColor={linkCardBackgroundColor}
                                     linkCardTextColor={linkCardTextColor}
                                 />
-                            ) : (
+                            ) : item.type === 'product' ? (
                                 <ProductItem
                                     key={item.id}
                                     product={item as Product}
                                     onUpdate={(id, updatedProduct) => onUpdateProduct(id, updatedProduct)}
                                     onRemove={() => onRemoveLink(item.id)}
                                 />
-                            )}
+                            ) : item.type === 'item' ? (
+                                <ItemForm
+                                    key={item.id}
+                                    item={item as Item}
+                                    onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
+                                    onRemove={() => onRemoveLink(item.id)}
+                                />
+                            ) : null}
                         </div>
                     </div>
                 ))}
                 
                 {currentLinks.length === 0 && (
                     <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                        <p className="text-lg mb-2">📄 No hay enlaces o productos configurados</p>
-                        <p className="text-sm">Agrega tu primer enlace o producto usando los botones de arriba</p>
+                        <p className="text-lg mb-2">📄 No hay enlaces, productos o items configurados</p>
+                        <p className="text-sm">Agrega tu primer elemento usando los botones de arriba</p>
                     </div>
                 )}
             </div>

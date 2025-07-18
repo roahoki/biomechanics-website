@@ -100,6 +100,8 @@ export function SortableLinksFormWithProducts({
         setLinkCardTextColor,
         productBuyButtonColor,
         setProductBuyButtonColor,
+        itemButtonColor,
+        setItemButtonColor,
         isValidHexColor,
         handleSocialIconColorChange
     } = useColorConfig({
@@ -113,7 +115,8 @@ export function SortableLinksFormWithProducts({
         initialTitleColor: styleSettings.titleColor || '#ffffff',
         initialLinkCardBackgroundColor: styleSettings.linkCardBackgroundColor || '#ffffff',
         initialLinkCardTextColor: styleSettings.linkCardTextColor || '#000000',
-        initialProductBuyButtonColor: styleSettings.productBuyButtonColor || '#ff6b35'
+        initialProductBuyButtonColor: styleSettings.productBuyButtonColor || '#ff6b35',
+        initialItemButtonColor: styleSettings.itemButtonColor || '#3b82f6'
     })
 
     // Estados adicionales para el fondo
@@ -127,11 +130,13 @@ export function SortableLinksFormWithProducts({
         setCurrentLinks,
         addNewLink,
         addNewProduct,
+        addNewItem,
         removeLink,
         confirmDelete,
         cancelDelete,
         updateLink,
         updateProduct,
+        updateItem,
         reorderLinks,
         showDeleteModal
     } = useLinksManagement(convertedLinks)
@@ -216,7 +221,8 @@ export function SortableLinksFormWithProducts({
                     titleColor,
                     linkCardBackgroundColor,
                     linkCardTextColor,
-                    productBuyButtonColor
+                    productBuyButtonColor,
+                    itemButtonColor
                 }
             }
 
@@ -326,6 +332,8 @@ export function SortableLinksFormWithProducts({
                                     setLinkCardTextColor={setLinkCardTextColor}
                                     productBuyButtonColor={productBuyButtonColor}
                                     setProductBuyButtonColor={setProductBuyButtonColor}
+                                    itemButtonColor={itemButtonColor}
+                                    setItemButtonColor={setItemButtonColor}
                                     isValidHexColor={isValidHexColor}
                                 />
                             </div>
@@ -342,9 +350,11 @@ export function SortableLinksFormWithProducts({
                                             currentLinks={currentLinks}
                                             onAddNewLink={addNewLink}
                                             onAddNewProduct={addNewProduct}
+                                            onAddNewItem={addNewItem}
                                             onRemoveLink={removeLink}
                                             onUpdateLink={updateLink}
                                             onUpdateProduct={updateProduct}
+                                            onUpdateItem={updateItem}
                                             onReorderLinks={reorderLinks}
                                             linkCardBackgroundColor={linkCardBackgroundColor}
                                             linkCardTextColor={linkCardTextColor}

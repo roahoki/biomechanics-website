@@ -1,20 +1,22 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { LinkItem, Product } from '@/types/product'
+import { LinkItem, Product, Item } from '@/types/product'
 import { StyleSettings } from '@/utils/links'
 
 interface PressableItemProps {
     item: LinkItem
     styleSettings: StyleSettings
     onProductClick?: (product: Product) => void
+    onItemClick?: (item: Item) => void
     index: number
 }
 
 export function PressableItem({ 
     item, 
     styleSettings, 
-    onProductClick, 
+    onProductClick,
+    onItemClick, 
     index 
 }: PressableItemProps) {
     const formatPrice = (price: number) => {
@@ -61,6 +63,48 @@ export function PressableItem({
                     <div className="absolute inset-0 flex items-center justify-center">
                         <h3 className="text-white font-bold text-xl text-center px-4 drop-shadow-lg">
                             {product.title}
+                        </h3>
+                    </div>
+                </button>
+            </motion.div>
+        )
+    }
+
+    // Si es un item
+    if (item.type === 'item') {
+        const itemData = item as Item
+        
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="w-full mb-4"
+            >
+                <button
+                    onClick={() => onItemClick?.(itemData)}
+                    className={`relative w-full h-32 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
+                        itemData.images?.length > 0 ? '' : 'bg-gray-200'
+                    }`}
+                    style={{
+                        backgroundImage: itemData.images?.length > 0 
+                            ? `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${itemData.images[0]})` 
+                            : undefined
+                    }}
+                >
+                    {/* Fallback para items sin imagen */}
+                    {(!itemData.images || itemData.images.length === 0) && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                        </div>
+                    )}
+
+                    {/* Título centrado */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <h3 className="text-white font-bold text-xl text-center px-4 drop-shadow-lg">
+                            {itemData.title}
                         </h3>
                     </div>
                 </button>

@@ -7,17 +7,23 @@ interface ImageCarouselProps {
     onImagesChange: (images: string[]) => void
     maxImages?: number
     maxSizeInMB?: number
+    bucketName?: string
+    folderPrefix?: string
+    error?: string
 }
 
 export function ImageCarousel({ 
     images, 
     onImagesChange, 
     maxImages = 10, 
-    maxSizeInMB = 2 
+    maxSizeInMB = 2,
+    bucketName = 'products',
+    folderPrefix,
+    error: externalError 
 }: ImageCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
-    const [error, setError] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(externalError || null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const touchStartX = useRef<number>(0)
     const touchEndX = useRef<number>(0)
