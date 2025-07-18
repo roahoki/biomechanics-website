@@ -17,9 +17,12 @@ export function PressablesList({
     onProductClick,
     onItemClick 
 }: PressablesListProps) {
+    // Filtrar solo los items visibles (por defecto son visibles si no se especifica)
+    const visibleItems = items.filter(item => item.visible !== false)
+    
     return (
         <div className="w-full max-w-md mx-auto">
-            {items.map((item, index) => (
+            {visibleItems.map((item, index) => (
                 <PressableItem
                     key={item.id}
                     item={item}

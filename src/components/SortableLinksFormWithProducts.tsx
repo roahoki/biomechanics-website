@@ -48,7 +48,8 @@ export function SortableLinksFormWithProducts({
     // Convertir links legacy a LinkItem
     const convertedLinks: LinkItem[] = links.map(link => ({
         ...link,
-        type: link.type || 'link'
+        type: link.type || 'link',
+        visible: link.visible !== undefined ? link.visible : true
     }))
 
     // Estado del formulario
@@ -138,6 +139,7 @@ export function SortableLinksFormWithProducts({
         updateProduct,
         updateItem,
         reorderLinks,
+        toggleVisibility,
         showDeleteModal
     } = useLinksManagement(convertedLinks)
 
@@ -356,6 +358,7 @@ export function SortableLinksFormWithProducts({
                                             onUpdateProduct={updateProduct}
                                             onUpdateItem={updateItem}
                                             onReorderLinks={reorderLinks}
+                                            onToggleVisibility={toggleVisibility}
                                             linkCardBackgroundColor={linkCardBackgroundColor}
                                             linkCardTextColor={linkCardTextColor}
                                         />

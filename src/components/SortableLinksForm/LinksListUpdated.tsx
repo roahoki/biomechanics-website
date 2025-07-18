@@ -13,6 +13,7 @@ interface LinksListProps {
     onUpdateProduct: (id: number, updatedProduct: Partial<Product>) => void
     onUpdateItem: (id: number, updatedItem: Partial<Item>) => void
     onReorderLinks: (newOrder: LinkItem[]) => void
+    onToggleVisibility: (id: number) => void
     linkCardBackgroundColor: string
     linkCardTextColor: string
 }
@@ -27,6 +28,7 @@ export function LinksListUpdated({
     onUpdateProduct,
     onUpdateItem,
     onReorderLinks,
+    onToggleVisibility,
     linkCardBackgroundColor,
     linkCardTextColor
 }: LinksListProps) {
@@ -84,7 +86,7 @@ export function LinksListUpdated({
             <div className="space-y-2">
                 {currentLinks.map((item, index) => (
                     <div key={item.id} className="flex items-start space-x-3 group">
-                        {/* Botones de reordenamiento */}
+                        {/* Botones de reordenamiento y visibilidad */}
                         <div className="flex flex-col items-center space-y-1 pt-4">
                             <button
                                 onClick={() => moveUp(index)}
@@ -115,10 +117,32 @@ export function LinksListUpdated({
                             >
                                 ⬇️
                             </button>
+                            
+                            {/* Botón de visibilidad */}
+                            <div className="flex flex-col items-center space-y-1">
+                                <button
+                                    onClick={() => onToggleVisibility(item.id)}
+                                    className={`p-2 rounded-md text-lg transition-all duration-200 ${
+                                        item.visible !== false
+                                            ? 'text-green-600 hover:text-green-700 hover:bg-green-50 hover:scale-110'
+                                            : 'text-red-600 hover:text-red-700 hover:bg-red-50 hover:scale-110'
+                                    }`}
+                                    title={item.visible !== false ? "Ocultar en página pública" : "Mostrar en página pública"}
+                                >
+                                    {item.visible !== false ? '👁️' : '🚫'}
+                                </button>
+                                <span className={`text-xs font-medium transition-colors duration-200 ${
+                                    item.visible !== false ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                    {item.visible !== false ? 'Visible' : 'Oculto'}
+                                </span>
+                            </div>
                         </div>
 
                         {/* Contenido del elemento */}
-                        <div className="flex-1 w-full max-w-full overflow-hidden">
+                        <div className={`flex-1 w-full max-w-full overflow-hidden transition-opacity duration-200 ${
+                            item.visible === false ? 'opacity-50' : 'opacity-100'
+                        }`}>
                             {item.type === 'link' ? (
                                 <LinkCard
                                     key={item.id}
