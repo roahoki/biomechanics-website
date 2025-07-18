@@ -16,7 +16,7 @@ export function ImageCarousel({
     images, 
     onImagesChange, 
     maxImages = 10, 
-    maxSizeInMB = 2,
+    maxSizeInMB = 10,
     bucketName = 'products',
     folderPrefix,
     error: externalError 

@@ -57,7 +57,7 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
                         images={product.images}
                         onImagesChange={(images) => onUpdate(product.id, { images })}
                         maxImages={10}
-                        maxSizeInMB={2}
+                        maxSizeInMB={10}
                     />
                 </div>
             </div>
