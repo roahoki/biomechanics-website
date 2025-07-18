@@ -44,7 +44,7 @@ export default function Page() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-black">
                 <div className="text-white">Cargando...</div>
             </div>
         )
@@ -52,7 +52,7 @@ export default function Page() {
 
     if (!linksData) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-black">
                 <div className="text-white">Error al cargar datos</div>
             </div>
         )
@@ -71,7 +71,7 @@ export default function Page() {
                 <img
                     src="/icons/default-avatar.png"
                     alt="Avatar por defecto"
-                    className={commonClasses}
+                    className={`${commonClasses} clickable`}
                     width={128}
                     height={128}
                 />
@@ -97,7 +97,7 @@ export default function Page() {
                 <img
                     src={profileImage}
                     alt="Foto de perfil Biomechanics"
-                    className={commonClasses}
+                    className={`${commonClasses} clickable`}
                     width={128}
                     height={128}
                     // No podemos usar onError en un componente de servidor
@@ -140,16 +140,27 @@ export default function Page() {
     // Vista de solo lectura para usuarios comunes
     return (
         <div
-            className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body"
-            style={backgroundStyle}
+            className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body select-none"
+            style={{
+                ...backgroundStyle,
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                WebkitTouchCallout: 'none',
+                msUserSelect: 'none'
+            }}
         >
             {/* Overlay de opacidad para imagen de fondo */}
             {hasImageBackground && (
                 <div 
-                    className="absolute inset-0 bg-black"
+                    className="absolute inset-0 bg-black select-none"
                     style={{ 
                         opacity: 1 - (backgroundSettings?.imageOpacity || 0.5),
-                        zIndex: 0
+                        zIndex: 0,
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
+                        WebkitTouchCallout: 'none',
+                        msUserSelect: 'none',
+                        pointerEvents: 'none'
                     }}
                 />
             )}

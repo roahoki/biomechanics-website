@@ -76,3 +76,46 @@
     background: rgb(243 244 246);
   }
 }
+
+/* Prevenir selección de imágenes de fondo en móvil */
+@layer base {
+  html,
+  body {
+    background-color: #000000;
+    color: #E6E7E8;
+    min-height: 100vh;
+  }
+  
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  
+  img {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    pointer-events: none;
+  }
+  
+  /* Permitir interacciones en imágenes que sí deben ser clickeables */
+  img[role="button"], 
+  img.clickable,
+  button img,
+  a img {
+    pointer-events: auto;
+  }
+  
+  /* Específicamente para fondos de imagen */
+  [style*="background-image"] {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
