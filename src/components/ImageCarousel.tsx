@@ -177,7 +177,7 @@ export function ImageCarousel({
                         <img
                             src={images[currentIndex]}
                             alt={`Imagen ${currentIndex + 1}`}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover clickable"
                             draggable={false}
                         />
 
@@ -275,7 +275,7 @@ export function ImageCarousel({
                                 <img
                                     src={image}
                                     alt={`Miniatura ${index + 1}`}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover clickable"
                                     draggable={false}
                                 />
                             </div>

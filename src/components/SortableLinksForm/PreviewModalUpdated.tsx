@@ -187,13 +187,26 @@ export function PreviewModalUpdated({
                     <div className="flex-1 overflow-hidden bg-gray-50 rounded-b-lg">
                         <div className={`${styles.viewport} overflow-y-auto h-full`}>
                             <div 
-                                className="min-h-full flex flex-col items-center p-6 relative"
-                                style={backgroundImageStyle}
+                                className="min-h-full flex flex-col items-center p-6 relative select-none"
+                                style={{
+                                    ...backgroundImageStyle,
+                                    userSelect: 'none',
+                                    WebkitUserSelect: 'none',
+                                    WebkitTouchCallout: 'none',
+                                    msUserSelect: 'none'
+                                }}
                             >
                                 {/* Overlay si hay imagen de fondo */}
                                 <div 
-                                    className="absolute inset-0 pointer-events-none"
-                                    style={overlayStyle}
+                                    className="absolute inset-0 pointer-events-none select-none"
+                                    style={{
+                                        ...overlayStyle,
+                                        userSelect: 'none',
+                                        WebkitUserSelect: 'none',
+                                        WebkitTouchCallout: 'none',
+                                        msUserSelect: 'none',
+                                        pointerEvents: 'none'
+                                    }}
                                 />
 
                                 {/* Content */}
