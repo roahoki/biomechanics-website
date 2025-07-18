@@ -79,6 +79,13 @@
 
 /* Prevenir selección de imágenes de fondo en móvil */
 @layer base {
+  html,
+  body {
+    background-color: #000000;
+    color: #E6E7E8;
+    min-height: 100vh;
+  }
+  
   * {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;

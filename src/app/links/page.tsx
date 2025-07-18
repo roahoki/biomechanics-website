@@ -44,7 +44,7 @@ export default function Page() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-black">
                 <div className="text-white">Cargando...</div>
             </div>
         )
@@ -52,7 +52,7 @@ export default function Page() {
 
     if (!linksData) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-black">
                 <div className="text-white">Error al cargar datos</div>
             </div>
         )

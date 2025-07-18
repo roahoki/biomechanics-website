@@ -28,11 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning>
+      <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning style={{ backgroundColor: '#000000' }}>
         <head>
           {/* Aquí puedes agregar meta tags adicionales si es necesario */}
         </head>
-        <body suppressHydrationWarning className={`${spaceGrotesk.className} antialiased`}>
+        <body suppressHydrationWarning className={`${spaceGrotesk.className} antialiased`} style={{ backgroundColor: '#000000', color: '#E6E7E8' }}>
           {children}
         </body>
       </html>
