@@ -13,7 +13,8 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
             id: newId,
             type: 'link',
             url: '',
-            label: ''
+            label: '',
+            visible: true
         }
         setCurrentLinks([newLink, ...currentLinks])
     }
@@ -28,7 +29,8 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
             price: 0,
             paymentLink: '',
             description: '',
-            images: []
+            images: [],
+            visible: true
         }
         setCurrentLinks([newProduct, ...currentLinks])
     }
@@ -45,7 +47,8 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
             buttonText: 'Ver más',
             paymentLink: '',
             description: '',
-            images: []
+            images: [],
+            visible: true
         }
         setCurrentLinks([newItem, ...currentLinks])
     }
@@ -97,6 +100,13 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
         setCurrentLinks(newOrder)
     }
 
+    // Función para cambiar la visibilidad de un elemento
+    const toggleVisibility = (id: number) => {
+        setCurrentLinks(currentLinks.map(item => 
+            item.id === id ? { ...item, visible: item.visible !== false ? false : true } : item
+        ))
+    }
+
     return {
         currentLinks,
         setCurrentLinks,
@@ -110,6 +120,7 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
         updateProduct,
         updateItem,
         reorderLinks,
+        toggleVisibility,
         showDeleteModal,
         linkToDelete
     }
