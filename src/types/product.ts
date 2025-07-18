@@ -9,6 +9,19 @@ export interface Product {
     images: string[]
 }
 
+export interface Item {
+    id: number
+    type: 'item'
+    title: string
+    subtitle?: string
+    price: number
+    priceVisible: boolean
+    buttonText: string
+    paymentLink: string
+    description: string
+    images: string[]
+}
+
 export interface Link {
     id: number
     type?: 'link'
@@ -16,4 +29,4 @@ export interface Link {
     label: string
 }
 
-export type LinkItem = Link | Product
+export type LinkItem = Link | Product | Item

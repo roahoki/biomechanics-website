@@ -2,15 +2,17 @@
 
 import { getLinksData } from '@/utils/links'
 import { SocialIcon } from '@/app/components/SocialIcon'
-import { LinkItem, Product } from '@/types/product'
+import { LinkItem, Product, Item } from '@/types/product'
 import Image from 'next/image'
 import { ProductModal } from '@/components/ProductModal'
+import { ItemModal } from '@/components/ItemModal'
 import { PressablesList } from '@/components/PressablesList'
 import { useState, useEffect } from 'react'
 
 export default function Page() {
     const [linksData, setLinksData] = useState<any>(null)
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -207,7 +209,7 @@ export default function Page() {
                     </div>
                 )}
 
-                {/* Lista unificada de presionables (links + productos) */}
+                {/* Lista unificada de presionables (links + productos + items) */}
                 {Array.isArray(links) && links.length > 0 && (
                     <PressablesList
                         items={links}
@@ -218,6 +220,7 @@ export default function Page() {
                             productBuyButtonColor: '#ff6b35'
                         }}
                         onProductClick={(product) => setSelectedProduct(product)}
+                        onItemClick={(item) => setSelectedItem(item)}
                     />
                 )}
             </div>
@@ -228,6 +231,16 @@ export default function Page() {
                     product={selectedProduct}
                     isOpen={!!selectedProduct}
                     onClose={() => setSelectedProduct(null)}
+                    styleSettings={styleSettings}
+                />
+            )}
+
+            {/* Modal de item */}
+            {selectedItem && (
+                <ItemModal
+                    item={selectedItem}
+                    isOpen={!!selectedItem}
+                    onClose={() => setSelectedItem(null)}
                     styleSettings={styleSettings}
                 />
             )}
