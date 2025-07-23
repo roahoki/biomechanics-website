@@ -44,6 +44,20 @@ export async function saveLinksToSupabase(linksData: LinksData) {
     // Usar el cliente admin de Supabase para operaciones del servidor
     const supabase = getSupabaseClient({ admin: true });
 
+    // Log del proceso
+    console.log('💾 Iniciando guardado en Supabase...')
+    console.log('📊 Resumen de datos:', {
+      linksCount: linksData.links?.length || 0,
+      description: linksData.description?.substring(0, 50) + '...',
+      profileImage: linksData.profileImage ? 'URL presente' : 'Sin imagen',
+      profileImageType: linksData.profileImageType,
+      backgroundType: linksData.backgroundSettings?.type,
+      backgroundImage: linksData.backgroundSettings?.imageUrl ? 'URL presente' : 'Sin imagen de fondo',
+      productCount: linksData.links?.filter(item => item.type === 'product').length || 0,
+      itemCount: linksData.links?.filter(item => item.type === 'item').length || 0,
+      linkCount: linksData.links?.filter(item => item.type === 'link' || !item.type).length || 0
+    })
+
     // Verificar si existe un registro
     const { data: existingData } = await supabase
       .from('site_settings')
@@ -55,6 +69,7 @@ export async function saveLinksToSupabase(linksData: LinksData) {
     
     if (existingData) {
       // Si existe, actualizar
+      console.log('🔄 Actualizando registro existente...')
       result = await supabase
         .from('site_settings')
         .update({ 
@@ -64,6 +79,7 @@ export async function saveLinksToSupabase(linksData: LinksData) {
         .eq('id', 'default');
     } else {
       // Si no existe, insertar
+      console.log('🆕 Creando nuevo registro...')
       result = await supabase
         .from('site_settings')
         .insert({ 
@@ -77,9 +93,10 @@ export async function saveLinksToSupabase(linksData: LinksData) {
       throw new Error(`Error al actualizar Supabase: ${result.error.message}`);
     }
 
+    console.log('✅ Datos guardados exitosamente en Supabase')
     return { success: true };
   } catch (error: any) {
-    console.error('Error guardando datos en Supabase:', error);
+    console.error('❌ Error guardando datos en Supabase:', error);
     throw new Error(`Error guardando datos: ${error.message}`);
   }
 }
@@ -206,6 +223,14 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
       ...otherData,
       links: items
     }
+    
+    console.log('💾 Guardando datos en Supabase:', {
+      linksCount: items.length,
+      profileImage: linksData.profileImage,
+      backgroundImage: linksData.backgroundSettings?.imageUrl,
+      productImages: items.filter(item => item.type === 'product').map(item => item.images?.length || 0),
+      itemImages: items.filter(item => item.type === 'item').map(item => item.images?.length || 0)
+    })
     
     // Guardar en Supabase
     await saveLinksToSupabase(linksData)

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useSupabaseClient } from '@/lib/supabase-auth'
 import { useUser } from '@clerk/nextjs'
 import { getFileType, isValidAvatarFile, type ProfileImageType } from '@/utils/file-utils'
 
@@ -9,7 +8,6 @@ interface UseFileUploadProps {
 
 export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
     const { user } = useUser()
-    const supabase = useSupabaseClient()
     const [uploadingImage, setUploadingImage] = useState(false)
 
     const uploadFileToSupabase = async (file: File): Promise<string | null> => {
@@ -18,36 +16,35 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
                 throw new Error('Usuario no autenticado')
             }
 
-            const fileExt = file.name.split('.').pop()
-            const fileType = getFileType(file)
-            const fileName = `${fileType}-${Date.now()}.${fileExt}`
+            console.log('🔄 Subiendo archivo de perfil:', file.name)
             
-            console.log(`🔄 Subiendo ${fileType}:`, fileName)
-            
-            const { data, error } = await supabase.storage
-                .from('avatars')
-                .upload(fileName, file, {
-                    cacheControl: '3600',
-                    upsert: true,
-                    contentType: file.type
-                })
+            const formData = new FormData()
+            formData.append('file', file)
 
-            if (error) {
-                console.error(`❌ Error subiendo ${fileType}:`, error)
-                throw error
+            const response = await fetch('/api/upload-avatar', {
+                method: 'POST',
+                body: formData,
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                console.error('❌ Error de la API:', errorData)
+                throw new Error(errorData.error || `Error HTTP: ${response.status}`)
             }
 
-            // Obtener URL pública
-            const { data: publicUrlData } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(fileName)
-
-            console.log(`✅ ${fileType} subido exitosamente:`, publicUrlData.publicUrl)
-            return publicUrlData.publicUrl
+            const result = await response.json()
+            
+            if (result.success) {
+                console.log('✅ Archivo de perfil subido exitosamente:', result.url)
+                return result.url
+            } else {
+                throw new Error(result.error || 'Error desconocido de la API')
+            }
 
         } catch (error) {
             console.error('💥 Error en uploadFileToSupabase:', error)
-            throw error
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+            throw new Error(errorMessage)
         }
     }
 
@@ -162,9 +159,97 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
         }
     }
 
+    const uploadMultipleItemImages = async (dataUrls: string[], itemId?: number): Promise<string[]> => {
+        try {
+            // Convertir data URLs a archivos
+            const files = await Promise.all(
+                dataUrls.map(async (dataUrl, index) => {
+                    try {
+                        const response = await fetch(dataUrl)
+                        if (!response.ok) {
+                            throw new Error(`Error al procesar imagen ${index + 1}: ${response.statusText}`)
+                        }
+                        
+                        const blob = await response.blob()
+                        return new File([blob], `item-image-${Date.now()}-${index}.jpg`, { 
+                            type: 'image/jpeg' 
+                        })
+                    } catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+                        console.error(`Error procesando imagen ${index + 1}:`, errorMessage)
+                        throw error
+                    }
+                })
+            )
+
+            // Crear FormData para enviar a la API
+            const formData = new FormData()
+            files.forEach((file) => {
+                formData.append('images', file)
+            })
+            if (itemId) {
+                formData.append('itemId', itemId.toString())
+            }
+
+            console.log(`🔄 Enviando ${files.length} imágenes de item a la API de subida...`)
+
+            // Llamar a la API de subida
+            const response = await fetch('/api/upload-item-images', {
+                method: 'POST',
+                body: formData
+            })
+
+            const result = await response.json()
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Error en la API de subida')
+            }
+
+            console.log(`✅ ${result.urls.length} imágenes de item subidas exitosamente`)
+            return result.urls
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+            console.error('Error uploading multiple item images:', errorMessage)
+            throw error
+        }
+    }
+
+    const uploadBackgroundImage = async (file: File): Promise<string> => {
+        try {
+            console.log(`🔄 Subiendo imagen de fondo...`)
+
+            // Crear FormData para enviar a la API
+            const formData = new FormData()
+            formData.append('image', file)
+
+            // Llamar a la API de subida
+            const response = await fetch('/api/upload-background', {
+                method: 'POST',
+                body: formData
+            })
+
+            const result = await response.json()
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Error en la API de subida de fondo')
+            }
+
+            console.log(`✅ Imagen de fondo subida exitosamente`)
+            return result.url
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+            console.error('Error uploading background image:', errorMessage)
+            throw error
+        }
+    }
+
     return {
         uploadFileToSupabase,
         uploadMultipleProductImages,
+        uploadMultipleItemImages,
+        uploadBackgroundImage,
         handleFileSelect,
         handleBackgroundFileSelect,
         uploadingImage,

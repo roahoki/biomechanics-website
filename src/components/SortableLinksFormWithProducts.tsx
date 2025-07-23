@@ -75,7 +75,10 @@ export function SortableLinksFormWithProducts({
     // File upload
     const { 
         handleFileSelect,
-        uploadMultipleProductImages 
+        uploadFileToSupabase,
+        uploadMultipleProductImages,
+        uploadMultipleItemImages,
+        uploadBackgroundImage 
     } = useFileUpload({
         onStatusChange: setStatus
     })
@@ -173,25 +176,98 @@ export function SortableLinksFormWithProducts({
         setStatus({ message: 'Guardando cambios...' })
 
         try {
-            // Procesar productos para subir imágenes a Supabase
+            // 1. Subir imagen de perfil si es necesaria
+            let finalProfileImage = previewUrl
+            let finalProfileImageType = previewType
+
+            if (selectedFile) {
+                setStatus({ message: 'Subiendo imagen de perfil...' })
+                try {
+                    console.log('🔄 Intentando subir imagen de perfil...')
+                    const uploadedUrl = await uploadFileToSupabase(selectedFile)
+                    if (uploadedUrl) {
+                        finalProfileImage = uploadedUrl
+                        finalProfileImageType = previewType
+                        console.log('✅ Imagen de perfil subida:', uploadedUrl)
+                    } else {
+                        console.warn('⚠️ La subida devolvió null')
+                    }
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+                    console.error('❌ Error subiendo imagen de perfil:', error)
+                    console.error('❌ Mensaje del error:', errorMessage)
+                    // No fallar todo el proceso por la imagen de perfil
+                    console.log('⚠️ Continuando sin imagen de perfil nueva...')
+                }
+            }
+
+            // 2. Subir imagen de fondo si es necesaria
+            let finalBackgroundImageUrl = backgroundImageUrl
+
+            if (selectedBackgroundFile) {
+                setStatus({ message: 'Subiendo imagen de fondo...' })
+                try {
+                    console.log('🔄 Intentando subir imagen de fondo...')
+                    const uploadedUrl = await uploadBackgroundImage(selectedBackgroundFile)
+                    finalBackgroundImageUrl = uploadedUrl
+                    console.log('✅ Imagen de fondo subida:', uploadedUrl)
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+                    console.error('❌ Error subiendo imagen de fondo:', error)
+                    // No fallar todo el proceso por la imagen de fondo
+                    console.log('⚠️ Continuando sin imagen de fondo nueva...')
+                }
+            }
+
+            // 3. Procesar productos e items para subir imágenes a Supabase
+            console.log('🔄 Procesando productos e items...')
             const processedLinks = await Promise.all(
                 currentLinks.map(async (item) => {
+                    console.log(`📝 Procesando item tipo: ${item.type}, ID: ${item.id}`)
+                    
+                    // Procesar productos
                     if (item.type === 'product' && item.images.length > 0) {
-                        // Filtrar solo imágenes que son data URLs (no subidas aún)
                         const dataUrls = item.images.filter(img => img.startsWith('data:'))
                         const publicUrls = item.images.filter(img => !img.startsWith('data:'))
+                        
+                        console.log(`📦 Producto "${item.title}": ${dataUrls.length} nuevas imágenes, ${publicUrls.length} existentes`)
                         
                         if (dataUrls.length > 0) {
                             setStatus({ message: `Subiendo imágenes del producto "${item.title}"...` })
                             try {
                                 const uploadedUrls = await uploadMultipleProductImages(dataUrls, item.id)
+                                console.log(`✅ Producto "${item.title}": ${uploadedUrls.length} imágenes subidas`)
                                 return {
                                     ...item,
                                     images: [...publicUrls, ...uploadedUrls]
                                 }
                             } catch (error) {
                                 const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+                                console.error(`❌ Error subiendo imágenes del producto "${item.title}":`, error)
                                 throw new Error(`Error subiendo imágenes del producto "${item.title}": ${errorMessage}`)
+                            }
+                        }
+                    }
+                    // Procesar items
+                    else if (item.type === 'item' && item.images.length > 0) {
+                        const dataUrls = item.images.filter(img => img.startsWith('data:'))
+                        const publicUrls = item.images.filter(img => !img.startsWith('data:'))
+                        
+                        console.log(`🎯 Item "${item.title}": ${dataUrls.length} nuevas imágenes, ${publicUrls.length} existentes`)
+                        
+                        if (dataUrls.length > 0) {
+                            setStatus({ message: `Subiendo imágenes del item "${item.title}"...` })
+                            try {
+                                const uploadedUrls = await uploadMultipleItemImages(dataUrls, item.id)
+                                console.log(`✅ Item "${item.title}": ${uploadedUrls.length} imágenes subidas`)
+                                return {
+                                    ...item,
+                                    images: [...publicUrls, ...uploadedUrls]
+                                }
+                            } catch (error) {
+                                const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+                                console.error(`❌ Error subiendo imágenes del item "${item.title}":`, error)
+                                throw new Error(`Error subiendo imágenes del item "${item.title}": ${errorMessage}`)
                             }
                         }
                     }
@@ -201,11 +277,11 @@ export function SortableLinksFormWithProducts({
 
             setStatus({ message: 'Guardando configuración...' })
 
-            // Preparar datos actualizados
+            // Preparar datos actualizados con las URLs finales
             const updatedData = {
                 description: localDescription,
-                profileImage: previewUrl,
-                profileImageType: previewType,
+                profileImage: finalProfileImage,
+                profileImageType: finalProfileImageType,
                 socialIcons: {
                     instagram: { url: socialIcons.instagram?.url, color: socialIconColors.instagram },
                     soundcloud: { url: socialIcons.soundcloud?.url, color: socialIconColors.soundcloud },
@@ -216,7 +292,7 @@ export function SortableLinksFormWithProducts({
                 backgroundSettings: {
                     type: backgroundType,
                     color: bgColor,
-                    imageUrl: backgroundImageUrl,
+                    imageUrl: finalBackgroundImageUrl,
                     imageOpacity: backgroundImageOpacity
                 },
                 styleSettings: {
@@ -233,6 +309,11 @@ export function SortableLinksFormWithProducts({
 
             if (result.success) {
                 setStatus({ message: result.message })
+                
+                // Limpiar archivos seleccionados después del éxito
+                setSelectedFile(null)
+                setSelectedBackgroundFile(null)
+                
                 // Opcionalmente recargar la página o navegar
                 setTimeout(() => {
                     router.refresh()
