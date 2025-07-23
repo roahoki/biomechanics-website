@@ -88,6 +88,8 @@ export function SortableLinksFormWithProducts({
         setPreviewUrl(profileImage)
         setPreviewType(profileImageType)
         setBackgroundPreviewUrl(backgroundSettings.imageUrl || '')
+        // También actualizar backgroundImageUrl cuando cambien los props
+        setBackgroundImageUrl(backgroundSettings.imageUrl || '')
     }, [profileImage, profileImageType, backgroundSettings.imageUrl, setPreviewUrl, setPreviewType, setBackgroundPreviewUrl])
 
     // Configuración de colores
@@ -176,6 +178,14 @@ export function SortableLinksFormWithProducts({
         setStatus({ message: 'Guardando cambios...' })
 
         try {
+            console.log('🔄 Iniciando proceso de guardado...')
+            console.log('📋 Estado inicial de imágenes:', {
+                profileImage: previewUrl,
+                backgroundImageUrl: backgroundImageUrl,
+                backgroundSettingsImageUrl: backgroundSettings.imageUrl,
+                selectedBackgroundFile: !!selectedBackgroundFile
+            })
+
             // 1. Subir imagen de perfil si es necesaria
             let finalProfileImage = previewUrl
             let finalProfileImageType = previewType
@@ -202,21 +212,29 @@ export function SortableLinksFormWithProducts({
             }
 
             // 2. Subir imagen de fondo si es necesaria
-            let finalBackgroundImageUrl = backgroundImageUrl
+            // Usar el valor actual de backgroundSettings.imageUrl como base
+            let finalBackgroundImageUrl = backgroundSettings.imageUrl || ''
 
             if (selectedBackgroundFile) {
                 setStatus({ message: 'Subiendo imagen de fondo...' })
                 try {
                     console.log('🔄 Intentando subir imagen de fondo...')
                     const uploadedUrl = await uploadBackgroundImage(selectedBackgroundFile)
-                    finalBackgroundImageUrl = uploadedUrl
-                    console.log('✅ Imagen de fondo subida:', uploadedUrl)
+                    if (uploadedUrl) {
+                        finalBackgroundImageUrl = uploadedUrl
+                        console.log('✅ Imagen de fondo subida:', uploadedUrl)
+                    }
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
                     console.error('❌ Error subiendo imagen de fondo:', error)
+                    console.error('❌ Mensaje del error:', errorMessage)
                     // No fallar todo el proceso por la imagen de fondo
                     console.log('⚠️ Continuando sin imagen de fondo nueva...')
                 }
+            } else {
+                // Si no hay nueva imagen, conservar la actual o usar backgroundImageUrl actualizado
+                finalBackgroundImageUrl = backgroundImageUrl || backgroundSettings.imageUrl || ''
+                console.log('📋 Manteniendo imagen de fondo actual:', finalBackgroundImageUrl)
             }
 
             // 3. Procesar productos e items para subir imágenes a Supabase
@@ -303,6 +321,13 @@ export function SortableLinksFormWithProducts({
                     itemButtonColor
                 }
             }
+
+            console.log('📤 Datos finales a enviar:', {
+                finalBackgroundImageUrl,
+                backgroundType,
+                backgroundImageOpacity,
+                originalBackgroundSettings: backgroundSettings
+            })
 
             // Llamar a la nueva función que soporta productos
             const result = await updateAdminLinksWithProducts(processedLinks, updatedData)

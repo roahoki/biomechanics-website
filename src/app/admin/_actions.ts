@@ -217,17 +217,35 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
     // Obtener los datos actuales para mantener la estructura
     const currentData = await getLinksData()
     
+    console.log('📋 Datos actuales vs nuevos:', {
+      currentBackgroundUrl: currentData.backgroundSettings?.imageUrl,
+      newBackgroundUrl: otherData.backgroundSettings?.imageUrl,
+      currentProfileImage: currentData.profileImage,
+      newProfileImage: otherData.profileImage
+    })
+    
     // Crear el objeto de datos para la base de datos
+    // Asegurándonos de que los datos nuevos sobrescriban los actuales
     const linksData: LinksData = {
       ...currentData,
       ...otherData,
-      links: items
+      links: items,
+      // Asegurar que los datos críticos se actualicen correctamente
+      profileImage: otherData.profileImage ?? currentData.profileImage,
+      profileImageType: otherData.profileImageType ?? currentData.profileImageType,
+      backgroundSettings: otherData.backgroundSettings ? {
+        type: otherData.backgroundSettings.type ?? currentData.backgroundSettings?.type ?? 'color',
+        color: otherData.backgroundSettings.color ?? currentData.backgroundSettings?.color ?? '#000000',
+        imageUrl: otherData.backgroundSettings.imageUrl ?? currentData.backgroundSettings?.imageUrl ?? '',
+        imageOpacity: otherData.backgroundSettings.imageOpacity ?? currentData.backgroundSettings?.imageOpacity ?? 0.5
+      } : currentData.backgroundSettings
     }
     
     console.log('💾 Guardando datos en Supabase:', {
       linksCount: items.length,
       profileImage: linksData.profileImage,
       backgroundImage: linksData.backgroundSettings?.imageUrl,
+      backgroundType: linksData.backgroundSettings?.type,
       productImages: items.filter(item => item.type === 'product').map(item => item.images?.length || 0),
       itemImages: items.filter(item => item.type === 'item').map(item => item.images?.length || 0)
     })
