@@ -3,7 +3,7 @@ import { getSupabaseClient } from '@/lib/supabase-db'
 export default async function TestSupabase() {
     let connectionStatus = 'error'
     let bucketsStatus = 'error'
-    let bucketsList = []
+    let bucketsList: any[] = []
     
     try {
         // Probar conexión básica
