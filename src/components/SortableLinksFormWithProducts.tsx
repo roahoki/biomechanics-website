@@ -33,9 +33,11 @@ export function SortableLinksFormWithProducts({
     socialIcons,
     backgroundColor,
     backgroundSettings,
-    styleSettings
+    styleSettings,
+    categories
 }: {
     links: any[]
+    categories: string[]
     title?: string
     description: string
     profileImage: string
@@ -490,6 +492,15 @@ export function SortableLinksFormWithProducts({
                                             onToggleVisibility={toggleVisibility}
                                             linkCardBackgroundColor={linkCardBackgroundColor}
                                             linkCardTextColor={linkCardTextColor}
+                                            availableCategories={categories}
+                                            onUpdateLinkCategories={(linkId: number, newCategories: string[]) => {
+                                                const updatedLinks = currentLinks.map(link => 
+                                                    link.id === linkId 
+                                                        ? { ...link, categories: newCategories }
+                                                        : link
+                                                )
+                                                setCurrentLinks(updatedLinks)
+                                            }}
                                         />
                                     </div>
                                 </div>

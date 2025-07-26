@@ -7,6 +7,8 @@ import Image from 'next/image'
 import { ProductModal } from '@/components/ProductModal'
 import { ItemModal } from '@/components/ItemModal'
 import { PressablesList } from '@/components/PressablesList'
+import CategoryFilter from '@/components/CategoryFilter'
+import { useCategoryFilter } from '@/hooks/useCategoryFilter'
 import { useState, useEffect } from 'react'
 
 export default function Page() {
@@ -14,6 +16,14 @@ export default function Page() {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
     const [selectedItem, setSelectedItem] = useState<Item | null>(null)
     const [loading, setLoading] = useState(true)
+
+    // Filtrado por categorías
+    const {
+        filteredItems,
+        categoriesWithItems,
+        selectedCategory,
+        setSelectedCategory
+    } = useCategoryFilter(linksData?.links || [], linksData?.categories || [])
 
     useEffect(() => {
         async function loadData() {
@@ -34,7 +44,8 @@ export default function Page() {
                     socialIcons: {},
                     backgroundColor: "#1a1a1a",
                     backgroundSettings: { type: 'color', color: "#1a1a1a", imageOpacity: 0.5 },
-                    styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" }
+                    styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" },
+                    categories: []
                 })
             } finally {
                 setLoading(false)
@@ -189,40 +200,53 @@ export default function Page() {
                 {socialIcons && Object.keys(socialIcons).length > 0 && (
                     <div className="flex gap-6 mb-8">
                         {socialIcons.instagram && socialIcons.instagram.url && (
-                            <SocialIcon 
-                                icon="instagram" 
-                                url={socialIcons.instagram.url} 
-                                color={socialIcons.instagram.color || '#E4405F'} 
+                            <SocialIcon
+                                icon="instagram"
+                                url={socialIcons.instagram.url}
+                                color={socialIcons.instagram.color || '#E4405F'}
                             />
                         )}
                         {socialIcons.soundcloud && socialIcons.soundcloud.url && (
-                            <SocialIcon 
-                                icon="soundcloud" 
-                                url={socialIcons.soundcloud.url} 
-                                color={socialIcons.soundcloud.color || '#FF5500'} 
+                            <SocialIcon
+                                icon="soundcloud"
+                                url={socialIcons.soundcloud.url}
+                                color={socialIcons.soundcloud.color || '#FF5500'}
                             />
                         )}
                         {socialIcons.youtube && socialIcons.youtube.url && (
-                            <SocialIcon 
-                                icon="youtube" 
-                                url={socialIcons.youtube.url} 
-                                color={socialIcons.youtube.color || '#FF0000'} 
+                            <SocialIcon
+                                icon="youtube"
+                                url={socialIcons.youtube.url}
+                                color={socialIcons.youtube.color || '#FF0000'}
                             />
                         )}
                         {socialIcons.tiktok && socialIcons.tiktok.url && (
-                            <SocialIcon 
-                                icon="tiktok" 
-                                url={socialIcons.tiktok.url} 
-                                color={socialIcons.tiktok.color || '#000000'} 
+                            <SocialIcon
+                                icon="tiktok"
+                                url={socialIcons.tiktok.url}
+                                color={socialIcons.tiktok.color || '#000000'}
                             />
                         )}
                     </div>
                 )}
 
+                {/* Filtro de categorías */}
+                {categoriesWithItems.length > 1 && (
+                    <div className="w-full max-w-4xl mb-8">
+                        <CategoryFilter
+                            categories={categoriesWithItems}
+                            selectedCategory={selectedCategory}
+                            onCategoryChange={setSelectedCategory}
+                        />
+                    </div>
+                )}
+
+
+
                 {/* Lista unificada de presionables (links + productos + items) */}
-                {Array.isArray(links) && links.length > 0 && (
+                {Array.isArray(filteredItems) && filteredItems.length > 0 && (
                     <PressablesList
-                        items={links}
+                        items={filteredItems}
                         styleSettings={styleSettings || { 
                             titleColor: '#ffffff', 
                             linkCardBackgroundColor: '#ffffff', 

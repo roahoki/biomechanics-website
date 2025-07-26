@@ -1,16 +1,19 @@
 'use client'
 
-import { useState } from 'react'
-import { ImageCarousel } from '@/components/ImageCarousel'
+import { useState, useEffect } from 'react'
 import { Product } from '@/types/product'
+import { ImageCarousel } from './ImageCarousel'
+import { TrashIcon, PlusIcon, PhotoIcon } from '@heroicons/react/24/outline'
+import CategorySelector from '@/components/CategorySelector'
 
 interface ProductFormProps {
     product?: Product
+    availableCategories: string[]
     onUpdate: (product: Partial<Product>) => void
     onRemove: () => void
 }
 
-export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
+export function ProductForm({ product, availableCategories, onUpdate, onRemove }: ProductFormProps) {
     const [errors, setErrors] = useState<Record<string, string>>({})
 
     // Estados locales para los campos
@@ -20,6 +23,7 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
     const [paymentLink, setPaymentLink] = useState(product?.paymentLink || '')
     const [description, setDescription] = useState(product?.description || '')
     const [images, setImages] = useState<string[]>(product?.images || [])
+    const [categories, setCategories] = useState<string[]>(product?.categories || [])
 
     // Validaciones
     const validateField = (field: string, value: any) => {
@@ -136,6 +140,11 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
         setImages(newImages)
         validateField('images', newImages)
         onUpdate({ images: newImages })
+    }
+
+    const handleCategoriesChange = (newCategories: string[]) => {
+        setCategories(newCategories)
+        onUpdate({ categories: newCategories })
     }
 
     // Verificar si el producto está completo
@@ -303,6 +312,22 @@ export function ProductForm({ product, onUpdate, onRemove }: ProductFormProps) {
                         )}
                         <p className="text-xs text-gray-500 ml-auto">{description.length}/1000</p>
                     </div>
+                </div>
+
+                {/* Categorías */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Categorías
+                    </label>
+                    <CategorySelector
+                        availableCategories={availableCategories}
+                        selectedCategories={categories}
+                        onChange={handleCategoriesChange}
+                        placeholder="Seleccionar categorías..."
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                        Las categorías permiten filtrar el contenido en la página principal
+                    </p>
                 </div>
             </div>
 

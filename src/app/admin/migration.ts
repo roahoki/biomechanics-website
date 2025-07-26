@@ -65,7 +65,8 @@ const initialConfig: LinksData = {
     titleColor: "#dbdb00",
     linkCardBackgroundColor: "#0e0c18",
     linkCardTextColor: "#cccccc"
-  }
+  },
+  categories: ["Música", "Tienda", "Eventos", "Prensa", "Posts"]
 };
 
 export async function migrateJsonToSupabase() {

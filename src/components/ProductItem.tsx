@@ -1,15 +1,17 @@
 'use client'
 
 import { ImageCarousel } from './ImageCarousel'
+import CategorySelector from './CategorySelector'
 import { Product } from '@/types/product'
 
 interface ProductItemProps {
     product: Product
+    availableCategories: string[]
     onUpdate: (id: number, updatedProduct: Partial<Product>) => void
     onRemove: (id: number) => void
 }
 
-export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
+export function ProductItem({ product, availableCategories, onUpdate, onRemove }: ProductItemProps) {
     // Formatear precio para input
     const formatPriceForInput = (price: number) => {
         return price === 0 ? '' : price.toString()
@@ -143,6 +145,22 @@ export function ProductItem({ product, onUpdate, onRemove }: ProductItemProps) {
                 <div className="text-xs text-gray-400 mt-1">
                     {product.description.length}/1000 caracteres
                 </div>
+            </div>
+
+            {/* Categorías */}
+            <div>
+                <label className="block text-sm font-medium text-gray-200 mb-1">
+                    Categorías
+                </label>
+                <CategorySelector
+                    availableCategories={availableCategories}
+                    selectedCategories={product.categories || []}
+                    onChange={(categories) => onUpdate(product.id, { categories })}
+                    placeholder="Seleccionar categorías..."
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                    Las categorías permiten filtrar el contenido en la página principal
+                </p>
             </div>
 
             {/* Validación visual */}

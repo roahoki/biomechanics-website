@@ -39,6 +39,7 @@ export interface StyleSettings {
 
 export interface LinksData {
   links: LinkItem[]
+  categories: string[]
   title?: string
   description: string
   profileImage: string
@@ -51,6 +52,7 @@ export interface LinksData {
 
 const DEFAULT_LINKS_DATA: LinksData = {
   links: [],
+  categories: ["Música", "Tienda", "Eventos", "Prensa", "Posts"],
   title: "biomechanics.wav",
   description: "biomechanics.wav",
   profileImage: "/ghost.jpg", // URL a una imagen por defecto
@@ -111,15 +113,23 @@ function transformDataFromSupabase(data: any): LinksData {
   
   // Si los datos ya están en el formato correcto
   if (typeof data === 'object' && 'links' in data) {
-    return {
+    const transformedData = {
       ...DEFAULT_LINKS_DATA,
       ...data,
     };
+    
+    // Migración: agregar categorías por defecto si no existen
+    if (!transformedData.categories) {
+      transformedData.categories = ["Música", "Tienda", "Eventos", "Prensa", "Posts"];
+    }
+    
+    return transformedData;
   }
   
   // Si los datos están en el formato antiguo (items en lugar de links)
-  return {
+  const migratedData = {
     links: data.items || [],
+    categories: data.categories || ["Música", "Tienda", "Eventos", "Prensa", "Posts"],
     title: data.title || DEFAULT_LINKS_DATA.title,
     description: data.description || DEFAULT_LINKS_DATA.description,
     profileImage: data.profileImage || DEFAULT_LINKS_DATA.profileImage,
@@ -129,4 +139,43 @@ function transformDataFromSupabase(data: any): LinksData {
     backgroundSettings: data.backgroundSettings || DEFAULT_LINKS_DATA.backgroundSettings,
     styleSettings: data.styleSettings || DEFAULT_LINKS_DATA.styleSettings
   };
+  
+  return migratedData;
+}
+
+// Función para actualizar solo las categorías en Supabase
+export async function updateCategoriesInSupabase(categories: string[]): Promise<boolean> {
+  try {
+    const supabase = getSupabaseClient();
+    
+    // Obtener datos actuales
+    const { data: currentData } = await supabase
+      .from('site_settings')
+      .select('data')
+      .eq('key', 'links_data')
+      .single();
+    
+    // Actualizar solo las categorías
+    const updatedData = {
+      ...currentData?.data,
+      categories
+    };
+    
+    const { error } = await supabase
+      .from('site_settings')
+      .upsert({
+        key: 'links_data',
+        data: updatedData
+      });
+    
+    if (error) {
+      console.error('Error updating categories:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error updating categories in Supabase:', error);
+    return false;
+  }
 }

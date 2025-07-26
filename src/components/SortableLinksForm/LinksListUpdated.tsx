@@ -5,11 +5,13 @@ import { LinkItem, Product, Item, Link } from '@/types/product'
 
 interface LinksListProps {
     currentLinks: LinkItem[]
+    availableCategories: string[]
     onAddNewLink: () => void
     onAddNewProduct: () => void
     onAddNewItem: () => void
     onRemoveLink: (id: number) => void
     onUpdateLink: (id: number, field: 'url' | 'label', value: string) => void
+    onUpdateLinkCategories: (id: number, categories: string[]) => void
     onUpdateProduct: (id: number, updatedProduct: Partial<Product>) => void
     onUpdateItem: (id: number, updatedItem: Partial<Item>) => void
     onReorderLinks: (newOrder: LinkItem[]) => void
@@ -20,11 +22,13 @@ interface LinksListProps {
 
 export function LinksListUpdated({ 
     currentLinks,
+    availableCategories,
     onAddNewLink,
     onAddNewProduct,
     onAddNewItem,
     onRemoveLink,
     onUpdateLink,
+    onUpdateLinkCategories,
     onUpdateProduct,
     onUpdateItem,
     onReorderLinks,
@@ -147,8 +151,10 @@ export function LinksListUpdated({
                                 <LinkCard
                                     key={item.id}
                                     link={item as Link}
+                                    availableCategories={availableCategories}
                                     onRemove={() => onRemoveLink(item.id)}
                                     onUpdate={(id, field, value) => onUpdateLink(id, field, value)}
+                                    onUpdateCategories={(id, categories) => onUpdateLinkCategories(id, categories)}
                                     linkCardBackgroundColor={linkCardBackgroundColor}
                                     linkCardTextColor={linkCardTextColor}
                                 />
@@ -156,6 +162,7 @@ export function LinksListUpdated({
                                 <ProductItem
                                     key={item.id}
                                     product={item as Product}
+                                    availableCategories={availableCategories}
                                     onUpdate={(id, updatedProduct) => onUpdateProduct(id, updatedProduct)}
                                     onRemove={() => onRemoveLink(item.id)}
                                 />
@@ -163,6 +170,7 @@ export function LinksListUpdated({
                                 <ItemForm
                                     key={item.id}
                                     item={item as Item}
+                                    availableCategories={availableCategories}
                                     onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
                                     onRemove={() => onRemoveLink(item.id)}
                                 />

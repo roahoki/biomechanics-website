@@ -21,5 +21,10 @@ export { ItemForm } from './ItemForm'
 export { ItemCard } from './ItemCard'
 export { ItemModal } from './ItemModal'
 
+// Componentes de categorías
+export { default as CategorySelector } from './CategorySelector'
+export { default as CategoryManager } from './CategoryManager'
+export { default as CategoryFilter } from './CategoryFilter'
+
 // Componente principal con productos
 export { SortableLinksFormWithProducts } from './SortableLinksFormWithProducts'
