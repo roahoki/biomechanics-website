@@ -27,6 +27,7 @@ export default function Page() {
                 // Proporcionar datos mínimos para que la página se renderice
                 setLinksData({
                     links: [],
+                    title: "biomechanics.wav",
                     description: "biomechanics.wav",
                     profileImage: "/ghost.jpg", 
                     profileImageType: "image",
@@ -171,17 +172,15 @@ export default function Page() {
                 {renderAvatar()}
 
                 {/* Nombre */}
-                <h1
+                <h1 
                     className="text-4xl font-display tracking-wide mb-2"
                     style={{ 
                         fontFamily: 'Space Grotesk, sans-serif',
                         color: styleSettings?.titleColor || '#ffffff'
                     }}
                 >
-                    biomechanics.wav
-                </h1>
-
-                {/* Descripción */}
+                    {linksData.title || "biomechanics.wav"}
+                </h1>                {/* Descripción */}
                 <p className="text-center text-lg mb-6 max-w-2xl">
                     {description}
                 </p>

@@ -39,6 +39,7 @@ export interface StyleSettings {
 
 export interface LinksData {
   links: LinkItem[]
+  title?: string
   description: string
   profileImage: string
   profileImageType: ProfileImageType
@@ -50,6 +51,7 @@ export interface LinksData {
 
 const DEFAULT_LINKS_DATA: LinksData = {
   links: [],
+  title: "biomechanics.wav",
   description: "biomechanics.wav",
   profileImage: "/ghost.jpg", // URL a una imagen por defecto
   profileImageType: "image",
@@ -118,6 +120,7 @@ function transformDataFromSupabase(data: any): LinksData {
   // Si los datos están en el formato antiguo (items en lugar de links)
   return {
     links: data.items || [],
+    title: data.title || DEFAULT_LINKS_DATA.title,
     description: data.description || DEFAULT_LINKS_DATA.description,
     profileImage: data.profileImage || DEFAULT_LINKS_DATA.profileImage,
     profileImageType: data.profileImageType || DEFAULT_LINKS_DATA.profileImageType,

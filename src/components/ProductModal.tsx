@@ -242,11 +242,6 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                                 </p>
                                             )}
 
-                                            {/* Precio */}
-                                            <div className="text-3xl md:text-4xl font-bold text-gray-900 text-center md:text-left">
-                                                {formatPrice(product.price)}
-                                            </div>
-
                                             {/* Descripción */}
                                             {product.description && (
                                                 <div className="text-gray-600">
@@ -259,23 +254,30 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
 
                                         {/* Botón de comprar - desktop */}
                                         <div className="hidden md:block">
-                                            <a
-                                                href={product.paymentLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="w-full inline-flex items-center justify-center px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 text-white shadow-lg hover:shadow-xl"
-                                                style={{ 
-                                                    backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35'
-                                                }}
-                                                onMouseOver={(e) => {
-                                                    e.currentTarget.style.filter = 'brightness(110%)'
-                                                }}
-                                                onMouseOut={(e) => {
-                                                    e.currentTarget.style.filter = 'brightness(100%)'
-                                                }}
-                                            >
-                                                COMPRAR AHORA
-                                            </a>
+                                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                                                <div className="text-left">
+                                                    <span className="text-2xl font-bold text-gray-900">
+                                                        {formatPrice(product.price)}
+                                                    </span>
+                                                </div>
+                                                <a
+                                                    href={product.paymentLink}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white shadow-lg hover:shadow-xl"
+                                                    style={{ 
+                                                        backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35'
+                                                    }}
+                                                    onMouseOver={(e) => {
+                                                        e.currentTarget.style.filter = 'brightness(110%)'
+                                                    }}
+                                                    onMouseOut={(e) => {
+                                                        e.currentTarget.style.filter = 'brightness(100%)'
+                                                    }}
+                                                >
+                                                    COMPRAR AHORA
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

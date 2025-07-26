@@ -26,6 +26,7 @@ import { PreviewModalUpdated } from '@/components/SortableLinksForm/PreviewModal
 
 export function SortableLinksFormWithProducts({
     links,
+    title,
     description,
     profileImage,
     profileImageType,
@@ -35,6 +36,7 @@ export function SortableLinksFormWithProducts({
     styleSettings
 }: {
     links: any[]
+    title?: string
     description: string
     profileImage: string
     profileImageType: ProfileImageType
@@ -153,7 +155,8 @@ export function SortableLinksFormWithProducts({
         setCurrentLinks(convertedLinks)
     }, [links])
 
-    // Descripción local
+    // Estados locales
+    const [localTitle, setLocalTitle] = useState(title || "biomechanics.wav")
     const [localDescription, setLocalDescription] = useState(description)
 
     // Manejadores de archivo
@@ -297,6 +300,7 @@ export function SortableLinksFormWithProducts({
 
             // Preparar datos actualizados con las URLs finales
             const updatedData = {
+                title: localTitle,
                 description: localDescription,
                 profileImage: finalProfileImage,
                 profileImageType: finalProfileImageType,
@@ -392,10 +396,29 @@ export function SortableLinksFormWithProducts({
                                     <FileInfo selectedFile={selectedFile} previewType={previewType} />
                                 </div>
 
+                                {/* Título */}
+                                <div>
+                                    <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
+                                        Título de la página
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="title"
+                                        value={localTitle}
+                                        onChange={(e) => setLocalTitle(e.target.value.slice(0, 65))}
+                                        maxLength={65}
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="biomechanics.wav"
+                                    />
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        {localTitle.length}/65 caracteres
+                                    </div>
+                                </div>
+
                                 {/* Descripción */}
                                 <div>
                                     <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">
-                                        Descripción/Título
+                                        Descripción/Subtítulo
                                     </label>
                                     <input
                                         type="text"
@@ -498,6 +521,7 @@ export function SortableLinksFormWithProducts({
                     previewUrl={previewUrl}
                     previewType={previewType}
                     titleColor={titleColor}
+                    title={localTitle}
                     description={localDescription}
                     socialIconColors={socialIconColors}
                     socialIcons={socialIcons}
