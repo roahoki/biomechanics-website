@@ -16,6 +16,7 @@ interface PreviewModalProps {
     previewUrl: string
     previewType: ProfileImageType
     titleColor: string
+    title?: string
     description: string
     socialIconColors: {
         instagram: string
@@ -41,6 +42,7 @@ export function PreviewModalUpdated({
     previewUrl,
     previewType,
     titleColor,
+    title,
     description,
     socialIconColors,
     socialIcons,
@@ -240,7 +242,7 @@ export function PreviewModalUpdated({
                                             fontFamily: 'Space Grotesk, sans-serif'
                                         }}
                                     >
-                                        biomechanics.wav
+                                        {title || "biomechanics.wav"}
                                     </h1>
 
                                     {/* Description */}
