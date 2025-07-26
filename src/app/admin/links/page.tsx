@@ -3,13 +3,17 @@
 import { useEffect, useState } from 'react'
 import { SortableLinksFormWithProducts as SortableLinksForm } from "@/components/SortableLinksFormWithProducts"
 import CategoryManagerCompact from "@/components/CategoryManagerCompact"
+import ListView from "@/components/ListView"
 import { checkAdminPermissions } from "../check-permissions"
 import { getLinksData } from '@/utils/links'
+import { LinkItem } from '@/types/product'
 
 export default function AdminSortableLinks() {
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [hasPermissions, setHasPermissions] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [isSaving, setIsSaving] = useState(false)
 
     useEffect(() => {
         async function loadData() {
