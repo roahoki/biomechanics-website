@@ -125,19 +125,14 @@ export default function Page() {
             imageOpacity: 0.5 
         };
         
-        // Verificar si es una imagen y tiene URL
-        if (settings.type === 'image' && 'imageUrl' in settings && settings.imageUrl) {
-            return {
-                backgroundImage: `url(${settings.imageUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                position: "relative" as const,
-            }
-        } else {
+        // Solo aplicar backgroundColor para color sólido
+        // Las imágenes se manejan con una capa fija separada
+        if (settings.type === 'color' || !('imageUrl' in settings) || !settings.imageUrl) {
             return {
                 backgroundColor: (settings.color || backgroundColor || "var(--color-neutral-base)"),
             }
+        } else {
+            return {}
         }
     }
 
@@ -148,20 +143,23 @@ export default function Page() {
 
     // Vista de solo lectura para usuarios comunes
     return (
-        <div
-            className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body select-none"
+        <div 
+            className="relative min-h-screen"
             style={{
-                ...backgroundStyle,
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
-                WebkitTouchCallout: 'none',
-                msUserSelect: 'none'
+                // Aplicar el fondo directamente aquí
+                ...(hasImageBackground ? {
+                    backgroundImage: `url(${backgroundSettings?.imageUrl})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    backgroundAttachment: "fixed"
+                } : backgroundStyle)
             }}
         >
             {/* Overlay de opacidad para imagen de fondo */}
             {hasImageBackground && (
                 <div 
-                    className="absolute inset-0 bg-black select-none"
+                    className="fixed inset-0 bg-black select-none"
                     style={{ 
                         opacity: 1 - (backgroundSettings?.imageOpacity || 0.5),
                         zIndex: 0,
@@ -173,9 +171,18 @@ export default function Page() {
                     }}
                 />
             )}
-            
-            {/* Contenido principal */}
-            <div className={`relative ${hasImageBackground ? 'z-10' : ''} flex flex-col items-center`}>
+
+            {/* Contenedor de contenido */}
+            <div
+                className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body select-none relative"
+                style={{
+                    zIndex: 1,
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTouchCallout: 'none',
+                    msUserSelect: 'none'
+                }}
+            >
                 {/* Avatar dinámico */}
                 {renderAvatar()}
 
@@ -229,11 +236,12 @@ export default function Page() {
 
                 {/* Filtro de categorías */}
                 {categoriesWithItems.length > 1 && (
-                    <div className="w-full max-w-4xl mb-8">
+                    <div className="w-full max-w-4xl mb-8 flex justify-center">
                         <CategoryFilter
                             categories={categoriesWithItems}
                             selectedCategory={selectedCategory}
                             onCategoryChange={setSelectedCategory}
+                            className="w-full lg:w-auto"
                         />
                     </div>
                 )}

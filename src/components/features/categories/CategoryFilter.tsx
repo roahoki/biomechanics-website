@@ -33,7 +33,7 @@ export default function CategoryFilter({
       {/* Contenedor scrolleable */}
       <div
         id="category-filter-container"
-        className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2"
+        className="flex justify-start lg:justify-center space-x-3 lg:space-x-4 overflow-x-auto scrollbar-hide pb-2 px-4 lg:px-0"
         style={{
           scrollbarWidth: 'none', /* Firefox */
           msOverflowStyle: 'none', /* Internet Explorer 10+ */
@@ -48,13 +48,13 @@ export default function CategoryFilter({
               key={category}
               onClick={() => onCategoryChange(category)}
               className={`
-                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-                border-2 backdrop-blur-md
+                flex-shrink-0 px-6 py-3 rounded-full text-sm lg:text-base font-medium transition-all duration-200
+                border-2 backdrop-blur-md min-w-fit whitespace-nowrap
                 ${isSelected
                   ? isEverything
-                    ? 'bg-white/20 border-white text-white shadow-lg'
-                    : 'bg-white/20 border-white text-white shadow-lg'
-                  : 'bg-white/10 border-white/30 text-white/80 hover:bg-white/15 hover:border-white/50 hover:text-white'
+                    ? 'bg-white/20 border-white text-white shadow-lg transform scale-105'
+                    : 'bg-white/20 border-white text-white shadow-lg transform scale-105'
+                  : 'bg-white/10 border-white/30 text-white/80 hover:bg-white/15 hover:border-white/50 hover:text-white hover:scale-105'
                 }
               `}
             >
