@@ -1,7 +1,7 @@
 'use server'
 
 import { getSupabaseClient } from '@/lib/supabase-db'
-import { checkAdminPermissions } from './check-permissions'
+import { checkAdminPermissions } from '../check-permissions'
 
 export async function addCategoriesToExistingData() {
   try {
