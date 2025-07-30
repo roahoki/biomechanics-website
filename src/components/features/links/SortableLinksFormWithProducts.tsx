@@ -14,15 +14,15 @@ import { useColorConfig } from '@/hooks/useColorConfig'
 import { useFormState } from '@/hooks/useFormState'
 
 // Componentes
-import { AvatarUpload } from '@/components/AvatarUpload'
-import { FileInfo } from '@/components/FileInfo'
-import { SocialIconsConfig } from '@/components/SocialIconsConfig'
-import { BackgroundConfig } from '@/components/BackgroundConfig'
-import { StyleConfig } from '@/components/StyleConfig'
-import { LinksListUpdated } from '@/components/SortableLinksForm/LinksListUpdated'
-import { DeleteModal } from '@/components/SortableLinksForm/DeleteModal'
-import { ActionButtons } from '@/components/SortableLinksForm/ActionButtons'
-import { PreviewModalUpdated } from '@/components/SortableLinksForm/PreviewModalUpdated'
+import { AvatarUpload } from '../../common/forms/AvatarUpload'
+import { FileInfo } from '../../common/ui/FileInfo'
+import { SocialIconsConfig } from '../profile/SocialIconsConfig'
+import { BackgroundConfig } from '../profile/BackgroundConfig'
+import { StyleConfig } from '../profile/StyleConfig'
+import { LinksListUpdated } from './SortableLinksForm/LinksListUpdated'
+import { DeleteModal } from './SortableLinksForm/DeleteModal'
+import { ActionButtons } from './SortableLinksForm/ActionButtons'
+import { PreviewModalUpdated } from './SortableLinksForm/PreviewModalUpdated'
 
 export function SortableLinksFormWithProducts({
     links,

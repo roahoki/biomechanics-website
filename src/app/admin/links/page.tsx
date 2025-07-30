@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { SortableLinksFormWithProducts as SortableLinksForm } from "@/components/SortableLinksFormWithProducts"
-import CategoryManagerCompact from "@/components/CategoryManagerCompact"
-import ListView from "@/components/ListView"
+import { SortableLinksFormWithProducts as SortableLinksForm } from "@/components"
+import { CategoryManagerCompact, ListView } from "@/components"
 import { checkAdminPermissions } from "../check-permissions"
 import { getLinksData } from '@/utils/links'
 import { LinkItem } from '@/types/product'

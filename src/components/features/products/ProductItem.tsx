@@ -1,7 +1,7 @@
 'use client'
 
-import { ImageCarousel } from './ImageCarousel'
-import CategorySelector from './CategorySelector'
+import { ImageCarousel } from '../../common/media/ImageCarousel'
+import CategorySelector from '../categories/CategorySelector'
 import { Product } from '@/types/product'
 
 interface ProductItemProps {

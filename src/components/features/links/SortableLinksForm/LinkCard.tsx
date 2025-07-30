@@ -1,4 +1,4 @@
-import CategorySelector from '../CategorySelector'
+import CategorySelector from '../../categories/CategorySelector'
 
 interface Link {
     id: number

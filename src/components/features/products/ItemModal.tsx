@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Product } from '@/types/product'
+import { Item } from '@/types/product'
 import { StyleSettings } from '@/utils/links'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
-import { ZoomableImage } from '@/components/ZoomableImage'
+import { ImageCarousel } from '@/components/common/media/ImageCarousel'
+import { ZoomableImage } from '@/components/common/media/ZoomableImage'
 
-interface ProductModalProps {
-    product: Product | null
+interface ItemModalProps {
+    item: Item | null
     isOpen: boolean
     onClose: () => void
     styleSettings?: StyleSettings
 }
 
-export function ProductModal({ product, isOpen, onClose, styleSettings }: ProductModalProps) {
+export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [isClient, setIsClient] = useState(false)
 
@@ -30,10 +31,10 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
         threshold: 50
     })
 
-    // Resetear index al cambiar producto
+    // Resetear index al cambiar item
     useEffect(() => {
         setCurrentImageIndex(0)
-    }, [product?.id])
+    }, [item?.id])
 
     // Cerrar modal con ESC y prevenir scroll del body
     useEffect(() => {
@@ -45,17 +46,17 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
 
         // Navegación con teclado para el carrusel
         const handleArrowKeys = (e: KeyboardEvent) => {
-            if (!product?.images || product.images.length <= 1) return
+            if (!item?.images || item.images.length <= 1) return
             
             if (e.key === 'ArrowLeft') {
                 e.preventDefault()
                 setCurrentImageIndex(prev => 
-                    prev === 0 ? product.images.length - 1 : prev - 1
+                    prev === 0 ? item.images.length - 1 : prev - 1
                 )
             } else if (e.key === 'ArrowRight') {
                 e.preventDefault()
                 setCurrentImageIndex(prev => 
-                    prev === product.images.length - 1 ? 0 : prev + 1
+                    prev === item.images.length - 1 ? 0 : prev + 1
                 )
             }
         }
@@ -71,7 +72,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
             document.removeEventListener('keydown', handleArrowKeys)
             document.body.style.overflow = 'unset'
         }
-    }, [isOpen, onClose, product?.images])
+    }, [isOpen, onClose, item?.images])
 
     // Formatear precio
     const formatPrice = (price: number) => {
@@ -83,7 +84,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
         }).format(price).replace('CLP', '').trim()
     }
 
-    if (!product) return null
+    if (!item) return null
 
     return (
         <AnimatePresence>
@@ -145,23 +146,23 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                 <div className="md:grid md:grid-cols-2 md:gap-8 space-y-6 md:space-y-0">
                                     {/* Carrusel de imágenes */}
                                     <div className="md:order-1">
-                                        {product.images && product.images.length > 0 ? (
+                                        {item.images && item.images.length > 0 ? (
                                             <div className="relative">
                                                 {/* Imagen principal */}
                                                 <div className="w-full aspect-square md:aspect-auto md:h-96 rounded-lg overflow-hidden bg-gray-100">
                                                     <ZoomableImage
-                                                        src={product.images[currentImageIndex]}
-                                                        alt={product.title}
+                                                        src={item.images[currentImageIndex]}
+                                                        alt={item.title}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </div>
 
                                                 {/* Navegación del carrusel */}
-                                                {product.images.length > 1 && (
+                                                {item.images.length > 1 && (
                                                     <>
                                                         <button
                                                             onClick={() => setCurrentImageIndex(
-                                                                currentImageIndex === 0 ? product.images.length - 1 : currentImageIndex - 1
+                                                                currentImageIndex === 0 ? item.images.length - 1 : currentImageIndex - 1
                                                             )}
                                                             className="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
                                                         >
@@ -171,7 +172,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                                         </button>
                                                         <button
                                                             onClick={() => setCurrentImageIndex(
-                                                                currentImageIndex === product.images.length - 1 ? 0 : currentImageIndex + 1
+                                                                currentImageIndex === item.images.length - 1 ? 0 : currentImageIndex + 1
                                                             )}
                                                             className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
                                                         >
@@ -182,7 +183,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
 
                                                         {/* Indicadores */}
                                                         <div className="flex justify-center mt-4 space-x-1">
-                                                            {product.images.map((_, index) => (
+                                                            {item.images.map((_, index) => (
                                                                 <button
                                                                     key={index}
                                                                     onClick={() => setCurrentImageIndex(index)}
@@ -197,7 +198,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
 
                                                         {/* Thumbnails en desktop */}
                                                         <div className="hidden md:flex mt-4 space-x-2 overflow-x-auto">
-                                                            {product.images.map((image, index) => (
+                                                            {item.images.map((image, index) => (
                                                                 <button
                                                                     key={index}
                                                                     onClick={() => setCurrentImageIndex(index)}
@@ -209,7 +210,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                                                 >
                                                                     <img
                                                                         src={image}
-                                                                        alt={`${product.title} ${index + 1}`}
+                                                                        alt={`${item.title} ${index + 1}`}
                                                                         className="w-full h-full object-cover"
                                                                     />
                                                                 </button>
@@ -227,78 +228,73 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                         )}
                                     </div>
 
-                                    {/* Información del producto */}
+                                    {/* Información del item */}
                                     <div className="md:order-2 md:flex md:flex-col md:justify-between space-y-6">
                                         <div className="space-y-4">
                                             {/* Título */}
                                             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center md:text-left">
-                                                {product.title || 'Producto sin título'}
+                                                {item.title || 'Item sin título'}
                                             </h2>
 
                                             {/* Subtítulo */}
-                                            {product.subtitle && (
+                                            {item.subtitle && (
                                                 <p className="text-lg md:text-xl text-gray-600 text-center md:text-left">
-                                                    {product.subtitle}
+                                                    {item.subtitle}
                                                 </p>
                                             )}
 
+                                            {/* Precio (solo si es visible) */}
+                                            {item.priceVisible && item.price > 0 && (
+                                                <div className="text-2xl md:text-3xl font-bold text-gray-900 text-center md:text-left">
+                                                    {formatPrice(item.price)}
+                                                </div>
+                                            )}
+
                                             {/* Descripción */}
-                                            {product.description && (
+                                            {item.description && (
                                                 <div className="text-gray-600">
                                                     <p className="leading-relaxed whitespace-pre-wrap">
-                                                        {product.description}
+                                                        {item.description}
                                                     </p>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Botón de comprar - desktop */}
+                                        {/* Botón de acción - desktop */}
                                         <div className="hidden md:block">
-                                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-                                                <div className="text-left">
-                                                    <span className="text-2xl font-bold text-gray-900">
-                                                        {formatPrice(product.price)}
-                                                    </span>
-                                                </div>
-                                                <a
-                                                    href={product.paymentLink}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white shadow-lg hover:shadow-xl"
-                                                    style={{ 
-                                                        backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35'
-                                                    }}
-                                                    onMouseOver={(e) => {
-                                                        e.currentTarget.style.filter = 'brightness(110%)'
-                                                    }}
-                                                    onMouseOut={(e) => {
-                                                        e.currentTarget.style.filter = 'brightness(100%)'
-                                                    }}
-                                                >
-                                                    COMPRAR AHORA
-                                                </a>
-                                            </div>
+                                            <a
+                                                href={item.paymentLink}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="w-full inline-flex items-center justify-center px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 text-white shadow-lg hover:shadow-xl"
+                                                style={{ 
+                                                    backgroundColor: styleSettings?.itemButtonColor || '#3b82f6'
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.filter = 'brightness(110%)'
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.filter = 'brightness(100%)'
+                                                }}
+                                            >
+                                                {item.buttonText || 'Ver más'}
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        {/* Footer fijo con precio y botón - solo móvil */}
+                        {/* Footer fijo con botón - solo móvil */}
                         <div className="md:hidden flex-shrink-0 p-4 border-t border-gray-200 bg-white">
-                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-                                <div className="text-left">
-                                    <span className="text-2xl font-bold text-gray-900">
-                                        {formatPrice(product.price)}
-                                    </span>
-                                </div>
+                            <div className="flex items-center justify-center">
                                 <a
-                                    href={product.paymentLink}
+                                    href={item.paymentLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white shadow-lg hover:shadow-xl"
+                                    className="w-full max-w-md px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white shadow-lg hover:shadow-xl text-center"
                                     style={{ 
-                                        backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35'
+                                        backgroundColor: styleSettings?.itemButtonColor || '#3b82f6'
                                     }}
                                     onMouseOver={(e) => {
                                         e.currentTarget.style.filter = 'brightness(110%)'
@@ -307,7 +303,7 @@ export function ProductModal({ product, isOpen, onClose, styleSettings }: Produc
                                         e.currentTarget.style.filter = 'brightness(100%)'
                                     }}
                                 >
-                                    COMPRAR
+                                    {item.buttonText || 'Ver más'}
                                 </a>
                             </div>
                         </div>

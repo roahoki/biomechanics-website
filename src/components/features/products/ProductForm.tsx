@@ -1,32 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Item } from '@/types/product'
-import { ImageCarousel } from './ImageCarousel'
+import { Product } from '@/types/product'
+import { ImageCarousel } from '../../common/media/ImageCarousel'
 import { TrashIcon, PlusIcon, PhotoIcon } from '@heroicons/react/24/outline'
-import CategorySelector from '@/components/CategorySelector'
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import CategorySelector from '../categories/CategorySelector'
 
-interface ItemFormProps {
-    item?: Item
+interface ProductFormProps {
+    product?: Product
     availableCategories: string[]
-    onUpdate: (item: Partial<Item>) => void
+    onUpdate: (product: Partial<Product>) => void
     onRemove: () => void
 }
 
-export function ItemForm({ item, availableCategories, onUpdate, onRemove }: ItemFormProps) {
+export function ProductForm({ product, availableCategories, onUpdate, onRemove }: ProductFormProps) {
     const [errors, setErrors] = useState<Record<string, string>>({})
 
     // Estados locales para los campos
-    const [title, setTitle] = useState(item?.title || '')
-    const [subtitle, setSubtitle] = useState(item?.subtitle || '')
-    const [price, setPrice] = useState(item?.price?.toString() || '')
-    const [priceVisible, setPriceVisible] = useState(item?.priceVisible ?? true)
-    const [buttonText, setButtonText] = useState(item?.buttonText || 'Ver más')
-    const [paymentLink, setPaymentLink] = useState(item?.paymentLink || '')
-    const [description, setDescription] = useState(item?.description || '')
-    const [images, setImages] = useState<string[]>(item?.images || [])
-    const [categories, setCategories] = useState<string[]>(item?.categories || [])
+    const [title, setTitle] = useState(product?.title || '')
+    const [subtitle, setSubtitle] = useState(product?.subtitle || '')
+    const [price, setPrice] = useState(product?.price?.toString() || '')
+    const [paymentLink, setPaymentLink] = useState(product?.paymentLink || '')
+    const [description, setDescription] = useState(product?.description || '')
+    const [images, setImages] = useState<string[]>(product?.images || [])
+    const [categories, setCategories] = useState<string[]>(product?.categories || [])
 
     // Validaciones
     const validateField = (field: string, value: any) => {
@@ -63,19 +60,9 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
                 }
                 break
 
-            case 'buttonText':
-                if (!value.trim()) {
-                    newErrors.buttonText = 'El texto del botón es obligatorio'
-                } else if (value.length > 20) {
-                    newErrors.buttonText = 'El texto del botón debe tener máximo 20 caracteres'
-                } else {
-                    delete newErrors.buttonText
-                }
-                break
-
             case 'paymentLink':
                 if (!value.trim()) {
-                    newErrors.paymentLink = 'El link es obligatorio'
+                    newErrors.paymentLink = 'El link de pago es obligatorio'
                 } else if (!value.includes('.')) {
                     newErrors.paymentLink = 'Ingresa un link válido'
                 } else {
@@ -116,7 +103,7 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
         return number.toLocaleString('es-CL')
     }
 
-    // Handlers para los campos
+    // Manejar cambios en los campos
     const handleTitleChange = (value: string) => {
         setTitle(value)
         validateField('title', value)
@@ -130,21 +117,11 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
     }
 
     const handlePriceChange = (value: string) => {
-        const cleanValue = value.replace(/\D/g, '')
-        setPrice(cleanValue)
-        validateField('price', cleanValue)
-        onUpdate({ price: parseInt(cleanValue) || 0 })
-    }
-
-    const handlePriceVisibleChange = (visible: boolean) => {
-        setPriceVisible(visible)
-        onUpdate({ priceVisible: visible })
-    }
-
-    const handleButtonTextChange = (value: string) => {
-        setButtonText(value)
-        validateField('buttonText', value)
-        onUpdate({ buttonText: value })
+        // Solo permitir números
+        const numbersOnly = value.replace(/\D/g, '')
+        setPrice(numbersOnly)
+        validateField('price', numbersOnly)
+        onUpdate({ price: parseInt(numbersOnly) || 0 })
     }
 
     const handlePaymentLinkChange = (value: string) => {
@@ -170,51 +147,68 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
         onUpdate({ categories: newCategories })
     }
 
-    // Verificar si el item está completo
-    const isComplete = title.trim() && price && buttonText.trim() && paymentLink.trim() && 
-                      description.trim() && images.length > 0 && 
+    // Verificar si el producto está completo
+    const isComplete = title.trim() && 
+                      price && 
+                      paymentLink.trim() && 
+                      description.trim() && 
+                      images.length > 0 &&
                       Object.keys(errors).length === 0
 
     return (
-        <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            {/* Header */}
-            <div className="border-b border-gray-200 p-4">
-                <div className="flex items-center justify-between">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4 border-l-4 border-green-500">
+            {/* Header del producto */}
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </div>
                     <h3 className="text-lg font-semibold text-gray-800">
-                        📦 {item ? `Editando Item #${item.id}` : 'Nuevo Item'}
+                        Producto {isComplete ? '✅' : '⚠️'}
                     </h3>
-                    <button
-                        onClick={onRemove}
-                        className="text-red-600 hover:text-red-800 font-medium text-sm px-3 py-1 rounded hover:bg-red-50 transition-colors"
-                    >
-                        Eliminar
-                    </button>
                 </div>
+                <button
+                    type="button"
+                    onClick={onRemove}
+                    className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                    title="Eliminar producto"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
             {/* Carrusel de imágenes */}
-            <div className="p-4 border-b border-gray-200">
+            <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Imágenes del producto *
+                </label>
                 <ImageCarousel
                     images={images}
                     onImagesChange={handleImagesChange}
-                    bucketName="items"
-                    folderPrefix={item?.id ? `item-${item.id}` : undefined}
-                    error={errors.images}
+                    maxImages={10}
+                    maxSizeInMB={10}
                 />
+                {errors.images && (
+                    <p className="mt-1 text-sm text-red-600">{errors.images}</p>
+                )}
             </div>
 
-            {/* Formulario */}
-            <div className="p-6 space-y-4">
+            {/* Campos del formulario */}
+            <div className="space-y-4">
                 {/* Título */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Título *
+                        Título del producto *
                     </label>
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => handleTitleChange(e.target.value)}
-                        placeholder="Ej: Consultora Personalizada"
+                        placeholder="Ej: Jockey Rosado"
                         maxLength={50}
                         className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             errors.title ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
@@ -237,7 +231,7 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
                         type="text"
                         value={subtitle}
                         onChange={(e) => handleSubtitleChange(e.target.value)}
-                        placeholder="Ej: Sesión de 1 hora para análisis biomecánico"
+                        placeholder="Ej: Edición especial con logo bordado"
                         maxLength={150}
                         className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             errors.subtitle ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
@@ -251,39 +245,18 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
                     </div>
                 </div>
 
-                {/* Precio con toggle de visibilidad */}
+                {/* Precio */}
                 <div>
-                    <div className="flex items-center justify-between mb-1">
-                        <label className="block text-sm font-medium text-gray-700">
-                            Precio (CLP) *
-                        </label>
-                        <div className="flex items-center space-x-2">
-                            <span className="text-xs text-gray-500">Visible:</span>
-                            <button
-                                type="button"
-                                onClick={() => handlePriceVisibleChange(!priceVisible)}
-                                className={`p-1 rounded-md transition-colors ${
-                                    priceVisible 
-                                        ? 'text-green-600 hover:bg-green-50' 
-                                        : 'text-gray-400 hover:bg-gray-50'
-                                }`}
-                                title={priceVisible ? 'Precio visible' : 'Precio oculto'}
-                            >
-                                {priceVisible ? (
-                                    <EyeIcon className="w-5 h-5" />
-                                ) : (
-                                    <EyeSlashIcon className="w-5 h-5" />
-                                )}
-                            </button>
-                        </div>
-                    </div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Precio (CLP) *
+                    </label>
                     <div className="relative">
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                             type="text"
                             value={formatPrice(price)}
                             onChange={(e) => handlePriceChange(e.target.value)}
-                            placeholder="25000"
+                            placeholder="15000"
                             className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                                 errors.price ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                             }`}
@@ -294,44 +267,21 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
                     )}
                     {price && !errors.price && (
                         <p className="mt-1 text-sm text-green-600">
-                            Se mostrará como: {priceVisible ? `$${formatPrice(price)}` : 'Precio oculto'}
+                            Se mostrará como: ${formatPrice(price)}
                         </p>
                     )}
                 </div>
 
-                {/* Texto del botón */}
+                {/* Link de pago */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Texto del botón *
-                    </label>
-                    <input
-                        type="text"
-                        value={buttonText}
-                        onChange={(e) => handleButtonTextChange(e.target.value)}
-                        placeholder="Ver más"
-                        maxLength={20}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            errors.buttonText ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                        }`}
-                    />
-                    <div className="flex justify-between mt-1">
-                        {errors.buttonText && (
-                            <p className="text-sm text-red-600">{errors.buttonText}</p>
-                        )}
-                        <p className="text-xs text-gray-500 ml-auto">{buttonText.length}/20</p>
-                    </div>
-                </div>
-
-                {/* Link */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Link *
+                        Link de pago *
                     </label>
                     <input
                         type="url"
                         value={paymentLink}
                         onChange={(e) => handlePaymentLinkChange(e.target.value)}
-                        placeholder="https://ejemplo.com/contacto"
+                        placeholder="https://mpago.la/2wPmNL9"
                         className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             errors.paymentLink ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                         }`}
@@ -349,7 +299,7 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
                     <textarea
                         value={description}
                         onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder="Describe tu item en detalle..."
+                        placeholder="Describe tu producto en detalle..."
                         maxLength={1000}
                         rows={5}
                         className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
@@ -381,11 +331,11 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
                 </div>
             </div>
 
-            {/* Estado del item */}
+            {/* Estado del producto */}
             <div className="mt-4 p-3 rounded-lg bg-gray-50">
                 <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700">
-                        Estado del item:
+                        Estado del producto:
                     </span>
                     <span className={`text-sm font-semibold ${
                         isComplete ? 'text-green-600' : 'text-orange-600'

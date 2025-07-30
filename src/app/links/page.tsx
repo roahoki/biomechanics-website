@@ -1,13 +1,10 @@
 'use client'
 
 import { getLinksData } from '@/utils/links'
-import { SocialIcon } from '@/app/components/SocialIcon'
+import { SocialIcon } from '@/components'
 import { LinkItem, Product, Item } from '@/types/product'
 import Image from 'next/image'
-import { ProductModal } from '@/components/ProductModal'
-import { ItemModal } from '@/components/ItemModal'
-import { PressablesList } from '@/components/PressablesList'
-import CategoryFilter from '@/components/CategoryFilter'
+import { ProductModal, ItemModal, PressablesList, CategoryFilter } from '@/components'
 import { useCategoryFilter } from '@/hooks/useCategoryFilter'
 import { useState, useEffect } from 'react'
 

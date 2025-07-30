@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { LinkCard } from './LinkCard'
-import { ProductItem } from '../ProductItem'
-import { ItemForm } from '../ItemForm'
-import ListView from '../ListView'
-import CategoryManagerCompact from '../CategoryManagerCompact'
+import { ProductItem } from '../../products/ProductItem'
+import { ItemForm } from '../../products/ItemForm'
+import ListView from '../../../common/ui/ListView'
+import CategoryManagerCompact from '../../categories/CategoryManagerCompact'
 import { LinkItem, Product, Item, Link } from '@/types/product'
 
 interface LinksListProps {
