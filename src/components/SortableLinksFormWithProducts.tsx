@@ -368,25 +368,16 @@ export function SortableLinksFormWithProducts({
 
     return (
         <div className="min-h-screen bg-gray-900">
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
                 <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700">
-                    {/* Header */}
-                    <div className="border-b border-gray-700 px-6 py-4">
-                        <h1 className="text-2xl font-bold text-white">
-                            Administrar Enlaces y Productos
-                        </h1>
-                        <p className="text-gray-300 mt-1">
-                            Gestiona tu página de enlaces y productos
-                        </p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    <form onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
+                        {/* Layout responsivo mejorado */}
+                        <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8">
                             {/* Primera columna: Perfil y descripción */}
-                            <div className="space-y-6 md:col-span-1 lg:col-span-1">
+                            <div className="space-y-4 sm:space-y-6">
                                 {/* Avatar Upload */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-200 mb-3">
+                                    <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
                                         Foto/Video de Perfil
                                     </label>
                                     <AvatarUpload
@@ -441,7 +432,7 @@ export function SortableLinksFormWithProducts({
                             </div>
 
                             {/* Segunda columna: Configuración de estilo */}
-                            <div className="space-y-6 md:col-span-1 lg:col-span-1">
+                            <div className="space-y-4 sm:space-y-6">
                                 {/* Configuración de Fondo */}
                                 <BackgroundConfig
                                     backgroundType={backgroundType}
@@ -472,13 +463,13 @@ export function SortableLinksFormWithProducts({
                             </div>
 
                             {/* Tercera columna: Lista de Links y Productos */}
-                            <div className="space-y-6 md:col-span-2 lg:col-span-1 w-full max-w-full overflow-hidden">
+                            <div className="space-y-4 sm:space-y-6 w-full lg:col-span-3">
                                 {/* Lista de Links y Productos */}
                                 <div className="w-full">
-                                    <label className="block text-sm font-medium text-gray-200 mb-3">
+                                    <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
                                         Enlaces y Productos
                                     </label>
-                                    <div className="w-full max-w-full overflow-hidden">
+                                    <div className="w-full">
                                         <LinksListUpdated
                                             currentLinks={currentLinks}
                                             onAddNewLink={addNewLink}
@@ -500,6 +491,11 @@ export function SortableLinksFormWithProducts({
                                                         : link
                                                 )
                                                 setCurrentLinks(updatedLinks)
+                                            }}
+                                            onCategoriesChange={() => {
+                                                // Para actualizar las categorías, necesitaríamos una función del componente padre
+                                                // Por ahora, podemos usar window.location.reload() o implementar un refetch
+                                                window.location.reload()
                                             }}
                                         />
                                     </div>
