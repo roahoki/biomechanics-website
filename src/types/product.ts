@@ -7,6 +7,7 @@ export interface Product {
     paymentLink: string
     description: string
     images: string[]
+    categories?: string[]
     visible?: boolean
 }
 
@@ -21,6 +22,7 @@ export interface Item {
     paymentLink: string
     description: string
     images: string[]
+    categories?: string[]
     visible?: boolean
 }
 
@@ -29,6 +31,7 @@ export interface Link {
     type?: 'link'
     url: string
     label: string
+    categories?: string[]
     visible?: boolean
 }
 
