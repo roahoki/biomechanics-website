@@ -367,37 +367,35 @@ export function SortableLinksFormWithProducts({
     }
 
     return (
-        <div className="min-h-screen bg-gray-900">
-            <div className="w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-                <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700">
-                    <form onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
-                        {/* Layout responsivo mejorado */}
-                        <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8">
-                            {/* Primera columna: Perfil y descripción */}
-                            <div className="space-y-4 sm:space-y-6">
-                                {/* Avatar Upload */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
-                                        Foto/Video de Perfil
-                                    </label>
-                                    <AvatarUpload
-                                        previewUrl={previewUrl}
-                                        previewType={previewType}
-                                        onFileSelect={onFileSelect}
-                                        selectedFile={selectedFile}
-                                    />
-                                    <FileInfo selectedFile={selectedFile} previewType={previewType} />
-                                </div>
+        <div className="w-full">
+            <form onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
+                {/* Layout completamente responsivo - Aprovecha todo el espacio */}
+                <div className="space-y-6 xl:space-y-0 xl:grid xl:grid-cols-4 xl:gap-6">
+                    {/* Primera columna: Perfil y descripción */}
+                    <div className="space-y-4 sm:space-y-6 xl:col-span-1">
+                        {/* Avatar Upload */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
+                                Foto/Video de Perfil
+                            </label>
+                            <AvatarUpload
+                                previewUrl={previewUrl}
+                                previewType={previewType}
+                                onFileSelect={onFileSelect}
+                                selectedFile={selectedFile}
+                            />
+                            <FileInfo selectedFile={selectedFile} previewType={previewType} />
+                        </div>
 
-                                {/* Título */}
-                                <div>
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
-                                        Título de la página
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="title"
-                                        value={localTitle}
+                        {/* Título */}
+                        <div>
+                            <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
+                                Título de la página
+                            </label>
+                            <input
+                                type="text"
+                                id="title"
+                                value={localTitle}
                                         onChange={(e) => setLocalTitle(e.target.value.slice(0, 65))}
                                         maxLength={65}
                                         className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -513,41 +511,39 @@ export function SortableLinksFormWithProducts({
                             selectedFile={selectedFile}
                         />
                     </form>
+
+                    {/* Modales */}
+                    <DeleteModal
+                        isOpen={showDeleteModal}
+                        onConfirm={confirmDelete}
+                        onCancel={cancelDelete}
+                    />
+
+                    <PreviewModalUpdated
+                        isOpen={showPreviewModal}
+                        onClose={() => setShowPreviewModal(false)}
+                        previewUrl={previewUrl}
+                        previewType={previewType}
+                        titleColor={titleColor}
+                        title={localTitle}
+                        description={localDescription}
+                        socialIconColors={socialIconColors}
+                        socialIcons={socialIcons}
+                        currentLinks={currentLinks}
+                        linkCardBackgroundColor={linkCardBackgroundColor}
+                        linkCardTextColor={linkCardTextColor}
+                        backgroundType={backgroundType}
+                        backgroundPreviewUrl={backgroundPreviewUrl}
+                        backgroundImageUrl={backgroundImageUrl}
+                        backgroundImageOpacity={backgroundImageOpacity}
+                        bgColor={bgColor}
+                        styleSettings={{
+                            titleColor,
+                            linkCardBackgroundColor,
+                            linkCardTextColor,
+                            productBuyButtonColor
+                        }}
+                    />
                 </div>
-
-                {/* Modales */}
-                <DeleteModal
-                    isOpen={showDeleteModal}
-                    onConfirm={confirmDelete}
-                    onCancel={cancelDelete}
-                />
-
-                <PreviewModalUpdated
-                    isOpen={showPreviewModal}
-                    onClose={() => setShowPreviewModal(false)}
-                    previewUrl={previewUrl}
-                    previewType={previewType}
-                    titleColor={titleColor}
-                    title={localTitle}
-                    description={localDescription}
-                    socialIconColors={socialIconColors}
-                    socialIcons={socialIcons}
-                    currentLinks={currentLinks}
-                    linkCardBackgroundColor={linkCardBackgroundColor}
-                    linkCardTextColor={linkCardTextColor}
-                    backgroundType={backgroundType}
-                    backgroundPreviewUrl={backgroundPreviewUrl}
-                    backgroundImageUrl={backgroundImageUrl}
-                    backgroundImageOpacity={backgroundImageOpacity}
-                    bgColor={bgColor}
-                    styleSettings={{
-                        titleColor,
-                        linkCardBackgroundColor,
-                        linkCardTextColor,
-                        productBuyButtonColor
-                    }}
-                />
-            </div>
-        </div>
-    )
-}
+            )
+        }
