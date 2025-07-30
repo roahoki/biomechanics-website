@@ -1,39 +1,102 @@
-import { SortableLinksFormWithProducts as SortableLinksForm } from "@/components/SortableLinksFormWithProducts"
-import { checkRole } from "@/utils/roles"
-import { redirect } from 'next/navigation'
-import { getLinksData } from '@/utils/links'
-import { log } from "console"
+'use client'
 
-export default async function AdminSortableLinks(params: {
-    searchParams: Promise<{ search?: string }>
-}) {
-    if (!checkRole('admin')) {
-        redirect('/')
+import { useEffect, useState } from 'react'
+import { SortableLinksFormWithProducts as SortableLinksForm } from "@/components"
+import { CategoryManagerCompact, ListView } from "@/components"
+import { checkAdminPermissions } from "../check-permissions"
+import { getLinksData } from '@/utils/links'
+import { LinkItem } from '@/types/product'
+
+export default function AdminSortableLinks() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+    const [hasPermissions, setHasPermissions] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [isSaving, setIsSaving] = useState(false)
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                // Verificar permisos primero
+                const isAdmin = await checkAdminPermissions()
+                if (!isAdmin) {
+                    // La función ya redirige automáticamente
+                    return
+                }
+                
+                setHasPermissions(true)
+                const result = await getLinksData()
+                setData(result)
+            } catch (error) {
+                console.error('Error loading data:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        loadData()
+    }, [])
+
+    const handleCategoriesChange = () => {
+        // Recargar los datos cuando las categorías cambien
+        getLinksData().then(setData)
     }
 
-    const { links, title, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings } = await getLinksData()
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-900">
+                <div className="text-white">Cargando...</div>
+            </div>
+        )
+    }
 
-    log('links', links)
-    log('title', title)
-    log('description', description)
-    log('profileImage', profileImage)
-    log('profileImageType', profileImageType)
-    log('socialIcons', socialIcons)
-    log('backgroundColor', backgroundColor)
-    log('backgroundSettings', backgroundSettings)
-    log('styleSettings', styleSettings)
+    if (!hasPermissions) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-900">
+                <div className="text-white">No tienes permisos de administrador</div>
+            </div>
+        )
+    }
+
+    if (!data) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-900">
+                <div className="text-white">Error al cargar datos</div>
+            </div>
+        )
+    }
+
+    const { links, title, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings, categories } = data
 
     return (
-            <SortableLinksForm 
-                links={links}
-                title={title}
-                description={description} 
-                profileImage={profileImage}
-                profileImageType={profileImageType}
-                socialIcons={socialIcons}
-                backgroundColor={backgroundColor || '#1a1a1a'}
-                backgroundSettings={backgroundSettings || { type: 'color', color: backgroundColor || '#1a1a1a', imageOpacity: 0.5 }}
-                styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000', productBuyButtonColor: '#ff6b35' }}
-            />
+        <div className="min-h-screen bg-gray-900">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+                <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700">
+                    {/* Header */}
+                    <div className="border-b border-gray-700 px-4 sm:px-6 py-4">
+                        <h1 className="text-xl sm:text-2xl font-bold text-white">
+                            Administrar Enlaces y Productos
+                        </h1>
+                        <p className="text-gray-300 mt-1 text-sm sm:text-base">
+                            Gestiona tu página de enlaces, productos y categorías
+                        </p>
+                    </div>
+
+                    <SortableLinksForm 
+                        links={links}
+                        categories={categories || []}
+                        title={title}
+                        description={description} 
+                        profileImage={profileImage}
+                        profileImageType={profileImageType}
+                        socialIcons={socialIcons}
+                        backgroundColor={backgroundColor || '#1a1a1a'}
+                        backgroundSettings={backgroundSettings || { type: 'color', color: backgroundColor || '#1a1a1a', imageOpacity: 0.5 }}
+                        styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000', productBuyButtonColor: '#ff6b35' }}
+                    />
+                
+                </div>
+            </div>
+        </div>
     )
 }

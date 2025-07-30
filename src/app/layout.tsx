@@ -19,6 +19,14 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Biomechanics",
   description: "Biomechanics Website",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { getLinksData, LinksData, SocialIcons } from '@/utils/links'
 import { getSupabaseClient } from '@/lib/supabase-db'
 import { LinkItem, Product } from '@/types/product'
+import { cleanupItemCategories } from '@/utils/category-utils'
 
 export async function setRole(formData: FormData): Promise<void> {
     const client = await clerkClient()
@@ -190,7 +191,8 @@ export async function updateAdminLinks(formData: FormData) {
       backgroundSettings,
       styleSettings,
       socialIcons,
-      links: newItems
+      links: newItems,
+      categories: currentData.categories || ["Música", "Tienda", "Eventos", "Prensa", "Posts"]
     }
     
     // Guardar en Supabase y como fallback en el archivo local
@@ -217,11 +219,17 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
     // Obtener los datos actuales para mantener la estructura
     const currentData = await getLinksData()
     
+    // Limpiar categorías de los items antes de guardar
+    const cleanedItems = cleanupItemCategories(items, currentData.categories || [])
+    
     console.log('📋 Datos actuales vs nuevos:', {
       currentBackgroundUrl: currentData.backgroundSettings?.imageUrl,
       newBackgroundUrl: otherData.backgroundSettings?.imageUrl,
       currentProfileImage: currentData.profileImage,
-      newProfileImage: otherData.profileImage
+      newProfileImage: otherData.profileImage,
+      itemsWithCategoriesCleanup: cleanedItems.filter(item => 
+        JSON.stringify(item.categories) !== JSON.stringify(items.find(i => i.id === item.id)?.categories)
+      ).length
     })
     
     // Crear el objeto de datos para la base de datos
@@ -229,7 +237,7 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
     const linksData: LinksData = {
       ...currentData,
       ...otherData,
-      links: items,
+      links: cleanedItems, // Usar los items con categorías limpias
       // Asegurar que los datos críticos se actualicen correctamente
       profileImage: otherData.profileImage ?? currentData.profileImage,
       profileImageType: otherData.profileImageType ?? currentData.profileImageType,
