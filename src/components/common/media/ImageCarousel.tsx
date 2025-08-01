@@ -10,6 +10,7 @@ interface ImageCarouselProps {
     bucketName?: string
     folderPrefix?: string
     error?: string
+    textColor?: string
 }
 
 export function ImageCarousel({ 
@@ -19,7 +20,8 @@ export function ImageCarousel({
     maxSizeInMB = 10,
     bucketName = 'products',
     folderPrefix,
-    error: externalError 
+    error: externalError,
+    textColor = '#6b7280'
 }: ImageCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
@@ -302,7 +304,10 @@ export function ImageCarousel({
             )}
 
             {/* Información */}
-            <div className="mt-4 text-xs text-gray-500 text-center">
+            <div 
+                className="mt-4 text-xs text-center opacity-60"
+                style={{ color: textColor }}
+            >
                 • Máximo {maxImages} imágenes<br/>
                 • Máximo {maxSizeInMB}MB por imagen<br/>
                 • Arrastra las miniaturas para reordenar<br/>
