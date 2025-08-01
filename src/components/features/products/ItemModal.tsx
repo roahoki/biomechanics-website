@@ -118,11 +118,15 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                         }}
                         transition={{ type: 'spring', damping: 25, stiffness: 500 }}
                         className={`
-                            fixed z-50 bg-white shadow-2xl
+                            fixed z-50 shadow-2xl
                             md:inset-0 md:m-auto md:max-w-4xl md:max-h-[90vh] md:rounded-xl
                             max-md:inset-x-0 max-md:bottom-0 max-md:rounded-t-2xl max-md:max-h-[90vh]
                             flex flex-col
                         `}
+                        style={{
+                            backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff',
+                            color: styleSettings?.linkCardTextColor || '#000000'
+                        }}
                     >
                         {/* Header con botón de cerrar */}
                         <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-200">
@@ -232,27 +236,39 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                                     <div className="md:order-2 md:flex md:flex-col md:justify-between space-y-6">
                                         <div className="space-y-4">
                                             {/* Título */}
-                                            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center md:text-left">
+                                            <h2 
+                                                className="text-2xl md:text-3xl font-bold text-center md:text-left"
+                                                style={{ color: styleSettings?.linkCardTextColor || '#000000' }}
+                                            >
                                                 {item.title || 'Item sin título'}
                                             </h2>
 
                                             {/* Subtítulo */}
                                             {item.subtitle && (
-                                                <p className="text-lg md:text-xl text-gray-600 text-center md:text-left">
+                                                <p 
+                                                    className="text-lg md:text-xl text-center md:text-left opacity-75"
+                                                    style={{ color: styleSettings?.linkCardTextColor || '#000000' }}
+                                                >
                                                     {item.subtitle}
                                                 </p>
                                             )}
 
                                             {/* Precio (solo si es visible) */}
                                             {item.priceVisible && item.price > 0 && (
-                                                <div className="text-2xl md:text-3xl font-bold text-gray-900 text-center md:text-left">
+                                                <div 
+                                                    className="text-2xl md:text-3xl font-bold text-center md:text-left"
+                                                    style={{ color: styleSettings?.linkCardTextColor || '#000000' }}
+                                                >
                                                     {formatPrice(item.price)}
                                                 </div>
                                             )}
 
                                             {/* Descripción */}
                                             {item.description && (
-                                                <div className="text-gray-600">
+                                                <div 
+                                                    className="opacity-80"
+                                                    style={{ color: styleSettings?.linkCardTextColor || '#000000' }}
+                                                >
                                                     <p className="leading-relaxed whitespace-pre-wrap">
                                                         {item.description}
                                                     </p>
@@ -286,7 +302,10 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                         </div>
                         
                         {/* Footer fijo con botón - solo móvil */}
-                        <div className="md:hidden flex-shrink-0 p-4 border-t border-gray-200 bg-white">
+                        <div 
+                            className="md:hidden flex-shrink-0 p-4 border-t border-gray-200"
+                            style={{ backgroundColor: styleSettings?.linkCardBackgroundColor || '#ffffff' }}
+                        >
                             <div className="flex items-center justify-center">
                                 <a
                                     href={item.paymentLink}

@@ -29,11 +29,11 @@ export default function CategoryFilter({
   }, [categories])
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative py-4 ${className}`}>
       {/* Contenedor scrolleable */}
       <div
         id="category-filter-container"
-        className="flex justify-start lg:justify-center space-x-3 lg:space-x-4 overflow-x-auto scrollbar-hide pb-2 px-4 lg:px-0"
+        className="flex justify-start lg:justify-center space-x-6 lg:space-x-8 overflow-x-auto overflow-y-visible scrollbar-hide px-4 lg:px-0"
         style={{
           scrollbarWidth: 'none', /* Firefox */
           msOverflowStyle: 'none', /* Internet Explorer 10+ */
@@ -41,20 +41,17 @@ export default function CategoryFilter({
       >
         {allCategories.map((category) => {
           const isSelected = selectedCategory === category
-          const isEverything = category === 'Todo'
           
           return (
             <button
               key={category}
               onClick={() => onCategoryChange(category)}
               className={`
-                flex-shrink-0 px-6 py-3 rounded-full text-sm lg:text-base font-medium transition-all duration-200
-                border-2 backdrop-blur-md min-w-fit whitespace-nowrap
+                flex-shrink-0 px-3 py-3 text-sm lg:text-base font-medium transition-colors duration-200
+                min-w-fit whitespace-nowrap relative border-b-2
                 ${isSelected
-                  ? isEverything
-                    ? 'bg-white/20 border-white text-white shadow-lg transform scale-105'
-                    : 'bg-white/20 border-white text-white shadow-lg transform scale-105'
-                  : 'bg-white/10 border-white/30 text-white/80 hover:bg-white/15 hover:border-white/50 hover:text-white hover:scale-105'
+                  ? 'text-white border-white'
+                  : 'text-white/70 border-transparent hover:text-white hover:border-white/30'
                 }
               `}
             >
