@@ -186,14 +186,21 @@ export function ItemForm({
 
     return (
         <div 
-            className="rounded-lg shadow-md border border-gray-200"
+            className="rounded-lg shadow-md border"
             style={{
                 backgroundColor: linkCardBackgroundColor,
-                color: linkCardTextColor
+                color: linkCardTextColor,
+                borderColor: linkCardTextColor + '20'
             }}
         >
             {/* Header */}
-            <div className="border-b border-gray-200 p-4">
+            <div 
+                className="border-b p-4"
+                style={{ 
+                    backgroundColor: linkCardBackgroundColor,
+                    borderColor: linkCardTextColor + '20'
+                }}
+            >
                 <div className="flex items-center justify-between">
                     <h3 
                         className="text-lg font-semibold"
@@ -211,18 +218,28 @@ export function ItemForm({
             </div>
 
             {/* Carrusel de imágenes */}
-            <div className="p-4 border-b border-gray-200">
+            <div 
+                className="p-4 border-b"
+                style={{ 
+                    backgroundColor: linkCardBackgroundColor,
+                    borderColor: linkCardTextColor + '20'
+                }}
+            >
                 <ImageCarousel
                     images={images}
                     onImagesChange={handleImagesChange}
                     bucketName="items"
                     folderPrefix={item?.id ? `item-${item.id}` : undefined}
                     error={errors.images}
+                    textColor={linkCardTextColor}
                 />
             </div>
 
             {/* Formulario */}
-            <div className="p-6 space-y-4">
+            <div 
+                className="p-6 space-y-4"
+                style={{ backgroundColor: linkCardBackgroundColor }}
+            >
                 {/* Título */}
                 <div>
                     <label 
@@ -245,7 +262,12 @@ export function ItemForm({
                         {errors.title && (
                             <p className="text-sm text-red-600">{errors.title}</p>
                         )}
-                        <p className="text-xs text-gray-500 ml-auto">{title.length}/50</p>
+                        <p 
+                            className="text-xs ml-auto opacity-60"
+                            style={{ color: linkCardTextColor }}
+                        >
+                            {title.length}/50
+                        </p>
                     </div>
                 </div>
 
@@ -271,7 +293,12 @@ export function ItemForm({
                         {errors.subtitle && (
                             <p className="text-sm text-red-600">{errors.subtitle}</p>
                         )}
-                        <p className="text-xs text-gray-500 ml-auto">{subtitle.length}/150</p>
+                        <p 
+                            className="text-xs ml-auto opacity-60"
+                            style={{ color: linkCardTextColor }}
+                        >
+                            {subtitle.length}/150
+                        </p>
                     </div>
                 </div>
 
@@ -285,7 +312,12 @@ export function ItemForm({
                             Precio (CLP) *
                         </label>
                         <div className="flex items-center space-x-2">
-                            <span className="text-xs text-gray-500">Visible:</span>
+                            <span 
+                                className="text-xs opacity-60"
+                                style={{ color: linkCardTextColor }}
+                            >
+                                Visible:
+                            </span>
                             <button
                                 type="button"
                                 onClick={() => handlePriceVisibleChange(!priceVisible)}
@@ -305,7 +337,12 @@ export function ItemForm({
                         </div>
                     </div>
                     <div className="relative">
-                        <span className="absolute left-3 top-2 text-gray-500">$</span>
+                        <span 
+                            className="absolute left-3 top-2 opacity-60"
+                            style={{ color: linkCardTextColor }}
+                        >
+                            $
+                        </span>
                         <input
                             type="text"
                             value={formatPrice(price)}
@@ -348,7 +385,12 @@ export function ItemForm({
                         {errors.buttonText && (
                             <p className="text-sm text-red-600">{errors.buttonText}</p>
                         )}
-                        <p className="text-xs text-gray-500 ml-auto">{buttonText.length}/20</p>
+                        <p 
+                            className="text-xs ml-auto opacity-60"
+                            style={{ color: linkCardTextColor }}
+                        >
+                            {buttonText.length}/20
+                        </p>
                     </div>
                 </div>
 
@@ -396,7 +438,12 @@ export function ItemForm({
                         {errors.description && (
                             <p className="text-sm text-red-600">{errors.description}</p>
                         )}
-                        <p className="text-xs text-gray-500 ml-auto">{description.length}/1000</p>
+                        <p 
+                            className="text-xs ml-auto opacity-60"
+                            style={{ color: linkCardTextColor }}
+                        >
+                            {description.length}/1000
+                        </p>
                     </div>
                 </div>
 
@@ -413,15 +460,25 @@ export function ItemForm({
                         selectedCategories={categories}
                         onChange={handleCategoriesChange}
                         placeholder="Seleccionar categorías..."
+                        label=""
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p 
+                        className="text-xs mt-1 opacity-60"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Las categorías permiten filtrar el contenido en la página principal
                     </p>
                 </div>
             </div>
 
             {/* Estado del item */}
-            <div className="mt-4 p-3 rounded-lg bg-gray-50">
+            <div 
+                className="mt-4 p-3 rounded-lg border"
+                style={{ 
+                    backgroundColor: linkCardBackgroundColor,
+                    borderColor: linkCardTextColor + '20' // 20% opacity
+                }}
+            >
                 <div className="flex items-center justify-between">
                     <span 
                         className="text-sm font-medium"
@@ -436,7 +493,10 @@ export function ItemForm({
                     </span>
                 </div>
                 {!isComplete && (
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p 
+                        className="text-xs mt-1 opacity-70"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Complete todos los campos obligatorios para que aparezca en la vista previa
                     </p>
                 )}
