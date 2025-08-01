@@ -302,6 +302,8 @@ export function LinksListUpdated({
                                             availableCategories={availableCategories}
                                             onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
                                             onRemove={() => onRemoveLink(item.id)}
+                                            linkCardBackgroundColor={linkCardBackgroundColor}
+                                            linkCardTextColor={linkCardTextColor}
                                         />
                                     ) : null}
                                 </div>

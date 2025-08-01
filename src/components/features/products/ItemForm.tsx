@@ -12,9 +12,18 @@ interface ItemFormProps {
     availableCategories: string[]
     onUpdate: (item: Partial<Item>) => void
     onRemove: () => void
+    linkCardBackgroundColor?: string
+    linkCardTextColor?: string
 }
 
-export function ItemForm({ item, availableCategories, onUpdate, onRemove }: ItemFormProps) {
+export function ItemForm({ 
+    item, 
+    availableCategories, 
+    onUpdate, 
+    onRemove,
+    linkCardBackgroundColor = '#ffffff',
+    linkCardTextColor = '#000000'
+}: ItemFormProps) {
     const [errors, setErrors] = useState<Record<string, string>>({})
 
     // Estados locales para los campos
@@ -176,11 +185,20 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
                       Object.keys(errors).length === 0
 
     return (
-        <div className="bg-white rounded-lg shadow-md border border-gray-200">
+        <div 
+            className="rounded-lg shadow-md border border-gray-200"
+            style={{
+                backgroundColor: linkCardBackgroundColor,
+                color: linkCardTextColor
+            }}
+        >
             {/* Header */}
             <div className="border-b border-gray-200 p-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-800">
+                    <h3 
+                        className="text-lg font-semibold"
+                        style={{ color: linkCardTextColor }}
+                    >
                         📦 {item ? `Editando Item #${item.id}` : 'Nuevo Item'}
                     </h3>
                     <button
@@ -207,7 +225,10 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
             <div className="p-6 space-y-4">
                 {/* Título */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label 
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Título *
                     </label>
                     <input
@@ -230,7 +251,10 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
 
                 {/* Subtítulo */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label 
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Subtítulo
                     </label>
                     <input
@@ -254,7 +278,10 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
                 {/* Precio con toggle de visibilidad */}
                 <div>
                     <div className="flex items-center justify-between mb-1">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label 
+                            className="block text-sm font-medium"
+                            style={{ color: linkCardTextColor }}
+                        >
                             Precio (CLP) *
                         </label>
                         <div className="flex items-center space-x-2">
@@ -301,7 +328,10 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
 
                 {/* Texto del botón */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label 
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Texto del botón *
                     </label>
                     <input
@@ -324,7 +354,10 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
 
                 {/* Link */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label 
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Link *
                     </label>
                     <input
@@ -343,7 +376,10 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
 
                 {/* Descripción */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label 
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Descripción *
                     </label>
                     <textarea
@@ -366,7 +402,10 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
 
                 {/* Categorías */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label 
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Categorías
                     </label>
                     <CategorySelector
@@ -384,7 +423,10 @@ export function ItemForm({ item, availableCategories, onUpdate, onRemove }: Item
             {/* Estado del item */}
             <div className="mt-4 p-3 rounded-lg bg-gray-50">
                 <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span 
+                        className="text-sm font-medium"
+                        style={{ color: linkCardTextColor }}
+                    >
                         Estado del item:
                     </span>
                     <span className={`text-sm font-semibold ${
