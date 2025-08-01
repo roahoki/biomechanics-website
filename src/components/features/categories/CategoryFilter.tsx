@@ -47,7 +47,7 @@ export default function CategoryFilter({
               key={category}
               onClick={() => onCategoryChange(category)}
               className={`
-                flex-shrink-0 px-3 py-3 text-sm lg:text-base font-medium transition-all duration-200
+                flex-shrink-0 px-3 py-3 text-sm lg:text-base font-medium transition-colors duration-200
                 min-w-fit whitespace-nowrap relative border-b-2
                 ${isSelected
                   ? 'text-white border-white'

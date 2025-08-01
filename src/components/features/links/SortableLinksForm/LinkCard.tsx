@@ -1,21 +1,28 @@
+import CategorySelector from '../../categories/CategorySelector'
+
 interface Link {
     id: number
     url: string
     label: string
+    categories?: string[]
 }
 
 interface LinkCardProps {
     link: Link
+    availableCategories: string[]
     onRemove: (id: number) => void
     onUpdate: (id: number, field: 'url' | 'label', value: string) => void
+    onUpdateCategories: (id: number, categories: string[]) => void
     linkCardBackgroundColor: string
     linkCardTextColor: string
 }
 
 export function LinkCard({ 
     link, 
+    availableCategories,
     onRemove, 
-    onUpdate, 
+    onUpdate,
+    onUpdateCategories, 
     linkCardBackgroundColor, 
     linkCardTextColor 
 }: LinkCardProps) {
@@ -61,6 +68,19 @@ export function LinkCard({
                 placeholder="Texto visible (ej: TikTok)"
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
+            
+            {/* Categorías */}
+            <div className="mt-3">
+                <label className="block text-sm font-medium mb-1" style={{ color: linkCardTextColor }}>
+                    Categorías
+                </label>
+                <CategorySelector
+                    availableCategories={availableCategories}
+                    selectedCategories={link.categories || []}
+                    onChange={(categories) => onUpdateCategories(link.id, categories)}
+                    placeholder="Seleccionar categorías..."
+                />
+            </div>
         </li>
     )
 }

@@ -1,12 +1,11 @@
 'use client'
 
 import { getLinksData } from '@/utils/links'
-import { SocialIcon } from '@/app/components/SocialIcon'
+import { SocialIcon } from '@/components'
 import { LinkItem, Product, Item } from '@/types/product'
 import Image from 'next/image'
-import { ProductModal } from '@/components/ProductModal'
-import { ItemModal } from '@/components/ItemModal'
-import { PressablesList } from '@/components/PressablesList'
+import { ProductModal, ItemModal, PressablesList, CategoryFilter } from '@/components'
+import { useCategoryFilter } from '@/hooks/useCategoryFilter'
 import { useState, useEffect } from 'react'
 
 export default function Page() {
@@ -14,6 +13,14 @@ export default function Page() {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
     const [selectedItem, setSelectedItem] = useState<Item | null>(null)
     const [loading, setLoading] = useState(true)
+
+    // Filtrado por categorías
+    const {
+        filteredItems,
+        categoriesWithItems,
+        selectedCategory,
+        setSelectedCategory
+    } = useCategoryFilter(linksData?.links || [], linksData?.categories || [])
 
     useEffect(() => {
         async function loadData() {
@@ -34,7 +41,8 @@ export default function Page() {
                     socialIcons: {},
                     backgroundColor: "#1a1a1a",
                     backgroundSettings: { type: 'color', color: "#1a1a1a", imageOpacity: 0.5 },
-                    styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" }
+                    styleSettings: { titleColor: "#ffffff", linkCardBackgroundColor: "#ffffff", linkCardTextColor: "#000000" },
+                    categories: []
                 })
             } finally {
                 setLoading(false)
@@ -117,19 +125,14 @@ export default function Page() {
             imageOpacity: 0.5 
         };
         
-        // Verificar si es una imagen y tiene URL
-        if (settings.type === 'image' && 'imageUrl' in settings && settings.imageUrl) {
-            return {
-                backgroundImage: `url(${settings.imageUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                position: "relative" as const,
-            }
-        } else {
+        // Solo aplicar backgroundColor para color sólido
+        // Las imágenes se manejan con una capa fija separada
+        if (settings.type === 'color' || !('imageUrl' in settings) || !settings.imageUrl) {
             return {
                 backgroundColor: (settings.color || backgroundColor || "var(--color-neutral-base)"),
             }
+        } else {
+            return {}
         }
     }
 
@@ -140,20 +143,23 @@ export default function Page() {
 
     // Vista de solo lectura para usuarios comunes
     return (
-        <div
-            className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body select-none"
+        <div 
+            className="relative min-h-screen"
             style={{
-                ...backgroundStyle,
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
-                WebkitTouchCallout: 'none',
-                msUserSelect: 'none'
+                // Aplicar el fondo directamente aquí
+                ...(hasImageBackground ? {
+                    backgroundImage: `url(${backgroundSettings?.imageUrl})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    backgroundAttachment: "fixed"
+                } : backgroundStyle)
             }}
         >
             {/* Overlay de opacidad para imagen de fondo */}
             {hasImageBackground && (
                 <div 
-                    className="absolute inset-0 bg-black select-none"
+                    className="fixed inset-0 bg-black select-none"
                     style={{ 
                         opacity: 1 - (backgroundSettings?.imageOpacity || 0.5),
                         zIndex: 0,
@@ -165,9 +171,18 @@ export default function Page() {
                     }}
                 />
             )}
-            
-            {/* Contenido principal */}
-            <div className={`relative ${hasImageBackground ? 'z-10' : ''} flex flex-col items-center`}>
+
+            {/* Contenedor de contenido */}
+            <div
+                className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body select-none relative"
+                style={{
+                    zIndex: 1,
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTouchCallout: 'none',
+                    msUserSelect: 'none'
+                }}
+            >
                 {/* Avatar dinámico */}
                 {renderAvatar()}
 
@@ -189,40 +204,54 @@ export default function Page() {
                 {socialIcons && Object.keys(socialIcons).length > 0 && (
                     <div className="flex gap-6 mb-8">
                         {socialIcons.instagram && socialIcons.instagram.url && (
-                            <SocialIcon 
-                                icon="instagram" 
-                                url={socialIcons.instagram.url} 
-                                color={socialIcons.instagram.color || '#E4405F'} 
+                            <SocialIcon
+                                icon="instagram"
+                                url={socialIcons.instagram.url}
+                                color={socialIcons.instagram.color || '#E4405F'}
                             />
                         )}
                         {socialIcons.soundcloud && socialIcons.soundcloud.url && (
-                            <SocialIcon 
-                                icon="soundcloud" 
-                                url={socialIcons.soundcloud.url} 
-                                color={socialIcons.soundcloud.color || '#FF5500'} 
+                            <SocialIcon
+                                icon="soundcloud"
+                                url={socialIcons.soundcloud.url}
+                                color={socialIcons.soundcloud.color || '#FF5500'}
                             />
                         )}
                         {socialIcons.youtube && socialIcons.youtube.url && (
-                            <SocialIcon 
-                                icon="youtube" 
-                                url={socialIcons.youtube.url} 
-                                color={socialIcons.youtube.color || '#FF0000'} 
+                            <SocialIcon
+                                icon="youtube"
+                                url={socialIcons.youtube.url}
+                                color={socialIcons.youtube.color || '#FF0000'}
                             />
                         )}
                         {socialIcons.tiktok && socialIcons.tiktok.url && (
-                            <SocialIcon 
-                                icon="tiktok" 
-                                url={socialIcons.tiktok.url} 
-                                color={socialIcons.tiktok.color || '#000000'} 
+                            <SocialIcon
+                                icon="tiktok"
+                                url={socialIcons.tiktok.url}
+                                color={socialIcons.tiktok.color || '#000000'}
                             />
                         )}
                     </div>
                 )}
 
+                {/* Filtro de categorías */}
+                {categoriesWithItems.length > 1 && (
+                    <div className="w-full max-w-4xl mb-8 flex justify-center">
+                        <CategoryFilter
+                            categories={categoriesWithItems}
+                            selectedCategory={selectedCategory}
+                            onCategoryChange={setSelectedCategory}
+                            className="w-full lg:w-auto"
+                        />
+                    </div>
+                )}
+
+
+
                 {/* Lista unificada de presionables (links + productos + items) */}
-                {Array.isArray(links) && links.length > 0 && (
+                {Array.isArray(filteredItems) && filteredItems.length > 0 && (
                     <PressablesList
-                        items={links}
+                        items={filteredItems}
                         styleSettings={styleSettings || { 
                             titleColor: '#ffffff', 
                             linkCardBackgroundColor: '#ffffff', 

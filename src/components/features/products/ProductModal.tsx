@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Item } from '@/types/product'
+import { Product } from '@/types/product'
 import { StyleSettings } from '@/utils/links'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
-import { ZoomableImage } from '@/components/ZoomableImage'
+import { ImageCarousel } from '@/components/common/media/ImageCarousel'
+import { ZoomableImage } from '@/components/common/media/ZoomableImage'
 
-interface ItemModalProps {
-    item: Item | null
+interface ProductModalProps {
+    product: Product | null
     isOpen: boolean
     onClose: () => void
     styleSettings?: StyleSettings
 }
 
-export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalProps) {
+export function ProductModal({ product, isOpen, onClose, styleSettings }: ProductModalProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [isClient, setIsClient] = useState(false)
 
@@ -30,10 +31,10 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
         threshold: 50
     })
 
-    // Resetear index al cambiar item
+    // Resetear index al cambiar producto
     useEffect(() => {
         setCurrentImageIndex(0)
-    }, [item?.id])
+    }, [product?.id])
 
     // Cerrar modal con ESC y prevenir scroll del body
     useEffect(() => {
@@ -45,17 +46,17 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
 
         // Navegación con teclado para el carrusel
         const handleArrowKeys = (e: KeyboardEvent) => {
-            if (!item?.images || item.images.length <= 1) return
+            if (!product?.images || product.images.length <= 1) return
             
             if (e.key === 'ArrowLeft') {
                 e.preventDefault()
                 setCurrentImageIndex(prev => 
-                    prev === 0 ? item.images.length - 1 : prev - 1
+                    prev === 0 ? product.images.length - 1 : prev - 1
                 )
             } else if (e.key === 'ArrowRight') {
                 e.preventDefault()
                 setCurrentImageIndex(prev => 
-                    prev === item.images.length - 1 ? 0 : prev + 1
+                    prev === product.images.length - 1 ? 0 : prev + 1
                 )
             }
         }
@@ -71,7 +72,7 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
             document.removeEventListener('keydown', handleArrowKeys)
             document.body.style.overflow = 'unset'
         }
-    }, [isOpen, onClose, item?.images])
+    }, [isOpen, onClose, product?.images])
 
     // Formatear precio
     const formatPrice = (price: number) => {
@@ -83,7 +84,7 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
         }).format(price).replace('CLP', '').trim()
     }
 
-    if (!item) return null
+    if (!product) return null
 
     return (
         <AnimatePresence>
@@ -145,23 +146,23 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                                 <div className="md:grid md:grid-cols-2 md:gap-8 space-y-6 md:space-y-0">
                                     {/* Carrusel de imágenes */}
                                     <div className="md:order-1">
-                                        {item.images && item.images.length > 0 ? (
+                                        {product.images && product.images.length > 0 ? (
                                             <div className="relative">
                                                 {/* Imagen principal */}
                                                 <div className="w-full aspect-square md:aspect-auto md:h-96 rounded-lg overflow-hidden bg-gray-100">
                                                     <ZoomableImage
-                                                        src={item.images[currentImageIndex]}
-                                                        alt={item.title}
+                                                        src={product.images[currentImageIndex]}
+                                                        alt={product.title}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </div>
 
                                                 {/* Navegación del carrusel */}
-                                                {item.images.length > 1 && (
+                                                {product.images.length > 1 && (
                                                     <>
                                                         <button
                                                             onClick={() => setCurrentImageIndex(
-                                                                currentImageIndex === 0 ? item.images.length - 1 : currentImageIndex - 1
+                                                                currentImageIndex === 0 ? product.images.length - 1 : currentImageIndex - 1
                                                             )}
                                                             className="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
                                                         >
@@ -171,7 +172,7 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                                                         </button>
                                                         <button
                                                             onClick={() => setCurrentImageIndex(
-                                                                currentImageIndex === item.images.length - 1 ? 0 : currentImageIndex + 1
+                                                                currentImageIndex === product.images.length - 1 ? 0 : currentImageIndex + 1
                                                             )}
                                                             className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all"
                                                         >
@@ -182,7 +183,7 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
 
                                                         {/* Indicadores */}
                                                         <div className="flex justify-center mt-4 space-x-1">
-                                                            {item.images.map((_, index) => (
+                                                            {product.images.map((_, index) => (
                                                                 <button
                                                                     key={index}
                                                                     onClick={() => setCurrentImageIndex(index)}
@@ -197,7 +198,7 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
 
                                                         {/* Thumbnails en desktop */}
                                                         <div className="hidden md:flex mt-4 space-x-2 overflow-x-auto">
-                                                            {item.images.map((image, index) => (
+                                                            {product.images.map((image, index) => (
                                                                 <button
                                                                     key={index}
                                                                     onClick={() => setCurrentImageIndex(index)}
@@ -209,7 +210,7 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                                                                 >
                                                                     <img
                                                                         src={image}
-                                                                        alt={`${item.title} ${index + 1}`}
+                                                                        alt={`${product.title} ${index + 1}`}
                                                                         className="w-full h-full object-cover"
                                                                     />
                                                                 </button>
@@ -227,73 +228,78 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                                         )}
                                     </div>
 
-                                    {/* Información del item */}
+                                    {/* Información del producto */}
                                     <div className="md:order-2 md:flex md:flex-col md:justify-between space-y-6">
                                         <div className="space-y-4">
                                             {/* Título */}
                                             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center md:text-left">
-                                                {item.title || 'Item sin título'}
+                                                {product.title || 'Producto sin título'}
                                             </h2>
 
                                             {/* Subtítulo */}
-                                            {item.subtitle && (
+                                            {product.subtitle && (
                                                 <p className="text-lg md:text-xl text-gray-600 text-center md:text-left">
-                                                    {item.subtitle}
+                                                    {product.subtitle}
                                                 </p>
                                             )}
 
-                                            {/* Precio (solo si es visible) */}
-                                            {item.priceVisible && item.price > 0 && (
-                                                <div className="text-2xl md:text-3xl font-bold text-gray-900 text-center md:text-left">
-                                                    {formatPrice(item.price)}
-                                                </div>
-                                            )}
-
                                             {/* Descripción */}
-                                            {item.description && (
+                                            {product.description && (
                                                 <div className="text-gray-600">
                                                     <p className="leading-relaxed whitespace-pre-wrap">
-                                                        {item.description}
+                                                        {product.description}
                                                     </p>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Botón de acción - desktop */}
+                                        {/* Botón de comprar - desktop */}
                                         <div className="hidden md:block">
-                                            <a
-                                                href={item.paymentLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="w-full inline-flex items-center justify-center px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 text-white shadow-lg hover:shadow-xl"
-                                                style={{ 
-                                                    backgroundColor: styleSettings?.itemButtonColor || '#3b82f6'
-                                                }}
-                                                onMouseOver={(e) => {
-                                                    e.currentTarget.style.filter = 'brightness(110%)'
-                                                }}
-                                                onMouseOut={(e) => {
-                                                    e.currentTarget.style.filter = 'brightness(100%)'
-                                                }}
-                                            >
-                                                {item.buttonText || 'Ver más'}
-                                            </a>
+                                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                                                <div className="text-left">
+                                                    <span className="text-2xl font-bold text-gray-900">
+                                                        {formatPrice(product.price)}
+                                                    </span>
+                                                </div>
+                                                <a
+                                                    href={product.paymentLink}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white shadow-lg hover:shadow-xl"
+                                                    style={{ 
+                                                        backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35'
+                                                    }}
+                                                    onMouseOver={(e) => {
+                                                        e.currentTarget.style.filter = 'brightness(110%)'
+                                                    }}
+                                                    onMouseOut={(e) => {
+                                                        e.currentTarget.style.filter = 'brightness(100%)'
+                                                    }}
+                                                >
+                                                    COMPRAR AHORA
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        {/* Footer fijo con botón - solo móvil */}
+                        {/* Footer fijo con precio y botón - solo móvil */}
                         <div className="md:hidden flex-shrink-0 p-4 border-t border-gray-200 bg-white">
-                            <div className="flex items-center justify-center">
+                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                                <div className="text-left">
+                                    <span className="text-2xl font-bold text-gray-900">
+                                        {formatPrice(product.price)}
+                                    </span>
+                                </div>
                                 <a
-                                    href={item.paymentLink}
+                                    href={product.paymentLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full max-w-md px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white shadow-lg hover:shadow-xl text-center"
+                                    className="px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white shadow-lg hover:shadow-xl"
                                     style={{ 
-                                        backgroundColor: styleSettings?.itemButtonColor || '#3b82f6'
+                                        backgroundColor: styleSettings?.productBuyButtonColor || '#ff6b35'
                                     }}
                                     onMouseOver={(e) => {
                                         e.currentTarget.style.filter = 'brightness(110%)'
@@ -302,7 +308,7 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                                         e.currentTarget.style.filter = 'brightness(100%)'
                                     }}
                                 >
-                                    {item.buttonText || 'Ver más'}
+                                    COMPRAR
                                 </a>
                             </div>
                         </div>

@@ -14,15 +14,15 @@ import { useColorConfig } from '@/hooks/useColorConfig'
 import { useFormState } from '@/hooks/useFormState'
 
 // Componentes
-import { AvatarUpload } from '@/components/AvatarUpload'
-import { FileInfo } from '@/components/FileInfo'
-import { SocialIconsConfig } from '@/components/SocialIconsConfig'
-import { BackgroundConfig } from '@/components/BackgroundConfig'
-import { StyleConfig } from '@/components/StyleConfig'
-import { LinksListUpdated } from '@/components/SortableLinksForm/LinksListUpdated'
-import { DeleteModal } from '@/components/SortableLinksForm/DeleteModal'
-import { ActionButtons } from '@/components/SortableLinksForm/ActionButtons'
-import { PreviewModalUpdated } from '@/components/SortableLinksForm/PreviewModalUpdated'
+import { AvatarUpload } from '../../common/forms/AvatarUpload'
+import { FileInfo } from '../../common/ui/FileInfo'
+import { SocialIconsConfig } from '../profile/SocialIconsConfig'
+import { BackgroundConfig } from '../profile/BackgroundConfig'
+import { StyleConfig } from '../profile/StyleConfig'
+import { LinksListUpdated } from './SortableLinksForm/LinksListUpdated'
+import { DeleteModal } from './SortableLinksForm/DeleteModal'
+import { ActionButtons } from './SortableLinksForm/ActionButtons'
+import { PreviewModalUpdated } from './SortableLinksForm/PreviewModalUpdated'
 
 export function SortableLinksFormWithProducts({
     links,
@@ -33,9 +33,11 @@ export function SortableLinksFormWithProducts({
     socialIcons,
     backgroundColor,
     backgroundSettings,
-    styleSettings
+    styleSettings,
+    categories
 }: {
     links: any[]
+    categories: string[]
     title?: string
     description: string
     profileImage: string
@@ -365,46 +367,35 @@ export function SortableLinksFormWithProducts({
     }
 
     return (
-        <div className="min-h-screen bg-gray-900">
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700">
-                    {/* Header */}
-                    <div className="border-b border-gray-700 px-6 py-4">
-                        <h1 className="text-2xl font-bold text-white">
-                            Administrar Enlaces y Productos
-                        </h1>
-                        <p className="text-gray-300 mt-1">
-                            Gestiona tu página de enlaces y productos
-                        </p>
-                    </div>
+        <div className="w-full">
+            <form onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
+                {/* Layout completamente responsivo - Aprovecha todo el espacio */}
+                <div className="space-y-6 xl:space-y-0 xl:grid xl:grid-cols-4 xl:gap-6">
+                    {/* Primera columna: Perfil y descripción */}
+                    <div className="space-y-4 sm:space-y-6 xl:col-span-1">
+                        {/* Avatar Upload */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
+                                Foto/Video de Perfil
+                            </label>
+                            <AvatarUpload
+                                previewUrl={previewUrl}
+                                previewType={previewType}
+                                onFileSelect={onFileSelect}
+                                selectedFile={selectedFile}
+                            />
+                            <FileInfo selectedFile={selectedFile} previewType={previewType} />
+                        </div>
 
-                    <form onSubmit={handleSubmit} className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                            {/* Primera columna: Perfil y descripción */}
-                            <div className="space-y-6 md:col-span-1 lg:col-span-1">
-                                {/* Avatar Upload */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-200 mb-3">
-                                        Foto/Video de Perfil
-                                    </label>
-                                    <AvatarUpload
-                                        previewUrl={previewUrl}
-                                        previewType={previewType}
-                                        onFileSelect={onFileSelect}
-                                        selectedFile={selectedFile}
-                                    />
-                                    <FileInfo selectedFile={selectedFile} previewType={previewType} />
-                                </div>
-
-                                {/* Título */}
-                                <div>
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
-                                        Título de la página
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="title"
-                                        value={localTitle}
+                        {/* Título */}
+                        <div>
+                            <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
+                                Título de la página
+                            </label>
+                            <input
+                                type="text"
+                                id="title"
+                                value={localTitle}
                                         onChange={(e) => setLocalTitle(e.target.value.slice(0, 65))}
                                         maxLength={65}
                                         className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -439,7 +430,7 @@ export function SortableLinksFormWithProducts({
                             </div>
 
                             {/* Segunda columna: Configuración de estilo */}
-                            <div className="space-y-6 md:col-span-1 lg:col-span-1">
+                            <div className="space-y-4 sm:space-y-6">
                                 {/* Configuración de Fondo */}
                                 <BackgroundConfig
                                     backgroundType={backgroundType}
@@ -470,13 +461,13 @@ export function SortableLinksFormWithProducts({
                             </div>
 
                             {/* Tercera columna: Lista de Links y Productos */}
-                            <div className="space-y-6 md:col-span-2 lg:col-span-1 w-full max-w-full overflow-hidden">
+                            <div className="space-y-4 sm:space-y-6 w-full lg:col-span-3">
                                 {/* Lista de Links y Productos */}
                                 <div className="w-full">
-                                    <label className="block text-sm font-medium text-gray-200 mb-3">
+                                    <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
                                         Enlaces y Productos
                                     </label>
-                                    <div className="w-full max-w-full overflow-hidden">
+                                    <div className="w-full">
                                         <LinksListUpdated
                                             currentLinks={currentLinks}
                                             onAddNewLink={addNewLink}
@@ -490,6 +481,20 @@ export function SortableLinksFormWithProducts({
                                             onToggleVisibility={toggleVisibility}
                                             linkCardBackgroundColor={linkCardBackgroundColor}
                                             linkCardTextColor={linkCardTextColor}
+                                            availableCategories={categories}
+                                            onUpdateLinkCategories={(linkId: number, newCategories: string[]) => {
+                                                const updatedLinks = currentLinks.map(link => 
+                                                    link.id === linkId 
+                                                        ? { ...link, categories: newCategories }
+                                                        : link
+                                                )
+                                                setCurrentLinks(updatedLinks)
+                                            }}
+                                            onCategoriesChange={() => {
+                                                // Para actualizar las categorías, necesitaríamos una función del componente padre
+                                                // Por ahora, podemos usar window.location.reload() o implementar un refetch
+                                                window.location.reload()
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -506,41 +511,39 @@ export function SortableLinksFormWithProducts({
                             selectedFile={selectedFile}
                         />
                     </form>
+
+                    {/* Modales */}
+                    <DeleteModal
+                        isOpen={showDeleteModal}
+                        onConfirm={confirmDelete}
+                        onCancel={cancelDelete}
+                    />
+
+                    <PreviewModalUpdated
+                        isOpen={showPreviewModal}
+                        onClose={() => setShowPreviewModal(false)}
+                        previewUrl={previewUrl}
+                        previewType={previewType}
+                        titleColor={titleColor}
+                        title={localTitle}
+                        description={localDescription}
+                        socialIconColors={socialIconColors}
+                        socialIcons={socialIcons}
+                        currentLinks={currentLinks}
+                        linkCardBackgroundColor={linkCardBackgroundColor}
+                        linkCardTextColor={linkCardTextColor}
+                        backgroundType={backgroundType}
+                        backgroundPreviewUrl={backgroundPreviewUrl}
+                        backgroundImageUrl={backgroundImageUrl}
+                        backgroundImageOpacity={backgroundImageOpacity}
+                        bgColor={bgColor}
+                        styleSettings={{
+                            titleColor,
+                            linkCardBackgroundColor,
+                            linkCardTextColor,
+                            productBuyButtonColor
+                        }}
+                    />
                 </div>
-
-                {/* Modales */}
-                <DeleteModal
-                    isOpen={showDeleteModal}
-                    onConfirm={confirmDelete}
-                    onCancel={cancelDelete}
-                />
-
-                <PreviewModalUpdated
-                    isOpen={showPreviewModal}
-                    onClose={() => setShowPreviewModal(false)}
-                    previewUrl={previewUrl}
-                    previewType={previewType}
-                    titleColor={titleColor}
-                    title={localTitle}
-                    description={localDescription}
-                    socialIconColors={socialIconColors}
-                    socialIcons={socialIcons}
-                    currentLinks={currentLinks}
-                    linkCardBackgroundColor={linkCardBackgroundColor}
-                    linkCardTextColor={linkCardTextColor}
-                    backgroundType={backgroundType}
-                    backgroundPreviewUrl={backgroundPreviewUrl}
-                    backgroundImageUrl={backgroundImageUrl}
-                    backgroundImageOpacity={backgroundImageOpacity}
-                    bgColor={bgColor}
-                    styleSettings={{
-                        titleColor,
-                        linkCardBackgroundColor,
-                        linkCardTextColor,
-                        productBuyButtonColor
-                    }}
-                />
-            </div>
-        </div>
-    )
-}
+            )
+        }
