@@ -85,9 +85,9 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
             return
         }
 
-        // Validar tamaño (máximo 10MB para fondo)
-        if (file.size > 10 * 1024 * 1024) {
-            onStatusChange({ error: 'La imagen de fondo debe ser menor a 10MB.' })
+        // Validar tamaño (máximo 1GB para fondo)
+        if (file.size > 1024 * 1024 * 1024) {
+            onStatusChange({ error: 'La imagen de fondo debe ser menor a 1GB.' })
             return
         }
 

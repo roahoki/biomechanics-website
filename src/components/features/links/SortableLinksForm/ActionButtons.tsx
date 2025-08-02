@@ -54,7 +54,7 @@ export function ActionButtons({
                 {selectedFile && (
                     <p>Se subirá un nuevo {getFileTypeText(previewType).toLowerCase()} al guardar los cambios.</p>
                 )}
-                <p>Formatos soportados: JPG, PNG, WebP, GIF, MP4, WebM. Tamaño máximo: 50MB</p>
+                <p>Formatos soportados: JPG, PNG, WebP, GIF, MP4, WebM. Tamaño máximo: 1GB</p>
                 <p className="mt-1 text-xs">
                     Los videos se reproducen automáticamente en bucle y sin sonido.
                 </p>

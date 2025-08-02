@@ -26,7 +26,7 @@ export function getFileType(file: File): ProfileImageType {
 
 // Validar si el archivo es soportado
 export function isValidAvatarFile(file: File): boolean {
-  const maxSize = 50 * 1024 * 1024 // 50MB
+  const maxSize = 1024 * 1024 * 1024 // 1GB
   const supportedTypes = [
     // Imágenes
     'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
