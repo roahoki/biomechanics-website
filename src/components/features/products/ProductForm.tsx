@@ -190,7 +190,7 @@ export function ProductForm({ product, availableCategories, onUpdate, onRemove }
                     images={images}
                     onImagesChange={handleImagesChange}
                     maxImages={10}
-                    maxSizeInMB={10}
+                    maxSizeInMB={1024}
                 />
                 {errors.images && (
                     <p className="mt-1 text-sm text-red-600">{errors.images}</p>

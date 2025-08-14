@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Item } from '@/types/product'
 import { StyleSettings } from '@/utils/links'
@@ -18,17 +18,20 @@ interface ItemModalProps {
 export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [isClient, setIsClient] = useState(false)
+    // Referencia al header del modal para el swipe
+    const headerRef = useRef<HTMLDivElement>(null)
 
     // Verificar que estamos en el cliente
     useEffect(() => {
         setIsClient(true)
     }, [])
 
-    // Hook para gestos de swipe en móvil
+    // Hook para gestos de swipe en móvil (solo en el header)
     useSwipeGesture({
         onSwipeDown: onClose,
         enabled: isOpen && isClient && window.innerWidth < 768, // Solo en móvil
-        threshold: 50
+        threshold: 50,
+        targetRef: headerRef // Aplicar solo al header
     })
 
     // Resetear index al cambiar item
@@ -129,7 +132,10 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                         }}
                     >
                         {/* Header con botón de cerrar */}
-                        <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-200">
+                        <div 
+                            ref={headerRef}
+                            className="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-200"
+                        >
                             <div className="w-8" />
                             {/* Handle visual - solo en móvil */}
                             <div className="w-12 h-1 bg-gray-300 rounded-full md:hidden"></div>
