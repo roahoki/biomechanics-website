@@ -1,72 +1,60 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
-import { updateCategoriesInSupabase } from '@/utils/links'
+import { PlusIcon, PencilIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
 
 interface CategoryManagerCompactProps {
   categories: string[]
-  onCategoriesChange: () => void
+  onCategoriesChange: (categories: string[]) => void
 }
 
 export default function CategoryManagerCompact({ categories, onCategoriesChange }: CategoryManagerCompactProps) {
   const [newCategoryName, setNewCategoryName] = useState('')
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingName, setEditingName] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false) // Conservado para deshabilitar UI mientras se procesa localmente
 
-  const addCategory = async () => {
+  const addCategory = () => {
     if (!newCategoryName.trim() || newCategoryName.length > 20) return
-    
     setIsLoading(true)
-    try {
-      const updatedCategories = [...categories, newCategoryName.trim()]
-      await updateCategoriesInSupabase(updatedCategories)
-      setNewCategoryName('')
-      onCategoriesChange()
-    } catch (error) {
-      console.error('Error agregando categoría:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    const updatedCategories = [...categories, newCategoryName.trim()]
+    onCategoriesChange(updatedCategories)
+    setNewCategoryName('')
+    setIsLoading(false)
   }
 
-  const deleteCategory = async (index: number) => {
+  const deleteCategory = (index: number) => {
     if (!confirm('¿Eliminar esta categoría?')) return
-    
     setIsLoading(true)
-    try {
-      const updatedCategories = categories.filter((_, i) => i !== index)
-      await updateCategoriesInSupabase(updatedCategories)
-      onCategoriesChange()
-    } catch (error) {
-      console.error('Error eliminando categoría:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    const updatedCategories = categories.filter((_, i) => i !== index)
+    onCategoriesChange(updatedCategories)
+    setIsLoading(false)
   }
 
-  const saveEdit = async () => {
+  const saveEdit = () => {
     if (!editingName.trim() || editingName.length > 20 || editingIndex === null) return
-    
     setIsLoading(true)
-    try {
-      const updatedCategories = [...categories]
-      updatedCategories[editingIndex] = editingName.trim()
-      await updateCategoriesInSupabase(updatedCategories)
-      setEditingIndex(null)
-      setEditingName('')
-      onCategoriesChange()
-    } catch (error) {
-      console.error('Error editando categoría:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    const updatedCategories = [...categories]
+    updatedCategories[editingIndex] = editingName.trim()
+    onCategoriesChange(updatedCategories)
+    setEditingIndex(null)
+    setEditingName('')
+    setIsLoading(false)
   }
 
   const cancelEdit = () => {
     setEditingIndex(null)
     setEditingName('')
+  }
+
+  const moveCategory = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= categories.length || fromIndex === toIndex) return
+    setIsLoading(true)
+    const updatedCategories = [...categories]
+    const [moved] = updatedCategories.splice(fromIndex, 1)
+    updatedCategories.splice(toIndex, 0, moved)
+    onCategoriesChange(updatedCategories)
+    setIsLoading(false)
   }
 
   return (
@@ -79,7 +67,7 @@ export default function CategoryManagerCompact({ categories, onCategoriesChange 
           onChange={(e) => setNewCategoryName(e.target.value.slice(0, 20))}
           placeholder="Nueva categoría..."
           className="flex-1 px-2 py-1 text-sm bg-gray-600 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          onKeyPress={(e) => e.key === 'Enter' && addCategory()}
+          onKeyDown={(e) => e.key === 'Enter' && addCategory()}
           disabled={isLoading}
         />
         <button
@@ -102,7 +90,7 @@ export default function CategoryManagerCompact({ categories, onCategoriesChange 
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value.slice(0, 20))}
                   className="flex-1 px-2 py-1 text-sm bg-gray-700 border border-gray-500 rounded text-white"
-                  onKeyPress={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') saveEdit()
                     if (e.key === 'Escape') cancelEdit()
                   }}
@@ -123,6 +111,25 @@ export default function CategoryManagerCompact({ categories, onCategoriesChange 
               </>
             ) : (
               <>
+                {/* Controles de orden */}
+                <div className="flex flex-col items-center space-y-1">
+                  <button
+                    onClick={() => moveCategory(index, index - 1)}
+                    disabled={index === 0 || isLoading}
+                    className={`p-1 rounded text-gray-300 hover:text-white hover:bg-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors`}
+                    title="Subir"
+                  >
+                    <ArrowUpIcon className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => moveCategory(index, index + 1)}
+                    disabled={index === categories.length - 1 || isLoading}
+                    className={`p-1 rounded text-gray-300 hover:text-white hover:bg-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors`}
+                    title="Bajar"
+                  >
+                    <ArrowDownIcon className="w-3 h-3" />
+                  </button>
+                </div>
                 <span className="flex-1 text-sm text-gray-200 truncate">{category}</span>
                 <button
                   onClick={() => {
@@ -152,6 +159,7 @@ export default function CategoryManagerCompact({ categories, onCategoriesChange 
           No hay categorías.<br />Agrega una nueva arriba.
         </p>
       )}
+      <p className="text-[10px] text-gray-400 text-right">Los cambios se guardarán al presionar "Guardar Cambios".</p>
     </div>
   )
 }

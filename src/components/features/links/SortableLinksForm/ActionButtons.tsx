@@ -22,13 +22,13 @@ export function ActionButtons({
             {/* Botones de acción responsivos */}
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
                 {/* Botón de vista previa */}
-                <button
+                {/* <button
                     type="button"
                     onClick={onPreview}
                     className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-blue-600 bg-white border border-blue-600 rounded-lg shadow hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium"
                 >
                     👁️ Vista Previa
-                </button>
+                </button> */}
 
                 {/* Botón para guardar cambios */}
                 <button
