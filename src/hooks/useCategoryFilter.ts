@@ -4,11 +4,11 @@ import { useState, useMemo } from 'react'
 import { LinkItem } from '@/types/product'
 
 export function useCategoryFilter(items: LinkItem[], categories: string[]) {
-  const [selectedCategory, setSelectedCategory] = useState('Todo')
+  const [selectedCategory, setSelectedCategory] = useState('Destacados')
 
   // Filtrar items basado en la categoría seleccionada
   const filteredItems = useMemo(() => {
-    if (selectedCategory === 'Todo') {
+    if (selectedCategory === 'Destacados') {
       return items
     }
 
