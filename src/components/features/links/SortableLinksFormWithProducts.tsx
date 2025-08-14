@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { updateAdminLinksWithProducts } from '@/app/admin/_actions'
 import { useRouter } from 'next/navigation'
 import { type ProfileImageType } from '@/utils/file-utils'
@@ -48,6 +48,7 @@ export function SortableLinksFormWithProducts({
     styleSettings: StyleSettings
 }) {
     const router = useRouter()
+    const formRef = useRef<HTMLFormElement | null>(null)
     
     // Convertir links legacy a LinkItem
     const convertedLinks: LinkItem[] = links.map(link => ({
@@ -160,6 +161,47 @@ export function SortableLinksFormWithProducts({
     // Estados locales
     const [localTitle, setLocalTitle] = useState(title || "biomechanics.wav")
     const [localDescription, setLocalDescription] = useState(description)
+    // Estado local de categorías (editable hasta guardar)
+    const [localCategories, setLocalCategories] = useState<string[]>(categories || [])
+    const [showUnsaved, setShowUnsaved] = useState(false)
+    const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+    // Baseline para comparar (se actualiza tras guardar con éxito)
+    const [baseline, setBaseline] = useState(() => ({
+        categories: categories || [],
+        title: title || 'biomechanics.wav',
+        description,
+        profileImage,
+        backgroundType: backgroundSettings.type || 'color',
+        backgroundImageUrl: backgroundSettings.imageUrl || '',
+        backgroundImageOpacity: backgroundSettings.imageOpacity || 0.5,
+        bgColor: backgroundColor,
+        titleColor: styleSettings.titleColor || '#ffffff',
+        linkCardBackgroundColor: styleSettings.linkCardBackgroundColor || '#ffffff',
+        linkCardTextColor: styleSettings.linkCardTextColor || '#000000',
+        productBuyButtonColor: styleSettings.productBuyButtonColor || '#ff6b35',
+        itemButtonColor: styleSettings.itemButtonColor || '#3b82f6'
+    }))
+
+    // Detectar cambios sin guardar comparando con baseline (no con props originales)
+    useEffect(() => {
+        const changed = (
+            JSON.stringify(localCategories) !== JSON.stringify(baseline.categories) ||
+            localTitle !== baseline.title ||
+            localDescription !== baseline.description ||
+            previewUrl !== baseline.profileImage ||
+            backgroundType !== baseline.backgroundType ||
+            backgroundImageUrl !== baseline.backgroundImageUrl ||
+            backgroundImageOpacity !== baseline.backgroundImageOpacity ||
+            bgColor !== baseline.bgColor ||
+            titleColor !== baseline.titleColor ||
+            linkCardBackgroundColor !== baseline.linkCardBackgroundColor ||
+            linkCardTextColor !== baseline.linkCardTextColor ||
+            productBuyButtonColor !== baseline.productBuyButtonColor ||
+            itemButtonColor !== baseline.itemButtonColor
+        )
+        setShowUnsaved(changed)
+    }, [localCategories, localTitle, localDescription, previewUrl, backgroundType, backgroundImageUrl, backgroundImageOpacity, bgColor, titleColor, linkCardBackgroundColor, linkCardTextColor, productBuyButtonColor, itemButtonColor, baseline])
 
     // Manejadores de archivo
     const onFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -325,7 +367,8 @@ export function SortableLinksFormWithProducts({
                     linkCardTextColor,
                     productBuyButtonColor,
                     itemButtonColor
-                }
+                },
+                categories: localCategories
             }
 
             console.log('📤 Datos finales a enviar:', {
@@ -340,17 +383,29 @@ export function SortableLinksFormWithProducts({
 
             if (result.success) {
                 setStatus({ message: result.message })
-                
-                // Limpiar archivos seleccionados después del éxito
-                setSelectedFile(null)
-                setSelectedBackgroundFile(null)
-                
-                // Opcionalmente recargar la página o navegar
-                setTimeout(() => {
-                    router.refresh()
-                }, 1000)
+                setToast({ type: 'success', message: 'Cambios guardados correctamente.' })
+                // Actualizar baseline para reflejar el nuevo estado persistido
+                setBaseline({
+                    categories: [...localCategories],
+                    title: localTitle,
+                    description: localDescription,
+                    profileImage: finalProfileImage,
+                    backgroundType,
+                    backgroundImageUrl: finalBackgroundImageUrl,
+                    backgroundImageOpacity,
+                    bgColor,
+                    titleColor,
+                    linkCardBackgroundColor,
+                    linkCardTextColor,
+                    productBuyButtonColor,
+                    itemButtonColor
+                })
+                setShowUnsaved(false)
+                setTimeout(() => setToast(null), 4000)
             } else {
                 setStatus({ error: result.error || 'Error desconocido' })
+                setToast({ type: 'error', message: result.error || 'Error al guardar.' })
+                setTimeout(() => setToast(null), 5000)
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido al guardar los cambios'
@@ -366,9 +421,22 @@ export function SortableLinksFormWithProducts({
         }
     }
 
+    useEffect(() => {
+        const keyHandler = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault()
+                if (!isSubmitting) {
+                    formRef.current?.requestSubmit()
+                }
+            }
+        }
+        window.addEventListener('keydown', keyHandler)
+        return () => window.removeEventListener('keydown', keyHandler)
+    }, [isSubmitting])
+
     return (
         <div className="w-full">
-            <form onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
+            <form ref={formRef} onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
                 {/* Layout completamente responsivo - Aprovecha todo el espacio */}
                 <div className="space-y-6 xl:space-y-0 xl:grid xl:grid-cols-4 xl:gap-6">
                     {/* Primera columna: Perfil y descripción */}
@@ -481,7 +549,7 @@ export function SortableLinksFormWithProducts({
                                             onToggleVisibility={toggleVisibility}
                                             linkCardBackgroundColor={linkCardBackgroundColor}
                                             linkCardTextColor={linkCardTextColor}
-                                            availableCategories={categories}
+                                            availableCategories={localCategories}
                                             onUpdateLinkCategories={(linkId: number, newCategories: string[]) => {
                                                 const updatedLinks = currentLinks.map(link => 
                                                     link.id === linkId 
@@ -490,11 +558,7 @@ export function SortableLinksFormWithProducts({
                                                 )
                                                 setCurrentLinks(updatedLinks)
                                             }}
-                                            onCategoriesChange={() => {
-                                                // Para actualizar las categorías, necesitaríamos una función del componente padre
-                                                // Por ahora, podemos usar window.location.reload() o implementar un refetch
-                                                window.location.reload()
-                                            }}
+                                            onCategoriesChange={(cats: string[]) => setLocalCategories(cats)}
                                         />
                                     </div>
                                 </div>
@@ -504,12 +568,34 @@ export function SortableLinksFormWithProducts({
                         {/* Action Buttons */}
                         <ActionButtons
                             onPreview={() => setShowPreviewModal(true)}
-                            onSubmit={() => {}} // El submit se maneja en el form onSubmit
+                            onSubmit={() => {}}
                             isSubmitting={isSubmitting}
                             uploadingImage={false}
                             previewType={previewType}
                             selectedFile={selectedFile}
                         />
+                        {/* Toast de cambios sin guardar */}
+                        {showUnsaved && !isSubmitting && !toast && (
+                          <div className="fixed bottom-4 right-4 z-50 max-w-sm bg-yellow-500/95 text-white px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in">
+                            <span className="text-lg">⚠️</span>
+                            <div className="text-sm leading-snug">
+                              <p className="font-semibold">Cambios sin guardar</p>
+                              <p>Pulsa "Guardar Cambios" para persistirlos.</p>
+                            </div>
+                            <button onClick={() => setShowUnsaved(false)} className="ml-2 text-white/80 hover:text-white">✕</button>
+                          </div>
+                        )}
+                        {/* Toast de resultado */}
+                        {toast && (
+                          <div className={`fixed bottom-4 right-4 z-50 max-w-sm px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in ${toast.type === 'success' ? 'bg-green-600/95' : 'bg-red-600/95'}`}> 
+                            <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
+                            <div className="text-sm leading-snug">
+                              <p className="font-semibold">{toast.type === 'success' ? 'Éxito' : 'Error'}</p>
+                              <p>{toast.message}</p>
+                            </div>
+                            <button onClick={() => setToast(null)} className="ml-2 text-white/80 hover:text-white">✕</button>
+                          </div>
+                        )}
                     </form>
 
                     {/* Modales */}
@@ -519,7 +605,7 @@ export function SortableLinksFormWithProducts({
                         onCancel={cancelDelete}
                     />
 
-                    <PreviewModalUpdated
+                    {/* <PreviewModalUpdated
                         isOpen={showPreviewModal}
                         onClose={() => setShowPreviewModal(false)}
                         previewUrl={previewUrl}
@@ -543,7 +629,7 @@ export function SortableLinksFormWithProducts({
                             linkCardTextColor,
                             productBuyButtonColor
                         }}
-                    />
+                    /> */}
                 </div>
             )
         }

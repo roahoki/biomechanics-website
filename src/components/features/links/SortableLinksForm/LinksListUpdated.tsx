@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LinkCard } from './LinkCard'
 import { ProductItem } from '../../products/ProductItem'
 import { ItemForm } from '../../products/ItemForm'
@@ -19,7 +19,7 @@ interface LinksListProps {
     onUpdateItem: (id: number, updatedItem: Partial<Item>) => void
     onReorderLinks: (newOrder: LinkItem[]) => void
     onToggleVisibility: (id: number) => void
-    onCategoriesChange: () => void
+    onCategoriesChange: (categories: string[]) => void // changed
     linkCardBackgroundColor: string
     linkCardTextColor: string
 }
@@ -42,6 +42,19 @@ export function LinksListUpdated({
     linkCardTextColor
 }: LinksListProps) {
     const [viewMode, setViewMode] = useState<'detail' | 'list'>('detail')
+
+    // Atajo: Ctrl + Shift -> cambiar a vista listado
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey) {
+                // Evitar interferir con otros atajos como Ctrl+Shift+C etc. solo si no hay otra tecla distinta a shift/control
+                // Si se presiona una letra adicional el keydown será de esa letra, este bloque aún se ejecutará
+                setViewMode('list')
+            }
+        }
+        window.addEventListener('keydown', handler)
+        return () => window.removeEventListener('keydown', handler)
+    }, [])
 
     // Funciones para manejo de reordenamiento
     const handleMoveUp = (index: number) => {
@@ -92,19 +105,19 @@ export function LinksListUpdated({
                         <span className="sm:hidden">➕ Enlace</span>
                         <span className="hidden sm:inline">➕ Agregar enlace</span>
                     </button>
-                    <button
+                    {/* <button
                         onClick={onAddNewProduct}
-                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm sm:text-base"
+                        className=""
                     >
                         <span className="sm:hidden">📦 Producto</span>
                         <span className="hidden sm:inline">📦 Agregar producto</span>
-                    </button>
+                    </button> */}
                     <button
                         onClick={onAddNewItem}
-                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm sm:text-base"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm sm:text-base"
                     >
-                        <span className="sm:hidden">⭐ Item</span>
-                        <span className="hidden sm:inline">⭐ Agregar presionable</span>
+                        <span className="sm:hidden">➕ Item</span>
+                        <span className="hidden sm:inline">➕ Item</span>
                     </button>
                 </div>
             </div>

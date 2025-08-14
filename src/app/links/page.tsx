@@ -236,7 +236,7 @@ export default function Page() {
 
                 {/* Filtro de categorías */}
                 {categoriesWithItems.length > 1 && (
-                    <div className="w-full max-w-4xl mb-8 flex justify-center">
+                    <div className="w-full max-w-4xl mb-8 flex justify-center sticky top-0 z-30 px-2 -mx-2">
                         <CategoryFilter
                             categories={categoriesWithItems}
                             selectedCategory={selectedCategory}
