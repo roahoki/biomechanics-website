@@ -20,6 +20,7 @@ export interface SocialIcons {
   soundcloud?: SocialIcon
   youtube?: SocialIcon
   tiktok?: SocialIcon
+  mixcloud?: SocialIcon
 }
 
 export interface BackgroundSettings {

@@ -231,6 +231,13 @@ export default function Page() {
                                 color={socialIcons.tiktok.color || '#000000'}
                             />
                         )}
+                        {socialIcons.mixcloud && socialIcons.mixcloud.url && (
+                            <SocialIcon
+                                icon="mixcloud"
+                                url={socialIcons.mixcloud.url}
+                                color={socialIcons.mixcloud.color || '#52ADE9'}
+                            />
+                        )}
                     </div>
                 )}
 

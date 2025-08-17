@@ -120,7 +120,8 @@ export function SortableLinksFormWithProducts({
             instagram: socialIcons.instagram?.color || '#E4405F',
             soundcloud: socialIcons.soundcloud?.color || '#FF5500',
             youtube: socialIcons.youtube?.color || '#FF0000',
-            tiktok: socialIcons.tiktok?.color || '#000000'
+            tiktok: socialIcons.tiktok?.color || '#000000',
+            mixcloud: socialIcons.mixcloud?.color || '#52ADE9'
         },
         initialBgColor: backgroundColor,
         initialTitleColor: styleSettings.titleColor || '#ffffff',
@@ -352,7 +353,8 @@ export function SortableLinksFormWithProducts({
                     instagram: { url: socialIcons.instagram?.url, color: socialIconColors.instagram },
                     soundcloud: { url: socialIcons.soundcloud?.url, color: socialIconColors.soundcloud },
                     youtube: { url: socialIcons.youtube?.url, color: socialIconColors.youtube },
-                    tiktok: { url: socialIcons.tiktok?.url, color: socialIconColors.tiktok }
+                    tiktok: { url: socialIcons.tiktok?.url, color: socialIconColors.tiktok },
+                    mixcloud: { url: socialIcons.mixcloud?.url || 'https://www.mixcloud.com/biomechanics-wav/', color: socialIconColors.mixcloud }
                 },
                 backgroundColor: bgColor,
                 backgroundSettings: {
