@@ -145,6 +145,10 @@ export async function updateAdminLinks(formData: FormData) {
       tiktok: {
         url: currentData.socialIcons.tiktok?.url,
         color: formData.get('socialIcon_tiktok_color')?.toString() || currentData.socialIcons.tiktok?.color || '#000000'
+      },
+      mixcloud: {
+        url: currentData.socialIcons.mixcloud?.url || 'https://www.mixcloud.com/biomechanics-wav/',
+        color: formData.get('socialIcon_mixcloud_color')?.toString() || currentData.socialIcons.mixcloud?.color || '#52ADE9'
       }
     }
     
