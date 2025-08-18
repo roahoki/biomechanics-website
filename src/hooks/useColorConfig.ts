@@ -6,6 +6,7 @@ interface ColorConfig {
         soundcloud: string
         youtube: string
         tiktok: string
+        mixcloud: string 
     }
     bgColor: string
     titleColor: string
