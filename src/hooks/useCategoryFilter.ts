@@ -8,10 +8,12 @@ export function useCategoryFilter(items: LinkItem[], categories: string[]) {
 
   // Filtrar items basado en la categoría seleccionada
   const filteredItems = useMemo(() => {
-    if (selectedCategory === 'Destacados') {
-      return items
+    if (selectedCategory === 'Todo') {
+      // "Todo" muestra todos los elementos visibles
+      return items.filter(item => item.visible !== false)
     }
 
+    // Para "Destacados" y todas las demás categorías, mostrar solo los elementos de esa categoría
     return items.filter(item => {
       // Verificar si el item tiene categorías y si incluye la categoría seleccionada
       return item.categories && item.categories.includes(selectedCategory)
@@ -32,8 +34,30 @@ export function useCategoryFilter(items: LinkItem[], categories: string[]) {
       }
     })
 
-    // Mantener el orden original de las categorías pero solo mostrar las que tienen items
-    return categories.filter(category => categoriesInUse.has(category))
+    // Filtrar solo las categorías que tienen items
+    const filteredCategories = categories.filter(category => categoriesInUse.has(category))
+    
+    // Crear un nuevo array con el orden deseado: "Destacados" primero, el resto en orden original
+    let orderedCategories = []
+    
+    // Si "Destacados" está en las categorías disponibles, asegurarnos que vaya primero
+    if (filteredCategories.includes('Destacados')) {
+      orderedCategories.push('Destacados')
+      // Agregar el resto de categorías (excepto "Destacados")
+      filteredCategories.forEach(category => {
+        if (category !== 'Destacados') {
+          orderedCategories.push(category)
+        }
+      })
+    } else {
+      // Si no existe "Destacados", mantener el orden original
+      orderedCategories = [...filteredCategories]
+    }
+    
+    // Agregar "Todo" al final
+    orderedCategories.push('Todo')
+    
+    return orderedCategories
   }, [items, categories])
 
   return {

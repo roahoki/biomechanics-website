@@ -141,46 +141,45 @@ export default function Page() {
                             'imageUrl' in (backgroundSettings || {}) && 
                             !!backgroundSettings.imageUrl
 
+    // Crear variables CSS para fondo y opacidad
+    const cssVariables = {
+        '--bg-image': hasImageBackground ? `url(${backgroundSettings?.imageUrl})` : 'none',
+        '--bg-color': backgroundSettings?.color || backgroundColor || "#1a1a1a",
+        '--bg-opacity': backgroundSettings?.imageOpacity || 0.5,
+    } as React.CSSProperties;
+
     // Vista de solo lectura para usuarios comunes
     return (
-        <div 
-            className="relative min-h-screen"
-            style={{
-                // Aplicar el fondo directamente aquí
-                ...(hasImageBackground ? {
-                    backgroundImage: `url(${backgroundSettings?.imageUrl})`,
+        <div className="relative min-h-screen" style={cssVariables}>
+            {/* Capa de fondo fija que no depende del contenido */}
+            <div 
+                className="fixed inset-0 z-0 pointer-events-none bg-background-layer"
+                style={{
+                    backgroundImage: hasImageBackground ? 'var(--bg-image)' : 'none',
+                    backgroundColor: hasImageBackground ? 'transparent' : 'var(--bg-color)',
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat",
-                    backgroundAttachment: "fixed"
-                } : backgroundStyle)
-            }}
-        >
-            {/* Overlay de opacidad para imagen de fondo */}
-            {hasImageBackground && (
-                <div 
-                    className="fixed inset-0 bg-black select-none"
-                    style={{ 
-                        opacity: 1 - (backgroundSettings?.imageOpacity || 0.5),
-                        zIndex: 0,
-                        userSelect: 'none',
-                        WebkitUserSelect: 'none',
-                        WebkitTouchCallout: 'none',
-                        msUserSelect: 'none',
-                        pointerEvents: 'none'
-                    }}
-                />
-            )}
+                    backgroundAttachment: "fixed",
+                    // Aplicar opacidad directamente a la imagen usando linear-gradient
+                    ...(hasImageBackground && {
+                        backgroundBlendMode: 'normal',
+                        // Esto crea un overlay negro con la opacidad deseada sin necesitar un div adicional
+                        backgroundImage: `linear-gradient(rgba(0, 0, 0, calc(1 - var(--bg-opacity))), rgba(0, 0, 0, calc(1 - var(--bg-opacity)))), var(--bg-image)`,
+                    })
+                }}
+            />
 
-            {/* Contenedor de contenido */}
+            {/* Contenedor de contenido - ahora con z-index y posición sobre la capa de fondo */}
             <div
-                className="flex flex-col items-center min-h-screen px-4 py-10 text-[var(--color-neutral-light)] font-body select-none relative"
+                className="flex flex-col items-center min-h-screen py-10 text-[var(--color-neutral-light)] font-body relative"
                 style={{
-                    zIndex: 1,
-                    userSelect: 'none',
-                    WebkitUserSelect: 'none',
-                    WebkitTouchCallout: 'none',
-                    msUserSelect: 'none'
+                    zIndex: 1, // Mantener encima de la capa de fondo
+                    position: 'relative', // Asegura el correcto apilamiento
+                    width: '100%', // Usar todo el ancho disponible
+                    overflowX: 'hidden', // Solo ocultar desbordamiento horizontal
+                    overflowY: 'auto', // Permitir scroll vertical
+                    WebkitOverflowScrolling: 'touch' // Scroll suave en iOS
                 }}
             >
                 {/* Avatar dinámico */}
@@ -243,7 +242,7 @@ export default function Page() {
 
                 {/* Filtro de categorías */}
                 {categoriesWithItems.length > 1 && (
-                    <div className="w-full max-w-4xl mb-8 flex justify-center sticky top-0 z-30 px-2 -mx-2">
+                    <div className="w-full max-w-4xl mb-4 flex justify-center z-30 px-2 -mx-2 sticky-category-filter">
                         <CategoryFilter
                             categories={categoriesWithItems}
                             selectedCategory={selectedCategory}
@@ -256,19 +255,28 @@ export default function Page() {
 
 
                 {/* Lista unificada de presionables (links + productos + items) */}
-                {Array.isArray(filteredItems) && filteredItems.length > 0 && (
-                    <PressablesList
-                        items={filteredItems}
-                        styleSettings={styleSettings || { 
-                            titleColor: '#ffffff', 
-                            linkCardBackgroundColor: '#ffffff', 
-                            linkCardTextColor: '#000000',
-                            productBuyButtonColor: '#ff6b35'
-                        }}
-                        onProductClick={(product) => setSelectedProduct(product)}
-                        onItemClick={(item) => setSelectedItem(item)}
-                    />
-                )}
+                <div className="w-full max-w-full px-4 md:px-8 lg:px-16 flex-grow flex flex-col items-center list-container">
+                    {Array.isArray(filteredItems) && filteredItems.length > 0 ? (
+                        <PressablesList
+                            items={filteredItems}
+                            styleSettings={styleSettings || { 
+                                titleColor: '#ffffff', 
+                                linkCardBackgroundColor: '#ffffff', 
+                                linkCardTextColor: '#000000',
+                                productBuyButtonColor: '#ff6b35'
+                            }}
+                            onProductClick={(product) => setSelectedProduct(product)}
+                            onItemClick={(item) => setSelectedItem(item)}
+                        />
+                    ) : (
+                        <div className="w-full py-8 text-center text-white">
+                            No hay elementos disponibles en esta categoría
+                        </div>
+                    )}
+                </div>
+                
+                {/* Espacio adicional para móvil */}
+                <div className="h-8 md:hidden"></div>
             </div>
 
             {/* Modal de producto */}
@@ -290,6 +298,55 @@ export default function Page() {
                     styleSettings={styleSettings}
                 />
             )}
+            
+            {/* Estilos para manejar el fondo y transiciones */}
+            <style jsx global>{`
+                /* Clase para la capa de fondo */
+                .bg-background-layer {
+                    transition: background-image 0.3s ease-in-out, background-color 0.3s ease-in-out;
+                    will-change: background-image, background-color;
+                    backface-visibility: hidden;
+                }
+                
+                /* Optimizaciones para mejorar el rendimiento */
+                @media (hover: hover) {
+                    .bg-background-layer {
+                        transform: translateZ(0);
+                    }
+                }
+                
+                /* Estilo para el filtro de categorías fijo */
+                .sticky-category-filter {
+                    position: relative;
+                    /* En móvil se comporta normalmente */
+                }
+                
+                /* En escritorio, ajustamos la estructura */
+                @media (min-width: 768px) {
+                    .sticky-category-filter {
+                        position: sticky;
+                        top: 0;
+                        padding-top: 1rem;
+                        padding-bottom: 1rem;
+                        background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 80%, rgba(0,0,0,0) 100%);
+                        margin-bottom: 1rem;
+                        z-index: 40;
+                    }
+                    
+                    /* Contenedor de la lista de presionables en escritorio */
+                    .list-container {
+                        height: auto; /* Altura automática según contenido */
+                        min-height: calc(100vh - 320px); /* Altura mínima para ocupar espacio disponible */
+                        overflow: visible; /* Permite que el contenido sea visible */
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        max-width: 100% !important; /* Asegurar que use todo el ancho disponible */
+                        width: 100% !important;
+                        padding-bottom: 40px; /* Espacio inferior para mejorar UX */
+                    }
+                }
+            `}</style>
         </div>
     );
 }

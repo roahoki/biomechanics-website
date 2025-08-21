@@ -28,26 +28,44 @@ export function PressableItem({
         }).format(price).replace('CLP', '').trim()
     }
 
+    // Generamos un número basado en el ID o índice del item para que la altura sea constante
+    // para el mismo elemento (evitando cambios de altura al cambiar categorías)
+    const getRandomHeight = (id: string | number) => {
+        // Convertir el ID a string si no lo es
+        const idStr = typeof id === 'string' ? id : id.toString();
+        // Sumar los valores ASCII de los caracteres para generar un número "aleatorio" pero consistente
+        let sum = 0;
+        for (let i = 0; i < idStr.length; i++) {
+            sum += idStr.charCodeAt(i);
+        }
+        // Generar un número entre 160 y 300px basado en la suma
+        return (sum % 140) + 160;
+    };
+
     // Si es un producto
     if (item.type === 'product') {
         const product = item as Product
+        
+        // Altura pseudo-aleatoria pero consistente para el mismo producto
+        const itemHeight = getRandomHeight(product.id || index);
         
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="w-full mb-4"
+                transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
+                className="w-full pinterest-item"
             >
                 <button
                     onClick={() => onProductClick?.(product)}
-                    className={`relative w-full h-32 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
+                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
                         product.images?.length > 0 ? '' : 'bg-gray-200'
                     }`}
                     style={{
                         backgroundImage: product.images?.length > 0 
                             ? `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${product.images[0]})` 
-                            : undefined
+                            : undefined,
+                        height: `${itemHeight}px`
                     }}
                 >
                     {/* Fallback para productos sin imagen */}
@@ -74,22 +92,26 @@ export function PressableItem({
     if (item.type === 'item') {
         const itemData = item as Item
         
+        // Altura pseudo-aleatoria pero consistente para el mismo item
+        const itemHeight = getRandomHeight(itemData.id || index);
+        
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="w-full mb-4"
+                transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
+                className="w-full pinterest-item"
             >
                 <button
                     onClick={() => onItemClick?.(itemData)}
-                    className={`relative w-full h-32 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
+                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
                         itemData.images?.length > 0 ? '' : 'bg-gray-200'
                     }`}
                     style={{
                         backgroundImage: itemData.images?.length > 0 
                             ? `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${itemData.images[0]})` 
-                            : undefined
+                            : undefined,
+                        height: `${itemHeight}px`
                     }}
                 >
                     {/* Fallback para items sin imagen */}
@@ -121,17 +143,18 @@ export function PressableItem({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="w-full mb-4"
+            transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
+            className="w-full pinterest-item"
         >
             <a
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full h-16 p-4 rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                className="block w-full p-4 rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
                 style={{
                     backgroundColor: styleSettings.linkCardBackgroundColor || '#ffffff',
-                    color: styleSettings.linkCardTextColor || '#000000'
+                    color: styleSettings.linkCardTextColor || '#000000',
+                    minHeight: '80px', // Altura mínima para links
                 }}
             >
                 <div className="flex items-center justify-between h-full">
