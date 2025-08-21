@@ -17,8 +17,8 @@ export default function CategoryFilter({
 }: CategoryFilterProps) {
   const [isScrollable, setIsScrollable] = useState(false)
 
-  // Agregar "Todo" al final de la lista
-  const allCategories = [...categories, 'Todo']
+  // Ya no es necesario agregar "Todo" aquí, se hace en el hook useCategoryFilter
+  const allCategories = categories
 
   // Verificar si el contenedor es scrolleable
   useEffect(() => {
