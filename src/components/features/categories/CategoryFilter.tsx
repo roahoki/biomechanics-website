@@ -17,8 +17,8 @@ export default function CategoryFilter({
 }: CategoryFilterProps) {
   const [isScrollable, setIsScrollable] = useState(false)
 
-  // Agregar "Todo" al final de la lista
-  const allCategories = [...categories, 'Todo']
+  // Ya no es necesario agregar "Todo" aquí, se hace en el hook useCategoryFilter
+  const allCategories = categories
 
   // Verificar si el contenedor es scrolleable
   useEffect(() => {
@@ -29,14 +29,15 @@ export default function CategoryFilter({
   }, [categories])
 
   return (
-    <div className={`relative py-2`}>
-      {/* Contenedor scrolleable */}
+    <div className={`relative py-2 z-10`}>
+      {/* Contenedor scrolleable - ahora con fondo semi-transparente más suave */}
       <div
         id="category-filter-container"
-        className="flex justify-start lg:justify-center space-x-4 lg:space-x-6 overflow-x-auto overflow-y-visible scrollbar-hide px-2 mx-auto lg:max-w-3xl lg:bg-black/30 lg:rounded-full lg:px-4 lg:py-1"
+        className="flex justify-start lg:justify-center space-x-4 lg:space-x-6 overflow-x-auto overflow-y-visible scrollbar-hide px-2 mx-auto lg:max-w-3xl lg:bg-black/30 lg:backdrop-blur-sm lg:rounded-full lg:px-4 lg:py-1"
         style={{
           scrollbarWidth: 'none', /* Firefox */
           msOverflowStyle: 'none', /* Internet Explorer 10+ */
+          transition: 'all 0.3s ease' /* Transición suave */
         }}
       >
         {allCategories.map((category) => {
@@ -47,10 +48,10 @@ export default function CategoryFilter({
               key={category}
               onClick={() => onCategoryChange(category)}
               className={`
-                flex-shrink-0 px-2.5 py-2 text-xs lg:text-sm font-medium transition-colors duration-200
+                flex-shrink-0 px-2.5 py-2 text-xs lg:text-sm font-medium transition-all duration-300 ease-in-out
                 min-w-fit whitespace-nowrap relative border-b-2
                 ${isSelected
-                  ? 'text-white border-white'
+                  ? 'text-white border-white font-semibold'
                   : 'text-white/70 border-transparent hover:text-white hover:border-white/30'
                 }
               `}
