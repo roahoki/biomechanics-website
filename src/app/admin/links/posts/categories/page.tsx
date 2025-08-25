@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { checkAdminPermissions } from '../../check-permissions';
+import { checkAdminPermissions } from '../../../check-permissions';
 import { getLinksData } from '@/utils/links';
 import { PostsNavigation } from '@/components';
 
-export default function AdminLinksPosts() {
+export default function PostCategories() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [hasPermissions, setHasPermissions] = useState(false);
@@ -57,32 +57,27 @@ export default function AdminLinksPosts() {
     );
   }
 
-  // Sección de publicaciones: enlaces y productos
-  const { links, categories } = data;
+  const { categories } = data;
 
   return (
     <div className="container mx-auto p-4 sm:p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Publicaciones
+          Categorías de Publicaciones
         </h1>
         <p className="text-gray-600">
-          Administra tus enlaces y productos
+          Gestiona las categorías para tus publicaciones
         </p>
       </div>
       
       <PostsNavigation />
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <p className="mb-4 text-gray-700">Esta sección está en desarrollo. Pronto podrás gestionar tus publicaciones aquí.</p>
+        <p className="mb-4 text-gray-700">Esta sección está en desarrollo. Pronto podrás gestionar categorías de publicaciones aquí.</p>
         
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <h2 className="font-bold text-lg mb-2">Publicaciones Actuales</h2>
+          <h2 className="font-bold text-lg mb-2">Categorías Actuales</h2>
           <div className="flex gap-4 mb-4">
-            <div className="bg-blue-50 p-4 rounded-lg text-center flex-1">
-              <p className="text-sm text-blue-500 mb-1">Total Enlaces</p>
-              <p className="text-2xl font-bold text-gray-800">{links?.length || 0}</p>
-            </div>
             <div className="bg-green-50 p-4 rounded-lg text-center flex-1">
               <p className="text-sm text-green-500 mb-1">Total Categorías</p>
               <p className="text-2xl font-bold text-gray-800">{categories?.length || 0}</p>
@@ -91,22 +86,21 @@ export default function AdminLinksPosts() {
         </div>
 
         <div className="mt-4">
-          <h3 className="font-medium text-lg mb-3">Enlaces Recientes</h3>
+          <h3 className="font-medium text-lg mb-3">Lista de Categorías</h3>
           <div className="space-y-2">
-            {links && links.length > 0 ? (
-              links.slice(0, 5).map((link: any, index: number) => (
+            {categories && categories.length > 0 ? (
+              categories.map((category: any, index: number) => (
                 <div key={index} className="p-3 border border-gray-200 rounded-lg flex justify-between items-center">
                   <div>
-                    <h4 className="font-medium">{link.title}</h4>
-                    <p className="text-sm text-gray-500">{link.url}</p>
+                    <h4 className="font-medium">{category.name}</h4>
                   </div>
                   <div className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    {link.category || 'Sin categoría'}
+                    {category.id}
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">No hay enlaces configurados</p>
+              <p className="text-gray-500">No hay categorías configuradas</p>
             )}
           </div>
         </div>

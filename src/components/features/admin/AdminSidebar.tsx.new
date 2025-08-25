@@ -22,21 +22,11 @@ export default function AdminSidebar() {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSubMenuOpen, setMobileSubMenuOpen] = useState<string | null>(null);
   const [isMenuExpanded, setIsMenuExpanded] = useState(false);
-  const [previousPathname, setPreviousPathname] = useState('');
 
   useEffect(() => {
-    // Cuando cambia la ruta, verificamos si estamos navegando dentro del mismo submenu
-    if (previousPathname && previousPathname !== pathname) {
-      // Si cambiamos de ruta y el menú no está expandido, cerramos los submenús
-      if (!isMenuExpanded) {
-        setExpandedItems({});
-      }
-    }
-    setPreviousPathname(pathname);
-    
     // Establecer el estado inicial para saber si el menú de Links debe estar expandido
     const isInLinksSection = pathname.startsWith('/admin/links/');
-    if (isInLinksSection && isMenuExpanded) {
+    if (isInLinksSection) {
       setExpandedItems(prev => ({ ...prev, 'links': true }));
     }
     
@@ -51,7 +41,7 @@ export default function AdminSidebar() {
     return () => {
       window.removeEventListener('resize', checkIsMobile);
     };
-  }, [pathname, isMenuExpanded, previousPathname]);
+  }, [pathname]);
   
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({
@@ -70,10 +60,6 @@ export default function AdminSidebar() {
   // Esta función se llama cuando el mouse entra en el menú
   const handleMouseEnter = () => {
     setIsMenuExpanded(true);
-    // Cuando estamos en la sección de links, expandimos ese menú
-    if (pathname.startsWith('/admin/links/')) {
-      setExpandedItems(prev => ({ ...prev, 'links': true }));
-    }
   };
   
   const navItems: NavItem[] = [
@@ -173,7 +159,7 @@ export default function AdminSidebar() {
                   )}
                 </div>
                 
-                {hasSubItems && isExpanded && isMenuExpanded && (
+                {hasSubItems && isExpanded && (
                   <div className="ml-12 border-l border-gray-200 pl-4 py-1">
                     {item.subItems?.map((subItem) => {
                       const isSubActive = pathname === subItem.href;
