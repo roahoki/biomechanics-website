@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { SortableLinksFormWithProducts as SortableLinksForm } from "@/components"
 import { CategoryManagerCompact, ListView } from "@/components"
-import { checkAdminPermissions } from "../check-permissions"
+import { checkClientAdminPermissionsWithRedirect } from "@/utils/client-roles"
 import { getLinksData } from '@/utils/links'
 import { LinkItem } from '@/types/product'
 
@@ -17,11 +17,10 @@ export default function AdminSortableLinks() {
     useEffect(() => {
         async function loadData() {
             try {
-                // Verificar permisos primero
-                const isAdmin = await checkAdminPermissions()
+                // Verificar permisos primero (incluye redirección automática si no es admin)
+                const isAdmin = await checkClientAdminPermissionsWithRedirect()
                 if (!isAdmin) {
-                    // La función ya redirige automáticamente
-                    return
+                    return // Ya se redirigió automáticamente
                 }
                 
                 setHasPermissions(true)
