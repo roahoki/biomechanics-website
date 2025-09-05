@@ -64,9 +64,6 @@ export default function AdminSortableLinks() {
                 <h1 className="text-xl sm:text-2xl font-bold text-white">
                     Administrar Enlaces y Productos
                 </h1>
-                <p className="text-gray-300 mt-1 text-sm sm:text-base">
-                    Gestiona tu página de enlaces, productos y categorías
-                </p>
             </div>
 
             <SortableLinksForm 

@@ -22,7 +22,6 @@ import { StyleConfig } from '../profile/StyleConfig'
 import { LinksListUpdated } from './SortableLinksForm/LinksListUpdated'
 import { DeleteModal } from './SortableLinksForm/DeleteModal'
 import { ActionButtons } from './SortableLinksForm/ActionButtons'
-import { PreviewModalUpdated } from './SortableLinksForm/PreviewModalUpdated'
 
 export function SortableLinksFormWithProducts({
     links,
