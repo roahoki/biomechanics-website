@@ -31,11 +31,6 @@ export default function AdminSortableLinks() {
         loadData()
     }, [])
 
-    const handleCategoriesChange = () => {
-        // Recargar los datos cuando las categorías cambien
-        getLinksData().then(setData)
-    }
-
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -63,34 +58,29 @@ export default function AdminSortableLinks() {
     const { links, title, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings, categories } = data
 
     return (
-        <div className="min-h-screen bg-gray-900">
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
-                <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700">
-                    {/* Header */}
-                    <div className="border-b border-gray-700 px-4 sm:px-6 py-4">
-                        <h1 className="text-xl sm:text-2xl font-bold text-white">
-                            Administrar Enlaces y Productos
-                        </h1>
-                        <p className="text-gray-300 mt-1 text-sm sm:text-base">
-                            Gestiona tu página de enlaces, productos y categorías
-                        </p>
-                    </div>
-
-                    <SortableLinksForm 
-                        links={links}
-                        categories={categories || []}
-                        title={title}
-                        description={description} 
-                        profileImage={profileImage}
-                        profileImageType={profileImageType}
-                        socialIcons={socialIcons}
-                        backgroundColor={backgroundColor || '#1a1a1a'}
-                        backgroundSettings={backgroundSettings || { type: 'color', color: backgroundColor || '#1a1a1a', imageOpacity: 0.5 }}
-                        styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000', productBuyButtonColor: '#ff6b35' }}
-                    />
-                
-                </div>
+        <div className="min-h-screen">
+            {/* Header */}
+            <div className="border-b border-gray-700 px-4 sm:px-6 py-4">
+                <h1 className="text-xl sm:text-2xl font-bold text-white">
+                    Administrar Enlaces y Productos
+                </h1>
+                <p className="text-gray-300 mt-1 text-sm sm:text-base">
+                    Gestiona tu página de enlaces, productos y categorías
+                </p>
             </div>
+
+            <SortableLinksForm 
+                links={links}
+                categories={categories || []}
+                title={title}
+                description={description} 
+                profileImage={profileImage}
+                profileImageType={profileImageType}
+                socialIcons={socialIcons}
+                backgroundColor={backgroundColor || '#1a1a1a'}
+                backgroundSettings={backgroundSettings || { type: 'color', color: backgroundColor || '#1a1a1a', imageOpacity: 0.5 }}
+                styleSettings={styleSettings || { titleColor: '#ffffff', linkCardBackgroundColor: '#ffffff', linkCardTextColor: '#000000', productBuyButtonColor: '#ff6b35' }}
+            />
         </div>
     )
 }
