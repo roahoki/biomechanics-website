@@ -1,11 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { EyeIcon, EyeSlashIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { Item } from '@/types/product'
-import { ImageCarousel } from '../../common/media/ImageCarousel'
-import { TrashIcon, PlusIcon, PhotoIcon } from '@heroicons/react/24/outline'
-import CategorySelector from '../categories/CategorySelector'
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { ImageCarousel, CategorySelector } from '@/components'
 
 interface ItemFormProps {
     item?: Item
@@ -185,321 +183,249 @@ export function ItemForm({
                       Object.keys(errors).length === 0
 
     return (
-        <div 
-            className="rounded-lg shadow-md border"
-            style={{
-                backgroundColor: linkCardBackgroundColor,
-                color: linkCardTextColor,
-                borderColor: linkCardTextColor + '20'
-            }}
-        >
-            {/* Header */}
-            <div 
-                className="border-b p-4"
-                style={{ 
-                    backgroundColor: linkCardBackgroundColor,
-                    borderColor: linkCardTextColor + '20'
-                }}
-            >
-                <div className="flex items-center justify-between">
-                    <h3 
-                        className="text-lg font-semibold"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        📦 {item ? `Editando Item #${item.id}` : 'Nuevo Item'}
-                    </h3>
-                    <button
-                        onClick={onRemove}
-                        className="text-red-600 hover:text-red-800 font-medium text-sm px-3 py-1 rounded hover:bg-red-50 transition-colors"
-                    >
-                        Eliminar
-                    </button>
-                </div>
+        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+            {/* Header minimalista */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <h3 className="text-xl font-semibold text-gray-900">
+                    {item ? 'Editar Item' : 'Crear Item'}
+                </h3>
+                <button
+                    onClick={onRemove}
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                    title="Eliminar item"
+                >
+                    <TrashIcon className="w-5 h-5" />
+                </button>
             </div>
 
-            {/* Carrusel de imágenes */}
-            <div 
-                className="p-4 border-b"
-                style={{ 
-                    backgroundColor: linkCardBackgroundColor,
-                    borderColor: linkCardTextColor + '20'
-                }}
-            >
-                <ImageCarousel
-                    images={images}
-                    onImagesChange={handleImagesChange}
-                    bucketName="items"
-                    folderPrefix={item?.id ? `item-${item.id}` : undefined}
-                    error={errors.images}
-                    textColor={linkCardTextColor}
-                />
-            </div>
-
-            {/* Formulario */}
-            <div 
-                className="p-6 space-y-4"
-                style={{ backgroundColor: linkCardBackgroundColor }}
-            >
-                {/* Título */}
-                <div>
-                    <label 
-                        className="block text-sm font-medium mb-1"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Título *
-                    </label>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => handleTitleChange(e.target.value)}
-                        placeholder="Ej: Consultora Personalizada"
-                        maxLength={50}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            errors.title ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                        }`}
-                    />
-                    <div className="flex justify-between mt-1">
-                        {errors.title && (
-                            <p className="text-sm text-red-600">{errors.title}</p>
-                        )}
-                        <p 
-                            className="text-xs ml-auto opacity-60"
-                            style={{ color: linkCardTextColor }}
-                        >
-                            {title.length}/50
-                        </p>
-                    </div>
-                </div>
-
-                {/* Subtítulo */}
-                <div>
-                    <label 
-                        className="block text-sm font-medium mb-1"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Subtítulo
-                    </label>
-                    <input
-                        type="text"
-                        value={subtitle}
-                        onChange={(e) => handleSubtitleChange(e.target.value)}
-                        placeholder="Ej: Sesión de 1 hora para análisis biomecánico"
-                        maxLength={150}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            errors.subtitle ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                        }`}
-                    />
-                    <div className="flex justify-between mt-1">
-                        {errors.subtitle && (
-                            <p className="text-sm text-red-600">{errors.subtitle}</p>
-                        )}
-                        <p 
-                            className="text-xs ml-auto opacity-60"
-                            style={{ color: linkCardTextColor }}
-                        >
-                            {subtitle.length}/150
-                        </p>
-                    </div>
-                </div>
-
-                {/* Precio con toggle de visibilidad */}
-                <div>
-                    <div className="flex items-center justify-between mb-1">
-                        <label 
-                            className="block text-sm font-medium"
-                            style={{ color: linkCardTextColor }}
-                        >
-                            Precio (CLP) *
-                        </label>
-                        <div className="flex items-center space-x-2">
-                            <span 
-                                className="text-xs opacity-60"
-                                style={{ color: linkCardTextColor }}
-                            >
-                                Visible:
-                            </span>
-                            <button
-                                type="button"
-                                onClick={() => handlePriceVisibleChange(!priceVisible)}
-                                className={`p-1 rounded-md transition-colors ${
-                                    priceVisible 
-                                        ? 'text-green-600 hover:bg-green-50' 
-                                        : 'text-gray-400 hover:bg-gray-50'
-                                }`}
-                                title={priceVisible ? 'Precio visible' : 'Precio oculto'}
-                            >
-                                {priceVisible ? (
-                                    <EyeIcon className="w-5 h-5" />
-                                ) : (
-                                    <EyeSlashIcon className="w-5 h-5" />
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                    <div className="relative">
-                        <span 
-                            className="absolute left-3 top-2 opacity-60"
-                            style={{ color: linkCardTextColor }}
-                        >
-                            $
-                        </span>
-                        <input
-                            type="text"
-                            value={formatPrice(price)}
-                            onChange={(e) => handlePriceChange(e.target.value)}
-                            placeholder="25000"
-                            className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                errors.price ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                            }`}
+            {/* Layout principal: 2 columnas estilo Pinterest */}
+            <div className="flex flex-col lg:flex-row">
+                {/* Columna izquierda - Preview de imágenes */}
+                <div className="lg:w-1/2 p-6 bg-gray-50">
+                    <div className="max-w-md mx-auto">
+                        <ImageCarousel
+                            images={images}
+                            onImagesChange={handleImagesChange}
+                            bucketName="items"
+                            folderPrefix={item?.id ? `item-${item.id}` : undefined}
+                            error={errors.images}
+                            textColor="#374151"
                         />
                     </div>
-                    {errors.price && (
-                        <p className="mt-1 text-sm text-red-600">{errors.price}</p>
-                    )}
-                    {price && !errors.price && (
-                        <p className="mt-1 text-sm text-green-600">
-                            Se mostrará como: {priceVisible ? `$${formatPrice(price)}` : 'Precio oculto'}
-                        </p>
-                    )}
                 </div>
 
-                {/* Texto del botón */}
-                <div>
-                    <label 
-                        className="block text-sm font-medium mb-1"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Texto del botón *
-                    </label>
-                    <input
-                        type="text"
-                        value={buttonText}
-                        onChange={(e) => handleButtonTextChange(e.target.value)}
-                        placeholder="Ver más"
-                        maxLength={20}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            errors.buttonText ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                        }`}
-                    />
-                    <div className="flex justify-between mt-1">
-                        {errors.buttonText && (
-                            <p className="text-sm text-red-600">{errors.buttonText}</p>
+                {/* Columna derecha - Formulario */}
+                <div className="lg:w-1/2 p-6 space-y-6">
+                    {/* Título */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Título
+                        </label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => handleTitleChange(e.target.value)}
+                            placeholder="Añade un título"
+                            maxLength={50}
+                            className={`w-full px-0 py-3 text-lg border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                errors.title ? 'border-red-300' : 'border-gray-200'
+                            }`}
+                        />
+                        <div className="flex justify-between mt-1">
+                            {errors.title && (
+                                <p className="text-sm text-red-500">{errors.title}</p>
+                            )}
+                            <span className="text-xs text-gray-400 ml-auto">
+                                {title.length}/50
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Descripción */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Descripción
+                        </label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => handleDescriptionChange(e.target.value)}
+                            placeholder="Añade una descripción detallada"
+                            maxLength={1000}
+                            rows={4}
+                            className={`w-full px-0 py-3 border-0 border-b-2 bg-transparent resize-none focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                errors.description ? 'border-red-300' : 'border-gray-200'
+                            }`}
+                        />
+                        <div className="flex justify-between mt-1">
+                            {errors.description && (
+                                <p className="text-sm text-red-500">{errors.description}</p>
+                            )}
+                            <span className="text-xs text-gray-400 ml-auto">
+                                {description.length}/1000
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Link */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Enlace
+                        </label>
+                        <input
+                            type="url"
+                            value={paymentLink}
+                            onChange={(e) => handlePaymentLinkChange(e.target.value)}
+                            placeholder="Añade un enlace"
+                            className={`w-full px-0 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                errors.paymentLink ? 'border-red-300' : 'border-gray-200'
+                            }`}
+                        />
+                        {errors.paymentLink && (
+                            <p className="text-sm text-red-500 mt-1">{errors.paymentLink}</p>
                         )}
-                        <p 
-                            className="text-xs ml-auto opacity-60"
-                            style={{ color: linkCardTextColor }}
-                        >
-                            {buttonText.length}/20
+                    </div>
+
+                    {/* Categorías (equivalente al "Tablero" de Pinterest) */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Categorías
+                        </label>
+                        <div className="relative">
+                            <CategorySelector
+                                availableCategories={availableCategories}
+                                selectedCategories={categories}
+                                onChange={handleCategoriesChange}
+                                placeholder="Selecciona categorías..."
+                                label=""
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Las categorías ayudan a organizar y filtrar el contenido
                         </p>
                     </div>
-                </div>
 
-                {/* Link */}
-                <div>
-                    <label 
-                        className="block text-sm font-medium mb-1"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Link *
-                    </label>
-                    <input
-                        type="url"
-                        value={paymentLink}
-                        onChange={(e) => handlePaymentLinkChange(e.target.value)}
-                        placeholder="https://ejemplo.com/contacto"
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            errors.paymentLink ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                        }`}
-                    />
-                    {errors.paymentLink && (
-                        <p className="mt-1 text-sm text-red-600">{errors.paymentLink}</p>
+                    {/* Subtítulo */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Subtítulo
+                        </label>
+                        <input
+                            type="text"
+                            value={subtitle}
+                            onChange={(e) => handleSubtitleChange(e.target.value)}
+                            placeholder="Añade un subtítulo (opcional)"
+                            maxLength={150}
+                            className={`w-full px-0 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                errors.subtitle ? 'border-red-300' : 'border-gray-200'
+                            }`}
+                        />
+                        <div className="flex justify-between mt-1">
+                            {errors.subtitle && (
+                                <p className="text-sm text-red-500">{errors.subtitle}</p>
+                            )}
+                            <span className="text-xs text-gray-400 ml-auto">
+                                {subtitle.length}/150
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Configuraciones de precio */}
+                    <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h4 className="text-sm font-medium text-gray-700">Configuración de precio</h4>
+                        
+                        {/* Precio */}
+                        <div>
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="text-sm font-medium text-gray-700">
+                                    Precio (CLP)
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => handlePriceVisibleChange(!priceVisible)}
+                                    className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-xs transition-colors ${
+                                        priceVisible 
+                                            ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {priceVisible ? (
+                                        <EyeIcon className="w-4 h-4" />
+                                    ) : (
+                                        <EyeSlashIcon className="w-4 h-4" />
+                                    )}
+                                    <span>{priceVisible ? 'Visible' : 'Oculto'}</span>
+                                </button>
+                            </div>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                    $
+                                </span>
+                                <input
+                                    type="text"
+                                    value={formatPrice(price)}
+                                    onChange={(e) => handlePriceChange(e.target.value)}
+                                    placeholder="25000"
+                                    className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                        errors.price ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                                    }`}
+                                />
+                            </div>
+                            {errors.price && (
+                                <p className="text-sm text-red-500 mt-1">{errors.price}</p>
+                            )}
+                            {price && !errors.price && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Se mostrará: {priceVisible ? `$${formatPrice(price)}` : 'Precio oculto'}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Texto del botón */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Texto del botón
+                            </label>
+                            <input
+                                type="text"
+                                value={buttonText}
+                                onChange={(e) => handleButtonTextChange(e.target.value)}
+                                placeholder="Ver más"
+                                maxLength={20}
+                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    errors.buttonText ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                                }`}
+                            />
+                            <div className="flex justify-between mt-1">
+                                {errors.buttonText && (
+                                    <p className="text-sm text-red-500">{errors.buttonText}</p>
+                                )}
+                                <span className="text-xs text-gray-400 ml-auto">
+                                    {buttonText.length}/20
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Estado del item */}
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <span className="text-sm font-medium text-gray-700">
+                            Estado del item:
+                        </span>
+                        <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
+                            isComplete 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                            {isComplete ? '✅ Completo' : '⚠️ Incompleto'}
+                        </span>
+                    </div>
+
+                    {!isComplete && (
+                        <p className="text-xs text-gray-500 text-center">
+                            Complete todos los campos obligatorios para que aparezca en la vista previa
+                        </p>
                     )}
                 </div>
-
-                {/* Descripción */}
-                <div>
-                    <label 
-                        className="block text-sm font-medium mb-1"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Descripción *
-                    </label>
-                    <textarea
-                        value={description}
-                        onChange={(e) => handleDescriptionChange(e.target.value)}
-                        placeholder="Describe tu item en detalle..."
-                        maxLength={1000}
-                        rows={5}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-                            errors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-                        }`}
-                    />
-                    <div className="flex justify-between mt-1">
-                        {errors.description && (
-                            <p className="text-sm text-red-600">{errors.description}</p>
-                        )}
-                        <p 
-                            className="text-xs ml-auto opacity-60"
-                            style={{ color: linkCardTextColor }}
-                        >
-                            {description.length}/1000
-                        </p>
-                    </div>
-                </div>
-
-                {/* Categorías */}
-                <div>
-                    <label 
-                        className="block text-sm font-medium mb-1"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Categorías
-                    </label>
-                    <CategorySelector
-                        availableCategories={availableCategories}
-                        selectedCategories={categories}
-                        onChange={handleCategoriesChange}
-                        placeholder="Seleccionar categorías..."
-                        label=""
-                    />
-                    <p 
-                        className="text-xs mt-1 opacity-60"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Las categorías permiten filtrar el contenido en la página principal
-                    </p>
-                </div>
-            </div>
-
-            {/* Estado del item */}
-            <div 
-                className="mt-4 p-3 rounded-lg border"
-                style={{ 
-                    backgroundColor: linkCardBackgroundColor,
-                    borderColor: linkCardTextColor + '20' // 20% opacity
-                }}
-            >
-                <div className="flex items-center justify-between">
-                    <span 
-                        className="text-sm font-medium"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Estado del item:
-                    </span>
-                    <span className={`text-sm font-semibold ${
-                        isComplete ? 'text-green-600' : 'text-orange-600'
-                    }`}>
-                        {isComplete ? 'Completo ✅' : 'Incompleto ⚠️'}
-                    </span>
-                </div>
-                {!isComplete && (
-                    <p 
-                        className="text-xs mt-1 opacity-70"
-                        style={{ color: linkCardTextColor }}
-                    >
-                        Complete todos los campos obligatorios para que aparezca en la vista previa
-                    </p>
-                )}
             </div>
         </div>
     )
