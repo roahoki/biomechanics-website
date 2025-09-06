@@ -41,7 +41,21 @@ export function LinksListUpdated({
     linkCardBackgroundColor,
     linkCardTextColor
 }: LinksListProps) {
-    const [viewMode, setViewMode] = useState<'detail' | 'list'>('detail')
+    const [viewMode, setViewMode] = useState<'detail' | 'list'>('list') // Cambiado a 'list' por defecto
+    const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set()) // Nuevo estado para items expandidos
+
+    // Función para toggle individual de expansión
+    const toggleItemExpansion = (itemId: number) => {
+        setExpandedItems(prev => {
+            const newSet = new Set(prev)
+            if (newSet.has(itemId)) {
+                newSet.delete(itemId)
+            } else {
+                newSet.add(itemId)
+            }
+            return newSet
+        })
+    }
 
     // Atajo: Ctrl + Shift -> cambiar a vista listado
     useEffect(() => {
@@ -122,31 +136,6 @@ export function LinksListUpdated({
                 </div>
             </div>
 
-            {/* 2. Tipos de visualización - Controles responsivos */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Tipos de visualización</h3>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={viewMode === 'list'}
-                            onChange={(e) => setViewMode(e.target.checked ? 'list' : 'detail')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="text-xs sm:text-sm text-gray-700">Vista de listado</span>
-                    </label>
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={viewMode === 'detail'}
-                            onChange={(e) => setViewMode(e.target.checked ? 'detail' : 'list')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="text-xs sm:text-sm text-gray-700">Vista de detalle</span>
-                    </label>
-                </div>
-            </div>
-
             {/* 3. Categorías - Gestión de categorías */}
             <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">Categorías</h3>
@@ -156,7 +145,7 @@ export function LinksListUpdated({
                 />
             </div>
 
-            {/* 4. Listado de items - Contenido según el modo de vista */}
+            {/* 4. Listado de items - Vista de listado con expansión individual */}
             <div className="bg-white rounded-lg border border-gray-200">
                 <div className="p-4 border-b border-gray-200">
                     <h3 className="text-sm font-medium text-gray-700">
@@ -164,38 +153,59 @@ export function LinksListUpdated({
                     </h3>
                 </div>
                 <div className="p-4">
-                    {viewMode === 'list' ? (
-                        <ListView
-                            items={currentLinks}
-                            onMoveUp={handleMoveUp}
-                            onMoveDown={handleMoveDown}
-                            onToggleVisibility={handleToggleVisibilityByIndex}
-                            onEdit={handleEditByIndex}
-                            onDelete={handleDeleteByIndex}
-                        />
-                    ) : (
-                        /* Vista de detalle - Lista actual con todos los formularios */
-                        <div className="space-y-3 sm:space-y-4">
-                    {currentLinks.map((item, index) => (
-                        <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                            {/* Header móvil con controles */}
-                            <div className="sm:hidden bg-gray-50 p-3 border-b border-gray-200">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="flex items-center justify-center w-6 h-6 bg-gray-200 text-gray-700 text-xs font-bold rounded-full">
+                    {/* Vista de listado con expansión individual */}
+                    <div className="space-y-2">
+                        {currentLinks.map((item, index) => (
+                            <div key={item.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                {/* Fila del ListView con botón de expansión */}
+                                <div className="bg-gray-50 p-3 flex items-center justify-between hover:bg-gray-100 transition-colors">
+                                    <div className="flex items-center space-x-4 flex-1">
+                                        {/* Posición */}
+                                        <span className="text-sm font-mono text-gray-500 min-w-[2ch]">
                                             {index + 1}
                                         </span>
-                                        <span className={`text-xs font-medium ${
-                                            item.visible !== false ? 'text-green-600' : 'text-red-600'
-                                        }`}>
-                                            {item.visible !== false ? 'Visible' : 'Oculto'}
-                                        </span>
+                                        
+                                        {/* Información del item */}
+                                        <div className="flex items-center space-x-2 flex-1">
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                item.type === 'link' ? 'bg-blue-100 text-blue-800' :
+                                                item.type === 'product' ? 'bg-purple-100 text-purple-800' :
+                                                'bg-green-100 text-green-800'
+                                            }`}>
+                                                {item.type === 'link' ? '🔗 Link' :
+                                                 item.type === 'product' ? '📦 Product' : 
+                                                 '📄 Item'}
+                                            </span>
+                                            
+                                            <span className="text-sm font-medium text-gray-900 truncate">
+                                                {item.type === 'link' ? (item as Link).label :
+                                                 item.type === 'product' ? (item as Product).title :
+                                                 (item as Item).title || 'Sin título'}
+                                            </span>
+                                            
+                                            {/* Características */}
+                                            <div className="flex items-center space-x-1">
+                                                {item.visible === false && (
+                                                    <span className="text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded">
+                                                        Oculto
+                                                    </span>
+                                                )}
+                                                {item.type === 'product' && !(item as Product).price && (
+                                                    <span className="text-xs text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
+                                                        Sin precio
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
+                                    
+                                    {/* Controles de acción */}
                                     <div className="flex items-center space-x-1">
+                                        {/* Controles de movimiento */}
                                         <button
                                             onClick={() => handleMoveUp(index)}
                                             disabled={index === 0}
-                                            className={`p-1.5 rounded text-sm ${
+                                            className={`p-1 rounded text-sm ${
                                                 index === 0 
                                                     ? 'text-gray-300 cursor-not-allowed' 
                                                     : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
@@ -207,7 +217,7 @@ export function LinksListUpdated({
                                         <button
                                             onClick={() => handleMoveDown(index)}
                                             disabled={index === currentLinks.length - 1}
-                                            className={`p-1.5 rounded text-sm ${
+                                            className={`p-1 rounded text-sm ${
                                                 index === currentLinks.length - 1 
                                                     ? 'text-gray-300 cursor-not-allowed' 
                                                     : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
@@ -216,122 +226,82 @@ export function LinksListUpdated({
                                         >
                                             ⬇️
                                         </button>
+                                        
+                                        {/* Control de visibilidad */}
                                         <button
-                                            onClick={() => onToggleVisibility(item.id)}
-                                            className={`p-1.5 rounded text-sm ${
+                                            onClick={() => handleToggleVisibilityByIndex(index)}
+                                            className={`p-1 rounded text-sm ${
                                                 item.visible !== false
                                                     ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
                                                     : 'text-red-600 hover:text-red-700 hover:bg-red-50'
                                             }`}
-                                            title={item.visible !== false ? "Ocultar en página pública" : "Mostrar en página pública"}
+                                            title={item.visible !== false ? "Ocultar" : "Mostrar"}
                                         >
                                             {item.visible !== false ? '👁️' : '🚫'}
                                         </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex">
-                                {/* Controles laterales - solo desktop */}
-                                <div className="hidden sm:flex flex-col items-center space-y-1 pt-4 px-3 bg-gray-50 border-r border-gray-200">
-                                    <button
-                                        onClick={() => handleMoveUp(index)}
-                                        disabled={index === 0}
-                                        className={`p-2 rounded-md text-lg transition-all duration-200 ${
-                                            index === 0 
-                                                ? 'text-gray-300 cursor-not-allowed' 
-                                                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-110'
-                                        }`}
-                                        title="Subir"
-                                    >
-                                        ⬆️
-                                    </button>
-                                    
-                                    <span className="text-xs text-gray-400 font-mono min-w-[2ch] text-center bg-gray-100 px-2 py-1 rounded">
-                                        {index + 1}
-                                    </span>
-                                    
-                                    <button
-                                        onClick={() => handleMoveDown(index)}
-                                        disabled={index === currentLinks.length - 1}
-                                        className={`p-2 rounded-md text-lg transition-all duration-200 ${
-                                            index === currentLinks.length - 1 
-                                                ? 'text-gray-300 cursor-not-allowed' 
-                                                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-110'
-                                        }`}
-                                        title="Bajar"
-                                    >
-                                        ⬇️
-                                    </button>
-                                    
-                                    {/* Botón de visibilidad */}
-                                    <div className="flex flex-col items-center space-y-1 mt-2">
+                                        
+                                        {/* Botón de eliminación */}
                                         <button
-                                            onClick={() => onToggleVisibility(item.id)}
-                                            className={`p-2 rounded-md text-lg transition-all duration-200 ${
-                                                item.visible !== false
-                                                    ? 'text-green-600 hover:text-green-700 hover:bg-green-50 hover:scale-110'
-                                                    : 'text-red-600 hover:text-red-700 hover:bg-red-50 hover:scale-110'
-                                            }`}
-                                            title={item.visible !== false ? "Ocultar en página pública" : "Mostrar en página pública"}
+                                            onClick={() => handleDeleteByIndex(index)}
+                                            className="p-1 rounded text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            title="Eliminar"
                                         >
-                                            {item.visible !== false ? '👁️' : '🚫'}
+                                            🗑️
                                         </button>
-                                        <span className={`text-xs font-medium transition-colors duration-200 ${
-                                            item.visible !== false ? 'text-green-600' : 'text-red-600'
-                                        }`}>
-                                            {item.visible !== false ? 'Visible' : 'Oculto'}
-                                        </span>
+                                        
+                                        {/* Botón de expansión */}
+                                        <button
+                                            onClick={() => toggleItemExpansion(item.id)}
+                                            className="p-1 rounded text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 ml-2"
+                                            title={expandedItems.has(item.id) ? "Contraer" : "Expandir"}
+                                        >
+                                            {expandedItems.has(item.id) ? '▼' : '▶️'}
+                                        </button>
                                     </div>
                                 </div>
-
-                                {/* Contenido del elemento */}
-                                <div className={`flex-1 w-full transition-opacity duration-200 ${
-                                    item.visible === false ? 'opacity-50' : 'opacity-100'
-                                }`}>
-                                    {item.type === 'link' ? (
-                                        <LinkCard
-                                            key={item.id}
-                                            link={item as Link}
-                                            availableCategories={availableCategories}
-                                            onRemove={() => onRemoveLink(item.id)}
-                                            onUpdate={(id, field, value) => onUpdateLink(id, field, value)}
-                                            onUpdateCategories={(id, categories) => onUpdateLinkCategories(id, categories)}
-                                            linkCardBackgroundColor={linkCardBackgroundColor}
-                                            linkCardTextColor={linkCardTextColor}
-                                        />
-                                    ) : item.type === 'product' ? (
-                                        <ProductItem
-                                            key={item.id}
-                                            product={item as Product}
-                                            availableCategories={availableCategories}
-                                            onUpdate={(id, updatedProduct) => onUpdateProduct(id, updatedProduct)}
-                                            onRemove={() => onRemoveLink(item.id)}
-                                        />
-                                    ) : item.type === 'item' ? (
-                                        <ItemForm
-                                            key={item.id}
-                                            item={item as Item}
-                                            availableCategories={availableCategories}
-                                            onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
-                                            onRemove={() => onRemoveLink(item.id)}
-                                            linkCardBackgroundColor={linkCardBackgroundColor}
-                                            linkCardTextColor={linkCardTextColor}
-                                        />
-                                    ) : null}
-                                </div>
+                                
+                                {/* Formulario de detalle expandible */}
+                                {expandedItems.has(item.id) && (
+                                    <div className="bg-white border-t border-gray-200">
+                                        {item.type === 'link' ? (
+                                            <LinkCard
+                                                link={item as Link}
+                                                availableCategories={availableCategories}
+                                                onRemove={() => onRemoveLink(item.id)}
+                                                onUpdate={(id, field, value) => onUpdateLink(id, field, value)}
+                                                onUpdateCategories={(id, categories) => onUpdateLinkCategories(id, categories)}
+                                                linkCardBackgroundColor={linkCardBackgroundColor}
+                                                linkCardTextColor={linkCardTextColor}
+                                            />
+                                        ) : item.type === 'product' ? (
+                                            <ProductItem
+                                                product={item as Product}
+                                                availableCategories={availableCategories}
+                                                onUpdate={(id, updatedProduct) => onUpdateProduct(id, updatedProduct)}
+                                                onRemove={() => onRemoveLink(item.id)}
+                                            />
+                                        ) : item.type === 'item' ? (
+                                            <ItemForm
+                                                item={item as Item}
+                                                availableCategories={availableCategories}
+                                                onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
+                                                onRemove={() => onRemoveLink(item.id)}
+                                                linkCardBackgroundColor={linkCardBackgroundColor}
+                                                linkCardTextColor={linkCardTextColor}
+                                            />
+                                        ) : null}
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    ))}
-                    
-                    {currentLinks.length === 0 && (
-                        <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                            <p className="text-lg mb-2">📄 No hay enlaces, productos o items configurados</p>
-                            <p className="text-sm">Agrega tu primer elemento usando los botones de arriba</p>
-                        </div>
-                    )}
-                        </div>
-                    )}
+                        ))}
+                        
+                        {currentLinks.length === 0 && (
+                            <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                                <p className="text-lg mb-2">📄 No hay enlaces, productos o items configurados</p>
+                                <p className="text-sm">Agrega tu primer elemento usando los botones de arriba</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

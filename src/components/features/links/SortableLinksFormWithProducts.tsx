@@ -438,7 +438,6 @@ export function SortableLinksFormWithProducts({
     return (
         <div className="w-full">
             <form ref={formRef} onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
-                {/* Layout completamente responsivo - Aprovecha todo el espacio */}
                 <div className="space-y-6 xl:space-y-0 xl:grid xl:grid-cols-4 xl:gap-6">
                     {/* Primera columna: Perfil y descripción */}
                     <div className="space-y-4 sm:space-y-6 xl:col-span-1">
@@ -453,7 +452,7 @@ export function SortableLinksFormWithProducts({
                                 onFileSelect={onFileSelect}
                                 selectedFile={selectedFile}
                             />
-                            <FileInfo selectedFile={selectedFile} previewType={previewType} />
+                            {/* <FileInfo selectedFile={selectedFile} previewType={previewType} /> */}
                         </div>
 
                         {/* Título */}
@@ -533,9 +532,6 @@ export function SortableLinksFormWithProducts({
                             <div className="space-y-4 sm:space-y-6 w-full lg:col-span-3">
                                 {/* Lista de Links y Productos */}
                                 <div className="w-full">
-                                    <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
-                                        Enlaces y Productos
-                                    </label>
                                     <div className="w-full">
                                         <LinksListUpdated
                                             currentLinks={currentLinks}
@@ -564,73 +560,46 @@ export function SortableLinksFormWithProducts({
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <ActionButtons
-                            onPreview={() => setShowPreviewModal(true)}
-                            onSubmit={() => {}}
-                            isSubmitting={isSubmitting}
-                            uploadingImage={false}
-                            previewType={previewType}
-                            selectedFile={selectedFile}
-                        />
-                        {/* Toast de cambios sin guardar */}
-                        {showUnsaved && !isSubmitting && !toast && (
-                          <div className="fixed bottom-4 right-4 z-50 max-w-sm bg-yellow-500/95 text-white px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in">
-                            <span className="text-lg">⚠️</span>
-                            <div className="text-sm leading-snug">
-                              <p className="font-semibold">Cambios sin guardar</p>
-                              <p>Pulsa "Guardar Cambios" para persistirlos.</p>
-                            </div>
-                            <button onClick={() => setShowUnsaved(false)} className="ml-2 text-white/80 hover:text-white">✕</button>
-                          </div>
-                        )}
-                        {/* Toast de resultado */}
-                        {toast && (
-                          <div className={`fixed bottom-4 right-4 z-50 max-w-sm px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in ${toast.type === 'success' ? 'bg-green-600/95' : 'bg-red-600/95'}`}> 
-                            <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
-                            <div className="text-sm leading-snug">
-                              <p className="font-semibold">{toast.type === 'success' ? 'Éxito' : 'Error'}</p>
-                              <p>{toast.message}</p>
-                            </div>
-                            <button onClick={() => setToast(null)} className="ml-2 text-white/80 hover:text-white">✕</button>
-                          </div>
-                        )}
-                    </form>
-
-                    {/* Modales */}
-                    <DeleteModal
-                        isOpen={showDeleteModal}
-                        onConfirm={confirmDelete}
-                        onCancel={cancelDelete}
-                    />
-
-                    {/* <PreviewModalUpdated
-                        isOpen={showPreviewModal}
-                        onClose={() => setShowPreviewModal(false)}
-                        previewUrl={previewUrl}
-                        previewType={previewType}
-                        titleColor={titleColor}
-                        title={localTitle}
-                        description={localDescription}
-                        socialIconColors={socialIconColors}
-                        socialIcons={socialIcons}
-                        currentLinks={currentLinks}
-                        linkCardBackgroundColor={linkCardBackgroundColor}
-                        linkCardTextColor={linkCardTextColor}
-                        backgroundType={backgroundType}
-                        backgroundPreviewUrl={backgroundPreviewUrl}
-                        backgroundImageUrl={backgroundImageUrl}
-                        backgroundImageOpacity={backgroundImageOpacity}
-                        bgColor={bgColor}
-                        styleSettings={{
-                            titleColor,
-                            linkCardBackgroundColor,
-                            linkCardTextColor,
-                            productBuyButtonColor
-                        }}
-                    /> */}
                 </div>
-            )
+
+                {/* Action Buttons */}
+                <ActionButtons
+                    onPreview={() => setShowPreviewModal(true)}
+                    onSubmit={() => {}}
+                    isSubmitting={isSubmitting}
+                    uploadingImage={false}
+                    previewType={previewType}
+                    selectedFile={selectedFile}
+                />
+                {/* Toast de cambios sin guardar */}
+                {showUnsaved && !isSubmitting && !toast && (
+                    <div className="fixed bottom-4 right-4 z-50 max-w-sm bg-yellow-500/95 text-white px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in">
+                    <span className="text-lg">⚠️</span>
+                    <div className="text-sm leading-snug">
+                        <p className="font-semibold">Cambios sin guardar</p>
+                        <p>Pulsa "Guardar Cambios" para persistirlos.</p>
+                    </div>
+                    <button onClick={() => setShowUnsaved(false)} className="ml-2 text-white/80 hover:text-white">✕</button>
+                    </div>
+                )}
+                {/* Toast de resultado */}
+                {toast && (
+                    <div className={`fixed bottom-4 right-4 z-50 max-w-sm px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in ${toast.type === 'success' ? 'bg-green-600/95' : 'bg-red-600/95'}`}> 
+                    <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
+                    <div className="text-sm leading-snug">
+                        <p className="font-semibold">{toast.type === 'success' ? 'Éxito' : 'Error'}</p>
+                        <p>{toast.message}</p>
+                    </div>
+                    <button onClick={() => setToast(null)} className="ml-2 text-white/80 hover:text-white">✕</button>
+                    </div>
+                )}
+            </form>
+            {/* Modales */}
+            <DeleteModal
+                isOpen={showDeleteModal}
+                onConfirm={confirmDelete}
+                onCancel={cancelDelete}
+            />
+        </div>
+        )
         }
