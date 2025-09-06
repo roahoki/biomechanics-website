@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { LinkCard } from './LinkCard'
 import { ProductItem } from '../../products/ProductItem'
 import { ItemForm } from '../../products/ItemForm'
@@ -44,8 +44,8 @@ export function LinksListUpdated({
     const [viewMode, setViewMode] = useState<'detail' | 'list'>('list') // Cambiado a 'list' por defecto
     const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set()) // Nuevo estado para items expandidos
 
-    // Función para toggle individual de expansión
-    const toggleItemExpansion = (itemId: number) => {
+    // Función para toggle individual de expansión - Memoizada para evitar re-renders
+    const toggleItemExpansion = useCallback((itemId: number) => {
         setExpandedItems(prev => {
             const newSet = new Set(prev)
             if (newSet.has(itemId)) {
@@ -55,7 +55,7 @@ export function LinksListUpdated({
             }
             return newSet
         })
-    }
+    }, []) // Sin dependencias para aislar completamente este estado
 
     // Atajo: Ctrl + Shift -> cambiar a vista listado
     useEffect(() => {
@@ -70,41 +70,41 @@ export function LinksListUpdated({
         return () => window.removeEventListener('keydown', handler)
     }, [])
 
-    // Funciones para manejo de reordenamiento
-    const handleMoveUp = (index: number) => {
+    // Funciones para manejo de reordenamiento - Memoizadas para evitar re-renders
+    const handleMoveUp = useCallback((index: number) => {
         if (index === 0) return
         const newOrder = [...currentLinks]
         const temp = newOrder[index]
         newOrder[index] = newOrder[index - 1]
         newOrder[index - 1] = temp
         onReorderLinks(newOrder)
-    }
+    }, [currentLinks, onReorderLinks])
 
-    const handleMoveDown = (index: number) => {
+    const handleMoveDown = useCallback((index: number) => {
         if (index === currentLinks.length - 1) return
         const newOrder = [...currentLinks]
         const temp = newOrder[index]
         newOrder[index] = newOrder[index + 1]
         newOrder[index + 1] = temp
         onReorderLinks(newOrder)
-    }
+    }, [currentLinks, onReorderLinks])
 
-    const handleToggleVisibilityByIndex = (index: number) => {
+    const handleToggleVisibilityByIndex = useCallback((index: number) => {
         const item = currentLinks[index]
         onToggleVisibility(item.id)
-    }
+    }, [currentLinks, onToggleVisibility])
 
-    const handleDeleteByIndex = (index: number) => {
+    const handleDeleteByIndex = useCallback((index: number) => {
         const item = currentLinks[index]
         if (window.confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
             onRemoveLink(item.id)
         }
-    }
+    }, [currentLinks, onRemoveLink])
 
-    const handleEditByIndex = (index: number) => {
+    const handleEditByIndex = useCallback((index: number) => {
         // Para editar, cambiar a vista detalle
         setViewMode('detail')
-    }
+    }, [])
 
     return (
         <div className="w-full space-y-6">
@@ -251,9 +251,14 @@ export function LinksListUpdated({
                                         
                                         {/* Botón de expansión */}
                                         <button
-                                            onClick={() => toggleItemExpansion(item.id)}
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                toggleItemExpansion(item.id)
+                                            }}
                                             className="p-1 rounded text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 ml-2"
                                             title={expandedItems.has(item.id) ? "Contraer" : "Expandir"}
+                                            type="button"
                                         >
                                             {expandedItems.has(item.id) ? '▼' : '▶️'}
                                         </button>
