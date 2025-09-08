@@ -35,6 +35,7 @@ export function ItemForm({
     const [paymentLink, setPaymentLink] = useState(item?.paymentLink || '')
     const [description, setDescription] = useState(item?.description || '')
     const [images, setImages] = useState<string[]>(item?.images || [])
+    const [aspectRatios, setAspectRatios] = useState<number[]>(item?.aspectRatios || [])
     const [categories, setCategories] = useState<string[]>(item?.categories || [])
 
     // Validaciones
@@ -174,6 +175,11 @@ export function ItemForm({
         onUpdate({ images: newImages })
     }
 
+    const handleAspectRatiosChange = (newAspectRatios: number[]) => {
+        setAspectRatios(newAspectRatios)
+        onUpdate({ aspectRatios: newAspectRatios })
+    }
+
     const handleCategoriesChange = (newCategories: string[]) => {
         setCategories(newCategories)
         onUpdate({ categories: newCategories })
@@ -216,6 +222,8 @@ export function ItemForm({
                         <ImageCarousel
                             images={images}
                             onImagesChange={handleImagesChange}
+                            aspectRatios={aspectRatios}
+                            onAspectRatiosChange={handleAspectRatiosChange}
                             bucketName="items"
                             folderPrefix={item?.id ? `item-${item.id}` : undefined}
                             error={errors.images}

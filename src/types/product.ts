@@ -22,6 +22,7 @@ export interface Item {
     paymentLink: string
     description: string
     images: string[]
+    aspectRatios?: number[]
     categories?: string[]
     visible?: boolean
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import ImageCropModal from './ImageCropModal'
 
 interface ImageCarouselProps {
     images: string[]
@@ -11,6 +12,8 @@ interface ImageCarouselProps {
     folderPrefix?: string
     error?: string
     textColor?: string
+    aspectRatios?: number[] // Array de aspect ratios para cada imagen [1, 9/16, 1, ...]
+    onAspectRatiosChange?: (aspectRatios: number[]) => void
 }
 
 export function ImageCarousel({ 
@@ -21,11 +24,16 @@ export function ImageCarousel({
     bucketName = 'products',
     folderPrefix,
     error: externalError,
-    textColor = '#6b7280'
+    textColor = '#6b7280',
+    aspectRatios = [],
+    onAspectRatiosChange
 }: ImageCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
     const [error, setError] = useState<string | null>(externalError || null)
+    const [cropModalOpen, setCropModalOpen] = useState(false)
+    const [currentCropImage, setCurrentCropImage] = useState<string | null>(null)
+    const [pendingCropIndex, setPendingCropIndex] = useState<number | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const touchStartX = useRef<number>(0)
     const touchEndX = useRef<number>(0)
@@ -63,18 +71,16 @@ export function ImageCarousel({
             }
         }
 
-        // Convertir archivos a URLs para preview
-        const newImagePromises = files.map(file => {
-            return new Promise<string>((resolve) => {
-                const reader = new FileReader()
-                reader.onload = (e) => resolve(e.target?.result as string)
-                reader.readAsDataURL(file)
-            })
-        })
-
-        Promise.all(newImagePromises).then(newImages => {
-            onImagesChange([...images, ...newImages])
-        })
+        // Procesar la primera imagen con crop modal
+        const file = files[0]
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            const imageUrl = e.target?.result as string
+            setCurrentCropImage(imageUrl)
+            setPendingCropIndex(images.length) // Nueva imagen al final
+            setCropModalOpen(true)
+        }
+        reader.readAsDataURL(file)
 
         // Limpiar input
         if (fileInputRef.current) {
@@ -82,10 +88,66 @@ export function ImageCarousel({
         }
     }
 
+    // Manejar imagen recortada
+    const handleCroppedImage = (croppedBlob: Blob, aspectRatio: number) => {
+        // Convertir blob a URL para mostrar
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            const croppedImageUrl = e.target?.result as string
+            
+            if (pendingCropIndex !== null) {
+                if (pendingCropIndex === images.length) {
+                    // Nueva imagen
+                    const newImages = [...images, croppedImageUrl]
+                    const newAspectRatios = [...aspectRatios, aspectRatio]
+                    onImagesChange(newImages)
+                    if (onAspectRatiosChange) {
+                        onAspectRatiosChange(newAspectRatios)
+                    }
+                    setCurrentIndex(newImages.length - 1)
+                } else {
+                    // Imagen existente editada
+                    const newImages = [...images]
+                    const newAspectRatios = [...aspectRatios]
+                    newImages[pendingCropIndex] = croppedImageUrl
+                    newAspectRatios[pendingCropIndex] = aspectRatio
+                    onImagesChange(newImages)
+                    if (onAspectRatiosChange) {
+                        onAspectRatiosChange(newAspectRatios)
+                    }
+                }
+            }
+            
+            // Cerrar modal
+            setCropModalOpen(false)
+            setCurrentCropImage(null)
+            setPendingCropIndex(null)
+        }
+        reader.readAsDataURL(croppedBlob)
+    }
+
+    // Cancelar crop
+    const handleCancelCrop = () => {
+        setCropModalOpen(false)
+        setCurrentCropImage(null)
+        setPendingCropIndex(null)
+    }
+
+    // Editar imagen existente
+    const handleEditImage = (index: number) => {
+        setCurrentCropImage(images[index])
+        setPendingCropIndex(index)
+        setCropModalOpen(true)
+    }
+
     // Remover imagen
     const removeImage = (index: number) => {
         const newImages = images.filter((_, i) => i !== index)
+        const newAspectRatios = aspectRatios.filter((_, i) => i !== index)
         onImagesChange(newImages)
+        if (onAspectRatiosChange) {
+            onAspectRatiosChange(newAspectRatios)
+        }
         if (currentIndex >= newImages.length && newImages.length > 0) {
             setCurrentIndex(newImages.length - 1)
         }
@@ -140,11 +202,20 @@ export function ImageCarousel({
         if (draggedIndex === null || draggedIndex === dropIndex) return
 
         const newImages = [...images]
+        const newAspectRatios = [...aspectRatios]
         const draggedImage = newImages[draggedIndex]
+        const draggedAspectRatio = newAspectRatios[draggedIndex] || 1
+
         newImages.splice(draggedIndex, 1)
         newImages.splice(dropIndex, 0, draggedImage)
         
+        newAspectRatios.splice(draggedIndex, 1)
+        newAspectRatios.splice(dropIndex, 0, draggedAspectRatio)
+        
         onImagesChange(newImages)
+        if (onAspectRatiosChange) {
+            onAspectRatiosChange(newAspectRatios)
+        }
         setDraggedIndex(null)
         setCurrentIndex(dropIndex)
     }
@@ -152,7 +223,14 @@ export function ImageCarousel({
     return (
         <div className="w-full max-w-sm mx-auto">
             {/* Área principal del carrusel */}
-            <div className="relative bg-gray-200 rounded-lg overflow-hidden aspect-square mb-4">
+            <div 
+                className="relative bg-gray-200 rounded-lg overflow-hidden mb-4"
+                style={{
+                    aspectRatio: images.length > 0 && aspectRatios[currentIndex] 
+                        ? `1 / ${1 / aspectRatios[currentIndex]}` 
+                        : '1 / 1'
+                }}
+            >
                 {images.length === 0 ? (
                     // Estado vacío
                     <div 
@@ -183,16 +261,32 @@ export function ImageCarousel({
                             draggable={false}
                         />
 
-                        {/* Botón eliminar */}
-                        <button
-                            type="button"
-                            onClick={() => removeImage(currentIndex)}
-                            className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                        {/* Botones de acción */}
+                        <div className="absolute top-2 right-2 flex space-x-2">
+                            {/* Botón editar */}
+                            <button
+                                type="button"
+                                onClick={() => handleEditImage(currentIndex)}
+                                className="w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center transition-colors"
+                                title="Editar imagen"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            
+                            {/* Botón eliminar */}
+                            <button
+                                type="button"
+                                onClick={() => removeImage(currentIndex)}
+                                className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                                title="Eliminar imagen"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
 
                         {/* Botones de navegación */}
                         {images.length > 1 && (
@@ -311,8 +405,20 @@ export function ImageCarousel({
                 • Máximo {maxImages} imágenes<br/>
                 • Máximo {maxSizeInMB}MB por imagen<br/>
                 • Arrastra las miniaturas para reordenar<br/>
-                • Desliza para navegar
+                • Desliza para navegar<br/>
+                • Toca el icono de edición para ajustar recorte
             </div>
+
+            {/* Modal de crop */}
+            {cropModalOpen && currentCropImage && (
+                <ImageCropModal
+                    isOpen={cropModalOpen}
+                    imageUrl={currentCropImage}
+                    onCrop={handleCroppedImage}
+                    onCancel={handleCancelCrop}
+                    defaultAspectRatio={1} // 1:1 por defecto
+                />
+            )}
         </div>
     )
 }
