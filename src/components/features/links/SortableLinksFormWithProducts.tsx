@@ -438,35 +438,44 @@ export function SortableLinksFormWithProducts({
     return (
         <div className="w-full">
             <form ref={formRef} onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
-                <div className="space-y-6 xl:space-y-0 xl:grid xl:grid-cols-4 xl:gap-6">
-                    {/* Primera columna: Perfil y descripción */}
-                    <div className="space-y-4 sm:space-y-6 xl:col-span-1">
-                        {/* Avatar Upload */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
-                                Foto/Video de Perfil
-                            </label>
-                            <AvatarUpload
-                                previewUrl={previewUrl}
-                                previewType={previewType}
-                                onFileSelect={onFileSelect}
-                                selectedFile={selectedFile}
-                            />
-                            {/* <FileInfo selectedFile={selectedFile} previewType={previewType} /> */}
-                        </div>
+                {/* Layout móvil: Stack vertical con prioridad al listado de items */}
+                <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-5 lg:gap-6">
+                    {/* Configuraciones principales - Acordeón en móvil */}
+                    <div className="lg:col-span-2 space-y-4">
+                        {/* Panel colapsable para móvil */}
+                        <details className="lg:hidden group bg-gray-800 rounded-lg">
+                            <summary className="flex items-center justify-between cursor-pointer p-4 text-gray-200 hover:bg-gray-700 transition-colors rounded-lg">
+                                <span className="text-sm font-medium">⚙️ Configuración del perfil</span>
+                                <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <div className="p-4 pt-0 space-y-4">
+                                {/* Avatar Upload */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                                        Foto/Video de Perfil
+                                    </label>
+                                    <AvatarUpload
+                                        previewUrl={previewUrl}
+                                        previewType={previewType}
+                                        onFileSelect={onFileSelect}
+                                        selectedFile={selectedFile}
+                                    />
+                                </div>
 
-                        {/* Título */}
-                        <div>
-                            <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
-                                Título de la página
-                            </label>
-                            <input
-                                type="text"
-                                id="title"
-                                value={localTitle}
+                                {/* Título */}
+                                <div>
+                                    <label htmlFor="title-mobile" className="block text-sm font-medium text-gray-200 mb-2">
+                                        Título de la página
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="title-mobile"
+                                        value={localTitle}
                                         onChange={(e) => setLocalTitle(e.target.value.slice(0, 65))}
                                         maxLength={65}
-                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="biomechanics.wav"
                                     />
                                     <div className="text-xs text-gray-400 mt-1">
@@ -476,29 +485,37 @@ export function SortableLinksFormWithProducts({
 
                                 {/* Descripción */}
                                 <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">
+                                    <label htmlFor="description-mobile" className="block text-sm font-medium text-gray-200 mb-2">
                                         Descripción/Subtítulo
                                     </label>
                                     <input
                                         type="text"
-                                        id="description"
+                                        id="description-mobile"
                                         value={localDescription}
                                         onChange={(e) => setLocalDescription(e.target.value)}
-                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="Tu nombre o descripción"
                                     />
                                 </div>
+                            </div>
+                        </details>
 
+                        {/* Configuraciones avanzadas - Acordeón en móvil */}
+                        <details className="lg:hidden group bg-gray-800 rounded-lg">
+                            <summary className="flex items-center justify-between cursor-pointer p-4 text-gray-200 hover:bg-gray-700 transition-colors rounded-lg">
+                                <span className="text-sm font-medium">🎨 Configuración de estilo</span>
+                                <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <div className="p-4 pt-0 space-y-4">
                                 {/* Iconos Sociales */}
                                 <SocialIconsConfig
                                     socialIconColors={socialIconColors}
                                     onColorChange={handleSocialIconColorChange}
                                     isValidHexColor={isValidHexColor}
                                 />
-                            </div>
 
-                            {/* Segunda columna: Configuración de estilo */}
-                            <div className="space-y-4 sm:space-y-6">
                                 {/* Configuración de Fondo */}
                                 <BackgroundConfig
                                     backgroundType={backgroundType}
@@ -527,39 +544,123 @@ export function SortableLinksFormWithProducts({
                                     isValidHexColor={isValidHexColor}
                                 />
                             </div>
+                        </details>
 
-                            {/* Tercera columna: Lista de Links y Productos */}
-                            <div className="space-y-4 sm:space-y-6 w-full lg:col-span-3">
-                                {/* Lista de Links y Productos */}
-                                <div className="w-full">
-                                    <div className="w-full">
-                                        <LinksListUpdated
-                                            currentLinks={currentLinks}
-                                            onAddNewLink={addNewLink}
-                                            onAddNewProduct={addNewProduct}
-                                            onAddNewItem={addNewItem}
-                                            onRemoveLink={removeLink}
-                                            onUpdateLink={updateLink}
-                                            onUpdateProduct={updateProduct}
-                                            onUpdateItem={updateItem}
-                                            onReorderLinks={reorderLinks}
-                                            onToggleVisibility={toggleVisibility}
-                                            linkCardBackgroundColor={linkCardBackgroundColor}
-                                            linkCardTextColor={linkCardTextColor}
-                                            availableCategories={localCategories}
-                                            onUpdateLinkCategories={(linkId: number, newCategories: string[]) => {
-                                                const updatedLinks = currentLinks.map(link => 
-                                                    link.id === linkId 
-                                                        ? { ...link, categories: newCategories }
-                                                        : link
-                                                )
-                                                setCurrentLinks(updatedLinks)
-                                            }}
-                                            onCategoriesChange={(cats: string[]) => setLocalCategories(cats)}
-                                        />
-                                    </div>
+                        {/* Desktop: Configuraciones siempre visibles */}
+                        <div className="hidden lg:block space-y-6">
+                            {/* Avatar Upload */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
+                                    Foto/Video de Perfil
+                                </label>
+                                <AvatarUpload
+                                    previewUrl={previewUrl}
+                                    previewType={previewType}
+                                    onFileSelect={onFileSelect}
+                                    selectedFile={selectedFile}
+                                />
+                            </div>
+
+                            {/* Título */}
+                            <div>
+                                <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
+                                    Título de la página
+                                </label>
+                                <input
+                                    type="text"
+                                    id="title"
+                                    value={localTitle}
+                                    onChange={(e) => setLocalTitle(e.target.value.slice(0, 65))}
+                                    maxLength={65}
+                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="biomechanics.wav"
+                                />
+                                <div className="text-xs text-gray-400 mt-1">
+                                    {localTitle.length}/65 caracteres
                                 </div>
                             </div>
+
+                            {/* Descripción */}
+                            <div>
+                                <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">
+                                    Descripción/Subtítulo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="description"
+                                    value={localDescription}
+                                    onChange={(e) => setLocalDescription(e.target.value)}
+                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Tu nombre o descripción"
+                                />
+                            </div>
+
+                            {/* Iconos Sociales */}
+                            <SocialIconsConfig
+                                socialIconColors={socialIconColors}
+                                onColorChange={handleSocialIconColorChange}
+                                isValidHexColor={isValidHexColor}
+                            />
+
+                            {/* Configuración de Fondo */}
+                            <BackgroundConfig
+                                backgroundType={backgroundType}
+                                setBackgroundType={setBackgroundType}
+                                bgColor={bgColor}
+                                setBgColor={setBgColor}
+                                backgroundPreviewUrl={backgroundPreviewUrl}
+                                backgroundImageOpacity={backgroundImageOpacity}
+                                setBackgroundImageOpacity={setBackgroundImageOpacity}
+                                onBackgroundFileSelect={onBackgroundFileSelect}
+                                isValidHexColor={isValidHexColor}
+                            />
+
+                            {/* Configuración de Estilos */}
+                            <StyleConfig
+                                titleColor={titleColor}
+                                setTitleColor={setTitleColor}
+                                linkCardBackgroundColor={linkCardBackgroundColor}
+                                setLinkCardBackgroundColor={setLinkCardBackgroundColor}
+                                linkCardTextColor={linkCardTextColor}
+                                setLinkCardTextColor={setLinkCardTextColor}
+                                productBuyButtonColor={productBuyButtonColor}
+                                setProductBuyButtonColor={setProductBuyButtonColor}
+                                itemButtonColor={itemButtonColor}
+                                setItemButtonColor={setItemButtonColor}
+                                isValidHexColor={isValidHexColor}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Lista de Items - Prioridad total en móvil */}
+                    <div className="lg:col-span-3">
+                        <div className="w-full">
+                            <LinksListUpdated
+                                currentLinks={currentLinks}
+                                onAddNewLink={addNewLink}
+                                onAddNewProduct={addNewProduct}
+                                onAddNewItem={addNewItem}
+                                onRemoveLink={removeLink}
+                                onUpdateLink={updateLink}
+                                onUpdateProduct={updateProduct}
+                                onUpdateItem={updateItem}
+                                onReorderLinks={reorderLinks}
+                                onToggleVisibility={toggleVisibility}
+                                linkCardBackgroundColor={linkCardBackgroundColor}
+                                linkCardTextColor={linkCardTextColor}
+                                availableCategories={localCategories}
+                                onUpdateLinkCategories={(linkId: number, newCategories: string[]) => {
+                                    const updatedLinks = currentLinks.map(link => 
+                                        link.id === linkId 
+                                            ? { ...link, categories: newCategories }
+                                            : link
+                                    )
+                                    setCurrentLinks(updatedLinks)
+                                }}
+                                onCategoriesChange={(cats: string[]) => setLocalCategories(cats)}
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 {/* Action Buttons */}

@@ -157,111 +157,114 @@ export function LinksListUpdated({
                     <div className="space-y-2">
                         {currentLinks.map((item, index) => (
                             <div key={item.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                                {/* Fila del ListView con botón de expansión */}
-                                <div className="bg-gray-50 p-3 flex items-center justify-between hover:bg-gray-100 transition-colors">
-                                    <div className="flex items-center space-x-4 flex-1">
-                                        {/* Posición */}
-                                        <span className="text-sm font-mono text-gray-500 min-w-[2ch]">
-                                            {index + 1}
-                                        </span>
-                                        
-                                        {/* Información del item */}
-                                        <div className="flex items-center space-x-2 flex-1">
-                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                item.type === 'link' ? 'bg-blue-100 text-blue-800' :
-                                                item.type === 'product' ? 'bg-purple-100 text-purple-800' :
-                                                'bg-green-100 text-green-800'
-                                            }`}>
-                                                {item.type === 'link' ? '🔗 Link' :
-                                                 item.type === 'product' ? '📦 Product' : 
-                                                 '📄 Item'}
+                                {/* Fila del ListView clickeable para expandir/contraer */}
+                                <div 
+                                    className="bg-gray-50 p-3 cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                                    onClick={(e) => {
+                                        // Solo expandir si no se hizo click en un botón de acción
+                                        if (!(e.target as HTMLElement).closest('button')) {
+                                            toggleItemExpansion(item.id)
+                                        }
+                                    }}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-4 flex-1">
+                                            {/* Indicador de expansión */}
+                                            <span className="text-sm text-gray-400 min-w-[1.5ch]">
+                                                {expandedItems.has(item.id) ? '▼' : '▶️'}
                                             </span>
                                             
-                                            <span className="text-sm font-medium text-gray-900 truncate">
-                                                {item.type === 'link' ? (item as Link).label :
-                                                 item.type === 'product' ? (item as Product).title :
-                                                 (item as Item).title || 'Sin título'}
+                                            {/* Posición */}
+                                            <span className="text-sm font-mono text-gray-500 min-w-[2ch]">
+                                                {index + 1}
                                             </span>
                                             
-                                            {/* Características */}
-                                            <div className="flex items-center space-x-1">
-                                                {item.visible === false && (
-                                                    <span className="text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded">
-                                                        Oculto
-                                                    </span>
-                                                )}
-                                                {item.type === 'product' && !(item as Product).price && (
-                                                    <span className="text-xs text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
-                                                        Sin precio
-                                                    </span>
-                                                )}
+                                            {/* Información del item */}
+                                            <div className="flex items-center space-x-2 flex-1">
+                                                <span className="text-sm font-medium text-gray-900 truncate">
+                                                    {item.type === 'link' ? (item as Link).label :
+                                                     item.type === 'product' ? (item as Product).title :
+                                                     (item as Item).title || 'Sin título'}
+                                                </span>
+                                                
+                                                {/* Características */}
+                                                <div className="flex items-center space-x-1">
+                                                    {item.visible === false && (
+                                                        <span className="text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded">
+                                                            Oculto
+                                                        </span>
+                                                    )}
+                                                    {item.type === 'product' && !(item as Product).price && (
+                                                        <span className="text-xs text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
+                                                            Sin precio
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    
-                                    {/* Controles de acción */}
-                                    <div className="flex items-center space-x-1">
-                                        {/* Controles de movimiento */}
-                                        <button
-                                            onClick={() => handleMoveUp(index)}
-                                            disabled={index === 0}
-                                            className={`p-1 rounded text-sm ${
-                                                index === 0 
-                                                    ? 'text-gray-300 cursor-not-allowed' 
-                                                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                                            }`}
-                                            title="Subir"
-                                        >
-                                            ⬆️
-                                        </button>
-                                        <button
-                                            onClick={() => handleMoveDown(index)}
-                                            disabled={index === currentLinks.length - 1}
-                                            className={`p-1 rounded text-sm ${
-                                                index === currentLinks.length - 1 
-                                                    ? 'text-gray-300 cursor-not-allowed' 
-                                                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                                            }`}
-                                            title="Bajar"
-                                        >
-                                            ⬇️
-                                        </button>
                                         
-                                        {/* Control de visibilidad */}
-                                        <button
-                                            onClick={() => handleToggleVisibilityByIndex(index)}
-                                            className={`p-1 rounded text-sm ${
-                                                item.visible !== false
-                                                    ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
-                                                    : 'text-red-600 hover:text-red-700 hover:bg-red-50'
-                                            }`}
-                                            title={item.visible !== false ? "Ocultar" : "Mostrar"}
-                                        >
-                                            {item.visible !== false ? '👁️' : '🚫'}
-                                        </button>
-                                        
-                                        {/* Botón de eliminación */}
-                                        <button
-                                            onClick={() => handleDeleteByIndex(index)}
-                                            className="p-1 rounded text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            title="Eliminar"
-                                        >
-                                            🗑️
-                                        </button>
-                                        
-                                        {/* Botón de expansión */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                e.stopPropagation()
-                                                toggleItemExpansion(item.id)
-                                            }}
-                                            className="p-1 rounded text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 ml-2"
-                                            title={expandedItems.has(item.id) ? "Contraer" : "Expandir"}
-                                            type="button"
-                                        >
-                                            {expandedItems.has(item.id) ? '▼' : '▶️'}
-                                        </button>
+                                        {/* Controles de acción */}
+                                        <div className="flex items-center space-x-1" onClick={e => e.stopPropagation()}>
+                                            {/* Controles de movimiento */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleMoveUp(index)
+                                                }}
+                                                disabled={index === 0}
+                                                className={`p-1 rounded text-sm ${
+                                                    index === 0 
+                                                        ? 'text-gray-300 cursor-not-allowed' 
+                                                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                                }`}
+                                                title="Subir"
+                                            >
+                                                ⬆️
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleMoveDown(index)
+                                                }}
+                                                disabled={index === currentLinks.length - 1}
+                                                className={`p-1 rounded text-sm ${
+                                                    index === currentLinks.length - 1 
+                                                        ? 'text-gray-300 cursor-not-allowed' 
+                                                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                                }`}
+                                                title="Bajar"
+                                            >
+                                                ⬇️
+                                            </button>
+                                            
+                                            {/* Control de visibilidad */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleToggleVisibilityByIndex(index)
+                                                }}
+                                                className={`p-1 rounded text-sm ${
+                                                    item.visible !== false
+                                                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                                                        : 'text-red-600 hover:text-red-700 hover:bg-red-50'
+                                                }`}
+                                                title={item.visible !== false ? "Ocultar" : "Mostrar"}
+                                            >
+                                                {item.visible !== false ? '👁️' : '🚫'}
+                                            </button>
+                                            
+                                            {/* Botón de eliminación */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleDeleteByIndex(index)
+                                                }}
+                                                className="p-1 rounded text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                title="Eliminar"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 
