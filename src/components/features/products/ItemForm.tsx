@@ -10,6 +10,7 @@ interface ItemFormProps {
     availableCategories: string[]
     onUpdate: (item: Partial<Item>) => void
     onRemove: () => void
+    onCategoriesChange?: (categories: string[]) => void
     linkCardBackgroundColor?: string
     linkCardTextColor?: string
 }
@@ -19,6 +20,7 @@ export function ItemForm({
     availableCategories, 
     onUpdate, 
     onRemove,
+    onCategoriesChange,
     linkCardBackgroundColor = '#ffffff',
     linkCardTextColor = '#000000'
 }: ItemFormProps) {
@@ -175,6 +177,14 @@ export function ItemForm({
     const handleCategoriesChange = (newCategories: string[]) => {
         setCategories(newCategories)
         onUpdate({ categories: newCategories })
+    }
+
+    // Función para crear nuevas categorías
+    const handleCreateCategory = (categoryName: string) => {
+        if (onCategoriesChange) {
+            const updatedCategories = [...availableCategories, categoryName]
+            onCategoriesChange(updatedCategories)
+        }
     }
 
     // Verificar si el item está completo
@@ -400,6 +410,7 @@ export function ItemForm({
                                     availableCategories={availableCategories}
                                     selectedCategories={categories}
                                     onChange={handleCategoriesChange}
+                                    onCreateCategory={handleCreateCategory}
                                     placeholder="Selecciona categorías..."
                                     label=""
                                 />
@@ -419,6 +430,7 @@ export function ItemForm({
                                     availableCategories={availableCategories}
                                     selectedCategories={categories}
                                     onChange={handleCategoriesChange}
+                                    onCreateCategory={handleCreateCategory}
                                     placeholder="Selecciona categorías..."
                                     label=""
                                 />
