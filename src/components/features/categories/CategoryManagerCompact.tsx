@@ -216,13 +216,6 @@ export default function CategoryManagerCompact({ categories, onCategoriesChange 
           </button>
         </div>
       )}
-
-      {/* Nota informativa */}
-      {categories.length > 0 && (
-        <p className="text-[10px] text-gray-400 text-right">
-          Los cambios se guardarán al presionar "Guardar Cambios".
-        </p>
-      )}
     </div>
   )
 }

@@ -108,7 +108,18 @@ export function LinksListUpdated({
 
     return (
         <div className="w-full space-y-6">
-            {/* 1. Enlaces y productos - Botones de agregar responsivos */}
+
+
+            {/* Categorías - Gestión de categorías */}
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Categorías</h3>
+                <CategoryManagerCompact 
+                    categories={availableCategories}
+                    onCategoriesChange={onCategoriesChange}
+                />
+            </div>
+
+            {/* Enlaces y productos - Botones de agregar responsivos */}
             <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">Enlaces y productos</h3>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
@@ -134,15 +145,6 @@ export function LinksListUpdated({
                         <span className="hidden sm:inline">➕ Item</span>
                     </button>
                 </div>
-            </div>
-
-            {/* 3. Categorías - Gestión de categorías */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Categorías</h3>
-                <CategoryManagerCompact 
-                    categories={availableCategories}
-                    onCategoriesChange={onCategoriesChange}
-                />
             </div>
 
             {/* 4. Listado de items - Vista de listado con expansión individual */}
