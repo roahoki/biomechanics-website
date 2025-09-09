@@ -82,6 +82,7 @@ export function SortableLinksFormWithProducts({
         uploadFileToSupabase,
         uploadMultipleProductImages,
         uploadMultipleItemImages,
+        uploadCroppedItemImages,
         uploadBackgroundImage 
     } = useFileUpload({
         onStatusChange: setStatus
@@ -138,6 +139,7 @@ export function SortableLinksFormWithProducts({
     // Gestión de links y productos
     const {
         currentLinks,
+        currentLinksRef,
         setCurrentLinks,
         addNewLink,
         addNewProduct,
@@ -286,14 +288,26 @@ export function SortableLinksFormWithProducts({
 
             // 3. Procesar productos e items para subir imágenes a Supabase
             console.log('🔄 Procesando productos e items...')
+            
+            // Obtener el estado más actualizado usando ref (evita stale closures)
+            const latestLinks = currentLinksRef.current
+            console.log('🔄 Usando ref para estado más actual, cantidad de items:', latestLinks.length)
+            
             const processedLinks = await Promise.all(
-                currentLinks.map(async (item) => {
+                latestLinks.map(async (item) => {
                     console.log(`📝 Procesando item tipo: ${item.type}, ID: ${item.id}`)
+                    if (item.id === 28 && item.type === 'item') {
+                        console.log(`🔍 ESTADO ITEM 28 en save:`, {
+                            title: (item as any).title,
+                            images: (item as any).images,
+                            imagesLength: (item as any).images?.length || 0
+                        })
+                    }
                     
                     // Procesar productos
                     if (item.type === 'product' && item.images.length > 0) {
-                        const dataUrls = item.images.filter(img => img.startsWith('data:'))
-                        const publicUrls = item.images.filter(img => !img.startsWith('data:'))
+                        const dataUrls = item.images.filter((img: string) => img.startsWith('data:'))
+                        const publicUrls = item.images.filter((img: string) => !img.startsWith('data:'))
                         
                         console.log(`📦 Producto "${item.title}": ${dataUrls.length} nuevas imágenes, ${publicUrls.length} existentes`)
                         
@@ -313,25 +327,31 @@ export function SortableLinksFormWithProducts({
                             }
                         }
                     }
-                    // Procesar items
+                    // Procesar items - MÉTODO SIMPLE
                     else if (item.type === 'item' && item.images.length > 0) {
-                        const dataUrls = item.images.filter(img => img.startsWith('data:'))
-                        const publicUrls = item.images.filter(img => !img.startsWith('data:'))
+                        const dataUrls = item.images.filter((img: string) => img.startsWith('data:'))
+                        const publicUrls = item.images.filter((img: string) => !img.startsWith('data:'))
                         
-                        console.log(`🎯 Item "${item.title}": ${dataUrls.length} nuevas imágenes, ${publicUrls.length} existentes`)
+                        console.log(`🔍 ITEM UPLOAD - "${item.title}" (ID: ${item.id}):`, {
+                            totalImages: item.images.length,
+                            dataUrls: dataUrls.length,
+                            publicUrls: publicUrls.length,
+                            allImages: item.images,
+                            firstDataUrl: dataUrls[0] ? dataUrls[0].substring(0, 50) + '...' : 'none'
+                        })
                         
                         if (dataUrls.length > 0) {
                             setStatus({ message: `Subiendo imágenes del item "${item.title}"...` })
                             try {
                                 const uploadedUrls = await uploadMultipleItemImages(dataUrls, item.id)
-                                console.log(`✅ Item "${item.title}": ${uploadedUrls.length} imágenes subidas`)
+                                console.log(`✅ UPLOAD SUCCESS - "${item.title}": ${uploadedUrls.length} imágenes subidas`)
                                 return {
                                     ...item,
                                     images: [...publicUrls, ...uploadedUrls]
                                 }
                             } catch (error) {
                                 const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-                                console.error(`❌ Error subiendo imágenes del item "${item.title}":`, error)
+                                console.error(`❌ UPLOAD ERROR - "${item.title}":`, error)
                                 throw new Error(`Error subiendo imágenes del item "${item.title}": ${errorMessage}`)
                             }
                         }

@@ -3,8 +3,14 @@
 import { useState, useRef } from 'react'
 import ImageCropModal from './ImageCropModal'
 
+interface ImageData {
+    url: string // Data URL para mostrar
+    blob?: Blob // Blob croppeado para subir (si existe)
+    aspectRatio: number
+}
+
 interface ImageCarouselProps {
-    images: string[]
+    images: string[] // Para compatibilidad hacia atrás
     onImagesChange: (images: string[]) => void
     maxImages?: number
     maxSizeInMB?: number
@@ -14,6 +20,9 @@ interface ImageCarouselProps {
     textColor?: string
     aspectRatios?: number[] // Array de aspect ratios para cada imagen [1, 9/16, 1, ...]
     onAspectRatiosChange?: (aspectRatios: number[]) => void
+    // Nuevas props para manejar blobs croppeados
+    imageData?: ImageData[]
+    onImageDataChange?: (imageData: ImageData[]) => void
 }
 
 export function ImageCarousel({ 
@@ -26,7 +35,9 @@ export function ImageCarousel({
     error: externalError,
     textColor = '#6b7280',
     aspectRatios = [],
-    onAspectRatiosChange
+    onAspectRatiosChange,
+    imageData: propImageData,
+    onImageDataChange
 }: ImageCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
@@ -37,6 +48,28 @@ export function ImageCarousel({
     const fileInputRef = useRef<HTMLInputElement>(null)
     const touchStartX = useRef<number>(0)
     const touchEndX = useRef<number>(0)
+
+    // Estado interno para imageData si no se provee desde props
+    const [internalImageData, setInternalImageData] = useState<ImageData[]>([])
+    
+    // Determinar si usar imageData de props o interno
+    const usePropsImageData = onImageDataChange !== undefined
+    const currentImageData = usePropsImageData ? (propImageData || []) : internalImageData
+    const setImageData = usePropsImageData ? onImageDataChange! : setInternalImageData
+
+    // Convertir images array a imageData cuando sea necesario (solo para modo legacy)
+    const [syncedWithProps, setSyncedWithProps] = useState(false)
+    
+    if (!usePropsImageData && images.length > 0 && !syncedWithProps) {
+        const convertedData: ImageData[] = images.map((url, index) => ({
+            url,
+            aspectRatio: aspectRatios[index] || 1
+        }))
+        setInternalImageData(convertedData)
+        setSyncedWithProps(true)
+    }
+
+
 
     // Validar archivo
     const validateFile = (file: File): string | null => {
@@ -54,7 +87,7 @@ export function ImageCarousel({
         const files = Array.from(event.target.files || [])
         if (files.length === 0) return
 
-        const availableSlots = maxImages - images.length
+        const availableSlots = maxImages - currentImageData.length
         if (files.length > availableSlots) {
             setError(`Solo puedes agregar ${availableSlots} imagen(es) más`)
             return
@@ -77,7 +110,7 @@ export function ImageCarousel({
         reader.onload = (e) => {
             const imageUrl = e.target?.result as string
             setCurrentCropImage(imageUrl)
-            setPendingCropIndex(images.length) // Nueva imagen al final
+            setPendingCropIndex(currentImageData.length) // Nueva imagen al final
             setCropModalOpen(true)
         }
         reader.readAsDataURL(file)
@@ -88,32 +121,64 @@ export function ImageCarousel({
         }
     }
 
-    // Manejar imagen recortada
+    // Manejar imagen recortada - FLUJO SIMPLE
     const handleCroppedImage = (croppedBlob: Blob, aspectRatio: number) => {
-        // Convertir blob a URL para mostrar
+        // Convertir blob a data URL para mostrar Y para guardar
         const reader = new FileReader()
         reader.onload = (e) => {
-            const croppedImageUrl = e.target?.result as string
+            const croppedImageDataURL = e.target?.result as string
+            console.log('✅ CROP SUCCESS - Data URL generado:', croppedImageDataURL.substring(0, 50) + '...')
             
             if (pendingCropIndex !== null) {
-                if (pendingCropIndex === images.length) {
-                    // Nueva imagen
-                    const newImages = [...images, croppedImageUrl]
-                    const newAspectRatios = [...aspectRatios, aspectRatio]
+                if (usePropsImageData) {
+                    // Modo con imageData (ItemForm)
+                    const newImageData = [...currentImageData]
+                    
+                    if (pendingCropIndex === currentImageData.length) {
+                        // Nueva imagen
+                        newImageData.push({
+                            url: croppedImageDataURL,
+                            aspectRatio
+                        })
+                        setCurrentIndex(newImageData.length - 1)
+                    } else {
+                        // Imagen existente editada
+                        newImageData[pendingCropIndex] = {
+                            url: croppedImageDataURL,
+                            aspectRatio
+                        }
+                    }
+                    
+                    setImageData(newImageData)
+                    
+                    // Actualizar arrays legacy para compatibilidad
+                    const newImages = newImageData.map(data => data.url)
+                    const newAspectRatios = newImageData.map(data => data.aspectRatio)
                     onImagesChange(newImages)
                     if (onAspectRatiosChange) {
                         onAspectRatiosChange(newAspectRatios)
                     }
-                    setCurrentIndex(newImages.length - 1)
                 } else {
-                    // Imagen existente editada
-                    const newImages = [...images]
-                    const newAspectRatios = [...aspectRatios]
-                    newImages[pendingCropIndex] = croppedImageUrl
-                    newAspectRatios[pendingCropIndex] = aspectRatio
-                    onImagesChange(newImages)
-                    if (onAspectRatiosChange) {
-                        onAspectRatiosChange(newAspectRatios)
+                    // Modo legacy (arrays directos)
+                    if (pendingCropIndex === images.length) {
+                        // Nueva imagen
+                        const newImages = [...images, croppedImageDataURL]
+                        const newAspectRatios = [...aspectRatios, aspectRatio]
+                        onImagesChange(newImages)
+                        if (onAspectRatiosChange) {
+                            onAspectRatiosChange(newAspectRatios)
+                        }
+                        setCurrentIndex(newImages.length - 1)
+                    } else {
+                        // Imagen existente editada
+                        const newImages = [...images]
+                        const newAspectRatios = [...aspectRatios]
+                        newImages[pendingCropIndex] = croppedImageDataURL
+                        newAspectRatios[pendingCropIndex] = aspectRatio
+                        onImagesChange(newImages)
+                        if (onAspectRatiosChange) {
+                            onAspectRatiosChange(newAspectRatios)
+                        }
                     }
                 }
             }
@@ -135,31 +200,38 @@ export function ImageCarousel({
 
     // Editar imagen existente
     const handleEditImage = (index: number) => {
-        setCurrentCropImage(images[index])
+        setCurrentCropImage(currentImageData[index]?.url || images[index])
         setPendingCropIndex(index)
         setCropModalOpen(true)
     }
 
     // Remover imagen
     const removeImage = (index: number) => {
-        const newImages = images.filter((_, i) => i !== index)
-        const newAspectRatios = aspectRatios.filter((_, i) => i !== index)
+        const newImageData = currentImageData.filter((_, i) => i !== index)
+        setImageData(newImageData)
+        
+        // Actualizar arrays legacy para compatibilidad
+        const newImages = newImageData.map(data => data.url)
+        const newAspectRatios = newImageData.map(data => data.aspectRatio)
         onImagesChange(newImages)
         if (onAspectRatiosChange) {
             onAspectRatiosChange(newAspectRatios)
         }
-        if (currentIndex >= newImages.length && newImages.length > 0) {
-            setCurrentIndex(newImages.length - 1)
+        
+        if (currentIndex >= newImageData.length && newImageData.length > 0) {
+            setCurrentIndex(newImageData.length - 1)
         }
     }
 
     // Navegación
     const goToPrevious = () => {
-        setCurrentIndex(prev => prev > 0 ? prev - 1 : images.length - 1)
+        const totalImages = Math.max(images.length, currentImageData.length)
+        setCurrentIndex(prev => prev > 0 ? prev - 1 : totalImages - 1)
     }
 
     const goToNext = () => {
-        setCurrentIndex(prev => prev < images.length - 1 ? prev + 1 : 0)
+        const totalImages = Math.max(images.length, currentImageData.length)
+        setCurrentIndex(prev => prev < totalImages - 1 ? prev + 1 : 0)
     }
 
     // Touch handlers para swipe
@@ -178,10 +250,11 @@ export function ImageCarousel({
         const isLeftSwipe = distance > 50
         const isRightSwipe = distance < -50
 
-        if (isLeftSwipe && images.length > 1) {
+        const totalImages = Math.max(images.length, currentImageData.length)
+        if (isLeftSwipe && totalImages > 1) {
             goToNext()
         }
-        if (isRightSwipe && images.length > 1) {
+        if (isRightSwipe && totalImages > 1) {
             goToPrevious()
         }
     }
@@ -201,21 +274,22 @@ export function ImageCarousel({
         e.preventDefault()
         if (draggedIndex === null || draggedIndex === dropIndex) return
 
-        const newImages = [...images]
-        const newAspectRatios = [...aspectRatios]
-        const draggedImage = newImages[draggedIndex]
-        const draggedAspectRatio = newAspectRatios[draggedIndex] || 1
+        const newImageData = [...currentImageData]
+        const draggedImageData = newImageData[draggedIndex]
 
-        newImages.splice(draggedIndex, 1)
-        newImages.splice(dropIndex, 0, draggedImage)
+        newImageData.splice(draggedIndex, 1)
+        newImageData.splice(dropIndex, 0, draggedImageData)
         
-        newAspectRatios.splice(draggedIndex, 1)
-        newAspectRatios.splice(dropIndex, 0, draggedAspectRatio)
+        setImageData(newImageData)
         
+        // Actualizar arrays legacy para compatibilidad
+        const newImages = newImageData.map(data => data.url)
+        const newAspectRatios = newImageData.map(data => data.aspectRatio)
         onImagesChange(newImages)
         if (onAspectRatiosChange) {
             onAspectRatiosChange(newAspectRatios)
         }
+        
         setDraggedIndex(null)
         setCurrentIndex(dropIndex)
     }
@@ -226,12 +300,12 @@ export function ImageCarousel({
             <div 
                 className="relative bg-gray-200 rounded-lg overflow-hidden mb-4"
                 style={{
-                    aspectRatio: images.length > 0 && aspectRatios[currentIndex] 
-                        ? `1 / ${1 / aspectRatios[currentIndex]}` 
+                    aspectRatio: currentImageData.length > 0 && currentImageData[currentIndex] 
+                        ? `1 / ${1 / currentImageData[currentIndex].aspectRatio}` 
                         : '1 / 1'
                 }}
             >
-                {images.length === 0 ? (
+                {currentImageData.length === 0 ? (
                     // Estado vacío
                     <div 
                         className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors"
@@ -255,7 +329,7 @@ export function ImageCarousel({
                         onTouchEnd={handleTouchEnd}
                     >
                         <img
-                            src={images[currentIndex]}
+                            src={currentImageData[currentIndex]?.url || images[currentIndex]}
                             alt={`Imagen ${currentIndex + 1}`}
                             className="w-full h-full object-cover clickable"
                             draggable={false}
@@ -289,7 +363,7 @@ export function ImageCarousel({
                         </div>
 
                         {/* Botones de navegación */}
-                        {images.length > 1 && (
+                        {currentImageData.length > 1 && (
                             <>
                                 <button
                                     type="button"
@@ -313,9 +387,9 @@ export function ImageCarousel({
                         )}
 
                         {/* Indicadores de página */}
-                        {images.length > 1 && (
+                        {currentImageData.length > 1 && (
                             <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                                {images.map((_, index) => (
+                                {currentImageData.map((_, index) => (
                                     <button
                                         key={index}
                                         type="button"
@@ -334,18 +408,18 @@ export function ImageCarousel({
             </div>
 
             {/* Botón agregar más imágenes */}
-            {images.length > 0 && images.length < maxImages && (
+            {currentImageData.length > 0 && currentImageData.length < maxImages && (
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors mb-4"
                 >
-                    Agregar imagen ({images.length}/{maxImages})
+                    Agregar imagen ({currentImageData.length}/{maxImages})
                 </button>
             )}
 
             {/* Thumbnails para reordenar */}
-            {images.length > 1 && (
+            {currentImageData.length > 1 && (
                 <div className="w-full">
                     <div 
                         className="flex space-x-2 overflow-x-auto pb-2 min-h-[4rem] scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300" 
@@ -354,7 +428,7 @@ export function ImageCarousel({
                             msOverflowStyle: 'none'
                         }}
                     >
-                        {images.map((image, index) => (
+                        {currentImageData.map((imageData, index) => (
                             <div
                                 key={index}
                                 draggable
@@ -369,7 +443,7 @@ export function ImageCarousel({
                                 onClick={() => setCurrentIndex(index)}
                             >
                                 <img
-                                    src={image}
+                                    src={imageData.url}
                                     alt={`Miniatura ${index + 1}`}
                                     className="w-full h-full object-cover clickable"
                                     draggable={false}

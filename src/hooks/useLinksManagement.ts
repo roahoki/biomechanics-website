@@ -1,10 +1,18 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { LinkItem, Link, Product, Item } from '@/types/product'
 
 export function useLinksManagement(initialLinks: LinkItem[]) {
     const [currentLinks, setCurrentLinks] = useState<LinkItem[]>(initialLinks)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [linkToDelete, setLinkToDelete] = useState<number | null>(null)
+    
+    // Ref para mantener el estado más actualizado
+    const currentLinksRef = useRef<LinkItem[]>(initialLinks)
+    
+    // Sincronizar ref con estado
+    useEffect(() => {
+        currentLinksRef.current = currentLinks
+    }, [currentLinks])
 
     // Función para agregar un nuevo link al principio
     const addNewLink = () => {
@@ -90,9 +98,25 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
 
     // Función para actualizar un item específico
     const updateItem = (id: number, updatedItem: Partial<Item>) => {
-        setCurrentLinks(currentLinks.map(item => 
+        console.log(`🔧 HOOK updateItem called - ID: ${id}`, updatedItem)
+        const newLinks = currentLinks.map(item => 
             item.id === id && item.type === 'item' ? { ...item, ...updatedItem } : item
-        ))
+        )
+        
+        // Log específico para el item 28
+        if (id === 28) {
+            const item28 = newLinks.find(item => item.id === 28)
+            console.log(`🔧 HOOK - Estado actualizado del item 28:`, {
+                id: item28?.id,
+                type: item28?.type,
+                title: (item28 as any)?.title,
+                images: (item28 as any)?.images,
+                imagesLength: (item28 as any)?.images?.length || 0,
+                firstImagePrefix: (item28 as any)?.images?.[0]?.substring(0, 30) || 'none'
+            })
+        }
+        
+        setCurrentLinks(newLinks)
     }
 
     // Función para reordenar los elementos
@@ -109,6 +133,7 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
 
     return {
         currentLinks,
+        currentLinksRef,
         setCurrentLinks,
         addNewLink,
         addNewProduct,

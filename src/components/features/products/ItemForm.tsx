@@ -1,9 +1,15 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { EyeIcon, EyeSlashIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { Item } from '@/types/product'
 import { ImageCarousel, CategorySelector } from '@/components'
+
+interface ImageData {
+    url: string // Data URL para mostrar
+    blob?: Blob // Blob croppeado para subir (si existe)
+    aspectRatio: number
+}
 
 interface ItemFormProps {
     item?: Item
@@ -37,6 +43,51 @@ export function ItemForm({
     const [images, setImages] = useState<string[]>(item?.images || [])
     const [aspectRatios, setAspectRatios] = useState<number[]>(item?.aspectRatios || [])
     const [categories, setCategories] = useState<string[]>(item?.categories || [])
+    const [visible, setVisible] = useState(item?.visible ?? true)
+    
+    // Estado para manejar imageData con blobs croppeados
+    const [imageData, setImageData] = useState<ImageData[]>([])
+    const imageDataRef = useRef<ImageData[]>([])
+    
+    // Flag para evitar conflictos entre handleImageDataChange y handleImagesChange
+    const justProcessedCrop = useRef(false)
+    
+    // Sincronizar imageData con images iniciales
+    useEffect(() => {
+        if (item?.images && item.images.length > 0 && imageData.length === 0) {
+            const initialImageData: ImageData[] = item.images.map((url, index) => ({
+                url,
+                aspectRatio: item.aspectRatios?.[index] || 1
+            }))
+            setImageData(initialImageData)
+            imageDataRef.current = initialImageData
+        }
+    }, [item?.images, item?.aspectRatios, imageData.length])
+
+    // Función helper para enviar estado completo
+    const updateCompleteState = (overrides: Partial<Item> = {}) => {
+        const completeState = {
+            title,
+            subtitle,
+            price: parseInt(price.replace(/\D/g, '')) || 0,
+            priceVisible,
+            buttonText,
+            paymentLink,
+            description,
+            images,
+            aspectRatios,
+            visible,
+            categories,
+            ...overrides  // Las sobrescrituras van al final
+        }
+        console.log(`🔄 ItemForm - Enviando estado completo para item ${item?.id}:`, {
+            ...completeState,
+            imagesLength: completeState.images.length,
+            firstImagePrefix: completeState.images[0]?.substring(0, 30) || 'none',
+            stackTrace: new Error().stack?.split('\n')[2]  // Ver quién llama esta función
+        })
+        onUpdate(completeState)
+    }
 
     // Validaciones
     const validateField = (field: string, value: any) => {
@@ -130,59 +181,133 @@ export function ItemForm({
     const handleTitleChange = (value: string) => {
         setTitle(value)
         validateField('title', value)
-        onUpdate({ title: value })
+        updateCompleteState({ title: value })
     }
 
     const handleSubtitleChange = (value: string) => {
         setSubtitle(value)
         validateField('subtitle', value)
-        onUpdate({ subtitle: value })
+        updateCompleteState({ subtitle: value })
     }
 
     const handlePriceChange = (value: string) => {
         const cleanValue = value.replace(/\D/g, '')
         setPrice(cleanValue)
         validateField('price', cleanValue)
-        onUpdate({ price: parseInt(cleanValue) || 0 })
+        updateCompleteState({ price: parseInt(cleanValue) || 0 })
     }
 
     const handlePriceVisibleChange = (visible: boolean) => {
         setPriceVisible(visible)
-        onUpdate({ priceVisible: visible })
+        updateCompleteState({ priceVisible: visible })
     }
 
     const handleButtonTextChange = (value: string) => {
         setButtonText(value)
         validateField('buttonText', value)
-        onUpdate({ buttonText: value })
+        updateCompleteState({ buttonText: value })
     }
 
     const handlePaymentLinkChange = (value: string) => {
         setPaymentLink(value)
         validateField('paymentLink', value)
-        onUpdate({ paymentLink: value })
+        updateCompleteState({ paymentLink: value })
     }
 
     const handleDescriptionChange = (value: string) => {
         setDescription(value)
         validateField('description', value)
-        onUpdate({ description: value })
+        updateCompleteState({ description: value })
     }
 
     const handleImagesChange = (newImages: string[]) => {
+        console.log('🔍 ItemForm - handleImagesChange:', newImages)
+        console.log('🔍 ItemForm - justProcessedCrop flag:', justProcessedCrop.current)
+        
+        // Si acabamos de procesar un crop, ignorar esta llamada para evitar conflictos
+        if (justProcessedCrop.current) {
+            console.log('🚫 ItemForm - Ignorando handleImagesChange porque acabamos de procesar crop')
+            return
+        }
+        
+        console.log('🔍 ItemForm - handleImagesChange STACK TRACE:', new Error().stack)
         setImages(newImages)
         validateField('images', newImages)
-        onUpdate({ images: newImages })
+        updateCompleteState({ images: newImages })
+        console.log('🔍 ItemForm - onUpdate called with images:', newImages)
     }
 
     const handleAspectRatiosChange = (newAspectRatios: number[]) => {
+        console.log('🔍 ItemForm - handleAspectRatiosChange:', newAspectRatios)
+        console.log('🔍 ItemForm - justProcessedCrop flag en aspectRatios:', justProcessedCrop.current)
+        
+        // Si acabamos de procesar un crop, ignorar esta llamada para evitar conflictos
+        if (justProcessedCrop.current) {
+            console.log('🚫 ItemForm - Ignorando handleAspectRatiosChange porque acabamos de procesar crop')
+            return
+        }
+        
         setAspectRatios(newAspectRatios)
-        onUpdate({ aspectRatios: newAspectRatios })
+        updateCompleteState({ aspectRatios: newAspectRatios })
+    }
+
+    const handleImageDataChange = (newImageData: ImageData[]) => {
+        console.log('🔍 ItemForm - handleImageDataChange:', newImageData)
+        justProcessedCrop.current = true
+        
+        setImageData(newImageData)
+        imageDataRef.current = newImageData
+        
+        // Actualizar también los arrays legacy para compatibilidad
+        const newImages = newImageData.map(data => data.url)
+        const newAspectRatios = newImageData.map(data => data.aspectRatio)
+        
+        console.log('🔍 ItemForm - Extracted images from imageData:', newImages)
+        
+        // Actualizar estados locales ANTES de llamar updateCompleteState
+        setImages(newImages)
+        setAspectRatios(newAspectRatios)
+        validateField('images', newImages)
+        
+        // IMPORTANTE: Usar los valores directos, no el estado (que puede estar desactualizado)
+        const immediateState = {
+            title,
+            subtitle,
+            price: parseInt(price.replace(/\D/g, '')) || 0,
+            priceVisible,
+            buttonText,
+            paymentLink,
+            description,
+            images: newImages,  // Usar el valor directo
+            aspectRatios: newAspectRatios,  // Usar el valor directo
+            visible,
+            categories
+        }
+        
+        console.log('🔍 ItemForm - Enviando estado inmediato:', {
+            ...immediateState,
+            imagesLength: immediateState.images.length,
+            firstImagePrefix: immediateState.images[0]?.substring(0, 30) || 'none'
+        })
+        
+        onUpdate(immediateState)
+        
+        console.log('🔍 ItemForm - onUpdate called with:', { 
+            itemTitle: item?.title, 
+            itemId: item?.id,
+            images: newImages, 
+            aspectRatios: newAspectRatios 
+        })
+        
+        // Reset flag después de un breve delay
+        setTimeout(() => {
+            justProcessedCrop.current = false
+        }, 100)
     }
 
     const handleCategoriesChange = (newCategories: string[]) => {
         setCategories(newCategories)
-        onUpdate({ categories: newCategories })
+        updateCompleteState({ categories: newCategories })
     }
 
     // Función para crear nuevas categorías
@@ -224,6 +349,8 @@ export function ItemForm({
                             onImagesChange={handleImagesChange}
                             aspectRatios={aspectRatios}
                             onAspectRatiosChange={handleAspectRatiosChange}
+                            imageData={imageData}
+                            onImageDataChange={handleImageDataChange}
                             bucketName="items"
                             folderPrefix={item?.id ? `item-${item.id}` : undefined}
                             error={errors.images}
