@@ -170,34 +170,34 @@ export function LinksListUpdated({
                                     }}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-4 flex-1">
+                                        <div className="flex items-center space-x-3 flex-1 min-w-0">
                                             {/* Indicador de expansión */}
-                                            <span className="text-sm text-gray-400 min-w-[1.5ch]">
+                                            <span className="text-sm text-gray-400 min-w-[1.5ch] flex-shrink-0">
                                                 {expandedItems.has(item.id) ? '▼' : '▶️'}
                                             </span>
                                             
                                             {/* Posición */}
-                                            <span className="text-sm font-mono text-gray-500 min-w-[2ch]">
+                                            <span className="text-sm font-mono text-gray-500 min-w-[2ch] flex-shrink-0">
                                                 {index + 1}
                                             </span>
                                             
-                                            {/* Información del item */}
-                                            <div className="flex items-center space-x-2 flex-1">
+                                            {/* Información del item - Permitir truncado */}
+                                            <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden">
                                                 <span className="text-sm font-medium text-gray-900 truncate">
                                                     {item.type === 'link' ? (item as Link).label :
                                                      item.type === 'product' ? (item as Product).title :
                                                      (item as Item).title || 'Sin título'}
                                                 </span>
                                                 
-                                                {/* Características */}
-                                                <div className="flex items-center space-x-1">
+                                                {/* Características - Solo mostrar en pantallas más grandes */}
+                                                <div className="hidden sm:flex items-center space-x-1 flex-shrink-0">
                                                     {item.visible === false && (
-                                                        <span className="text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded">
+                                                        <span className="text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded whitespace-nowrap">
                                                             Oculto
                                                         </span>
                                                     )}
                                                     {item.type === 'product' && !(item as Product).price && (
-                                                        <span className="text-xs text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
+                                                        <span className="text-xs text-gray-600 bg-gray-100 px-1 py-0.5 rounded whitespace-nowrap">
                                                             Sin precio
                                                         </span>
                                                     )}
@@ -205,47 +205,22 @@ export function LinksListUpdated({
                                             </div>
                                         </div>
                                         
-                                        {/* Controles de acción */}
-                                        <div className="flex items-center space-x-1" onClick={e => e.stopPropagation()}>
-                                            {/* Controles de movimiento */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleMoveUp(index)
-                                                }}
-                                                disabled={index === 0}
-                                                className={`p-1 rounded text-sm ${
-                                                    index === 0 
-                                                        ? 'text-gray-300 cursor-not-allowed' 
-                                                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                                                }`}
-                                                title="Subir"
-                                            >
-                                                ⬆️
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleMoveDown(index)
-                                                }}
-                                                disabled={index === currentLinks.length - 1}
-                                                className={`p-1 rounded text-sm ${
-                                                    index === currentLinks.length - 1 
-                                                        ? 'text-gray-300 cursor-not-allowed' 
-                                                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                                                }`}
-                                                title="Bajar"
-                                            >
-                                                ⬇️
-                                            </button>
+                                        {/* Controles de acción - Siempre visibles a la derecha */}
+                                        <div className="flex items-center space-x-1 flex-shrink-0 ml-2" onClick={e => e.stopPropagation()}>
+                                            {/* Mostrar estado oculto en móvil como icono */}
+                                            {item.visible === false && (
+                                                <span className="sm:hidden text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded flex-shrink-0">
+                                                    ❌
+                                                </span>
+                                            )}
                                             
-                                            {/* Control de visibilidad */}
+                                            {/* Control de visibilidad - Siempre visible */}
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation()
                                                     handleToggleVisibilityByIndex(index)
                                                 }}
-                                                className={`p-1 rounded text-sm ${
+                                                className={`p-2 rounded text-base flex-shrink-0 ${
                                                     item.visible !== false
                                                         ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
                                                         : 'text-red-600 hover:text-red-700 hover:bg-red-50'
@@ -253,18 +228,6 @@ export function LinksListUpdated({
                                                 title={item.visible !== false ? "Ocultar" : "Mostrar"}
                                             >
                                                 {item.visible !== false ? '👁️' : '🚫'}
-                                            </button>
-                                            
-                                            {/* Botón de eliminación */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleDeleteByIndex(index)
-                                                }}
-                                                className="p-1 rounded text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                title="Eliminar"
-                                            >
-                                                🗑️
                                             </button>
                                         </div>
                                     </div>
