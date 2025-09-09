@@ -49,7 +49,7 @@ export function ItemForm({
     const [imageData, setImageData] = useState<ImageData[]>([])
     const imageDataRef = useRef<ImageData[]>([])
     
-    // Flag para evitar conflictos entre handleImageDataChange y handleImagesChange
+    // Flag para evitar conflictos durante el procesamiento de crop
     const justProcessedCrop = useRef(false)
     
     // Sincronizar imageData con images iniciales
@@ -80,12 +80,6 @@ export function ItemForm({
             categories,
             ...overrides  // Las sobrescrituras van al final
         }
-        console.log(`🔄 ItemForm - Enviando estado completo para item ${item?.id}:`, {
-            ...completeState,
-            imagesLength: completeState.images.length,
-            firstImagePrefix: completeState.images[0]?.substring(0, 30) || 'none',
-            stackTrace: new Error().stack?.split('\n')[2]  // Ver quién llama esta función
-        })
         onUpdate(completeState)
     }
 
@@ -221,29 +215,19 @@ export function ItemForm({
     }
 
     const handleImagesChange = (newImages: string[]) => {
-        console.log('🔍 ItemForm - handleImagesChange:', newImages)
-        console.log('🔍 ItemForm - justProcessedCrop flag:', justProcessedCrop.current)
-        
         // Si acabamos de procesar un crop, ignorar esta llamada para evitar conflictos
         if (justProcessedCrop.current) {
-            console.log('🚫 ItemForm - Ignorando handleImagesChange porque acabamos de procesar crop')
             return
         }
         
-        console.log('🔍 ItemForm - handleImagesChange STACK TRACE:', new Error().stack)
         setImages(newImages)
         validateField('images', newImages)
         updateCompleteState({ images: newImages })
-        console.log('🔍 ItemForm - onUpdate called with images:', newImages)
     }
 
     const handleAspectRatiosChange = (newAspectRatios: number[]) => {
-        console.log('🔍 ItemForm - handleAspectRatiosChange:', newAspectRatios)
-        console.log('🔍 ItemForm - justProcessedCrop flag en aspectRatios:', justProcessedCrop.current)
-        
         // Si acabamos de procesar un crop, ignorar esta llamada para evitar conflictos
         if (justProcessedCrop.current) {
-            console.log('🚫 ItemForm - Ignorando handleAspectRatiosChange porque acabamos de procesar crop')
             return
         }
         
@@ -252,7 +236,6 @@ export function ItemForm({
     }
 
     const handleImageDataChange = (newImageData: ImageData[]) => {
-        console.log('🔍 ItemForm - handleImageDataChange:', newImageData)
         justProcessedCrop.current = true
         
         setImageData(newImageData)
@@ -262,14 +245,12 @@ export function ItemForm({
         const newImages = newImageData.map(data => data.url)
         const newAspectRatios = newImageData.map(data => data.aspectRatio)
         
-        console.log('🔍 ItemForm - Extracted images from imageData:', newImages)
-        
-        // Actualizar estados locales ANTES de llamar updateCompleteState
+        // Actualizar estados locales
         setImages(newImages)
         setAspectRatios(newAspectRatios)
         validateField('images', newImages)
         
-        // IMPORTANTE: Usar los valores directos, no el estado (que puede estar desactualizado)
+        // Enviar estado inmediato para evitar problemas de stale closures
         const immediateState = {
             title,
             subtitle,
@@ -278,26 +259,13 @@ export function ItemForm({
             buttonText,
             paymentLink,
             description,
-            images: newImages,  // Usar el valor directo
-            aspectRatios: newAspectRatios,  // Usar el valor directo
+            images: newImages,
+            aspectRatios: newAspectRatios,
             visible,
             categories
         }
         
-        console.log('🔍 ItemForm - Enviando estado inmediato:', {
-            ...immediateState,
-            imagesLength: immediateState.images.length,
-            firstImagePrefix: immediateState.images[0]?.substring(0, 30) || 'none'
-        })
-        
         onUpdate(immediateState)
-        
-        console.log('🔍 ItemForm - onUpdate called with:', { 
-            itemTitle: item?.title, 
-            itemId: item?.id,
-            images: newImages, 
-            aspectRatios: newAspectRatios 
-        })
         
         // Reset flag después de un breve delay
         setTimeout(() => {

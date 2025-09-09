@@ -292,10 +292,7 @@ export function LinksListUpdated({
                                             <ItemForm
                                                 item={item as Item}
                                                 availableCategories={availableCategories}
-                                                onUpdate={(updatedItem) => {
-                                                    console.log(`🔗 LinksListUpdated - onUpdate called for item ${item.id}`, updatedItem)
-                                                    onUpdateItem(item.id, updatedItem)
-                                                }}
+                                                onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
                                                 onRemove={() => onRemoveLink(item.id)}
                                                 onCategoriesChange={onCategoriesChange}
                                                 linkCardBackgroundColor={linkCardBackgroundColor}

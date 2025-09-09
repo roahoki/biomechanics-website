@@ -98,24 +98,9 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
 
     // Función para actualizar un item específico
     const updateItem = (id: number, updatedItem: Partial<Item>) => {
-        console.log(`🔧 HOOK updateItem called - ID: ${id}`, updatedItem)
         const newLinks = currentLinks.map(item => 
             item.id === id && item.type === 'item' ? { ...item, ...updatedItem } : item
         )
-        
-        // Log específico para el item 28
-        if (id === 28) {
-            const item28 = newLinks.find(item => item.id === 28)
-            console.log(`🔧 HOOK - Estado actualizado del item 28:`, {
-                id: item28?.id,
-                type: item28?.type,
-                title: (item28 as any)?.title,
-                images: (item28 as any)?.images,
-                imagesLength: (item28 as any)?.images?.length || 0,
-                firstImagePrefix: (item28 as any)?.images?.[0]?.substring(0, 30) || 'none'
-            })
-        }
-        
         setCurrentLinks(newLinks)
     }
 
