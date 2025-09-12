@@ -46,7 +46,7 @@ export interface LinksData {
   profileImage: string
   profileImageType: ProfileImageType
   socialIcons: SocialIcons
-  backgroundColor?: string // Mantener compatibilidad hacia atrás
+  backgroundColor?: string
   backgroundSettings?: BackgroundSettings
   styleSettings?: StyleSettings
 }
@@ -121,7 +121,7 @@ function transformDataFromSupabase(data: any): LinksData {
     
     // Migración: agregar categorías por defecto si no existen
     if (!transformedData.categories) {
-      transformedData.categories = ["Música", "Tienda", "Eventos", "Prensa", "Posts"];
+      transformedData.categories = ["Destacados", "Música", "Tienda", "Eventos", "Prensa", "Posts"];
     }
     
     return transformedData;

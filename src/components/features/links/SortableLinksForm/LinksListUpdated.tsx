@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { LinkCard } from './LinkCard'
 import { ProductItem } from '../../products/ProductItem'
 import { ItemForm } from '../../products/ItemForm'
@@ -41,7 +41,21 @@ export function LinksListUpdated({
     linkCardBackgroundColor,
     linkCardTextColor
 }: LinksListProps) {
-    const [viewMode, setViewMode] = useState<'detail' | 'list'>('detail')
+    const [viewMode, setViewMode] = useState<'detail' | 'list'>('list') // Cambiado a 'list' por defecto
+    const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set()) // Nuevo estado para items expandidos
+
+    // Función para toggle individual de expansión - Memoizada para evitar re-renders
+    const toggleItemExpansion = useCallback((itemId: number) => {
+        setExpandedItems(prev => {
+            const newSet = new Set(prev)
+            if (newSet.has(itemId)) {
+                newSet.delete(itemId)
+            } else {
+                newSet.add(itemId)
+            }
+            return newSet
+        })
+    }, []) // Sin dependencias para aislar completamente este estado
 
     // Atajo: Ctrl + Shift -> cambiar a vista listado
     useEffect(() => {
@@ -56,45 +70,56 @@ export function LinksListUpdated({
         return () => window.removeEventListener('keydown', handler)
     }, [])
 
-    // Funciones para manejo de reordenamiento
-    const handleMoveUp = (index: number) => {
+    // Funciones para manejo de reordenamiento - Memoizadas para evitar re-renders
+    const handleMoveUp = useCallback((index: number) => {
         if (index === 0) return
         const newOrder = [...currentLinks]
         const temp = newOrder[index]
         newOrder[index] = newOrder[index - 1]
         newOrder[index - 1] = temp
         onReorderLinks(newOrder)
-    }
+    }, [currentLinks, onReorderLinks])
 
-    const handleMoveDown = (index: number) => {
+    const handleMoveDown = useCallback((index: number) => {
         if (index === currentLinks.length - 1) return
         const newOrder = [...currentLinks]
         const temp = newOrder[index]
         newOrder[index] = newOrder[index + 1]
         newOrder[index + 1] = temp
         onReorderLinks(newOrder)
-    }
+    }, [currentLinks, onReorderLinks])
 
-    const handleToggleVisibilityByIndex = (index: number) => {
+    const handleToggleVisibilityByIndex = useCallback((index: number) => {
         const item = currentLinks[index]
         onToggleVisibility(item.id)
-    }
+    }, [currentLinks, onToggleVisibility])
 
-    const handleDeleteByIndex = (index: number) => {
+    const handleDeleteByIndex = useCallback((index: number) => {
         const item = currentLinks[index]
         if (window.confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
             onRemoveLink(item.id)
         }
-    }
+    }, [currentLinks, onRemoveLink])
 
-    const handleEditByIndex = (index: number) => {
+    const handleEditByIndex = useCallback((index: number) => {
         // Para editar, cambiar a vista detalle
         setViewMode('detail')
-    }
+    }, [])
 
     return (
         <div className="w-full space-y-6">
-            {/* 1. Enlaces y productos - Botones de agregar responsivos */}
+
+
+            {/* Categorías - Gestión de categorías */}
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Categorías</h3>
+                <CategoryManagerCompact 
+                    categories={availableCategories}
+                    onCategoriesChange={onCategoriesChange}
+                />
+            </div>
+
+            {/* Enlaces y productos - Botones de agregar responsivos */}
             <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">Enlaces y productos</h3>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
@@ -122,41 +147,7 @@ export function LinksListUpdated({
                 </div>
             </div>
 
-            {/* 2. Tipos de visualización - Controles responsivos */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Tipos de visualización</h3>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={viewMode === 'list'}
-                            onChange={(e) => setViewMode(e.target.checked ? 'list' : 'detail')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="text-xs sm:text-sm text-gray-700">Vista de listado</span>
-                    </label>
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={viewMode === 'detail'}
-                            onChange={(e) => setViewMode(e.target.checked ? 'detail' : 'list')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="text-xs sm:text-sm text-gray-700">Vista de detalle</span>
-                    </label>
-                </div>
-            </div>
-
-            {/* 3. Categorías - Gestión de categorías */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Categorías</h3>
-                <CategoryManagerCompact 
-                    categories={availableCategories}
-                    onCategoriesChange={onCategoriesChange}
-                />
-            </div>
-
-            {/* 4. Listado de items - Contenido según el modo de vista */}
+            {/* 4. Listado de items - Vista de listado con expansión individual */}
             <div className="bg-white rounded-lg border border-gray-200">
                 <div className="p-4 border-b border-gray-200">
                     <h3 className="text-sm font-medium text-gray-700">
@@ -164,174 +155,127 @@ export function LinksListUpdated({
                     </h3>
                 </div>
                 <div className="p-4">
-                    {viewMode === 'list' ? (
-                        <ListView
-                            items={currentLinks}
-                            onMoveUp={handleMoveUp}
-                            onMoveDown={handleMoveDown}
-                            onToggleVisibility={handleToggleVisibilityByIndex}
-                            onEdit={handleEditByIndex}
-                            onDelete={handleDeleteByIndex}
-                        />
-                    ) : (
-                        /* Vista de detalle - Lista actual con todos los formularios */
-                        <div className="space-y-3 sm:space-y-4">
-                    {currentLinks.map((item, index) => (
-                        <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                            {/* Header móvil con controles */}
-                            <div className="sm:hidden bg-gray-50 p-3 border-b border-gray-200">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="flex items-center justify-center w-6 h-6 bg-gray-200 text-gray-700 text-xs font-bold rounded-full">
-                                            {index + 1}
-                                        </span>
-                                        <span className={`text-xs font-medium ${
-                                            item.visible !== false ? 'text-green-600' : 'text-red-600'
-                                        }`}>
-                                            {item.visible !== false ? 'Visible' : 'Oculto'}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                        <button
-                                            onClick={() => handleMoveUp(index)}
-                                            disabled={index === 0}
-                                            className={`p-1.5 rounded text-sm ${
-                                                index === 0 
-                                                    ? 'text-gray-300 cursor-not-allowed' 
-                                                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                                            }`}
-                                            title="Subir"
-                                        >
-                                            ⬆️
-                                        </button>
-                                        <button
-                                            onClick={() => handleMoveDown(index)}
-                                            disabled={index === currentLinks.length - 1}
-                                            className={`p-1.5 rounded text-sm ${
-                                                index === currentLinks.length - 1 
-                                                    ? 'text-gray-300 cursor-not-allowed' 
-                                                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                                            }`}
-                                            title="Bajar"
-                                        >
-                                            ⬇️
-                                        </button>
-                                        <button
-                                            onClick={() => onToggleVisibility(item.id)}
-                                            className={`p-1.5 rounded text-sm ${
-                                                item.visible !== false
-                                                    ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
-                                                    : 'text-red-600 hover:text-red-700 hover:bg-red-50'
-                                            }`}
-                                            title={item.visible !== false ? "Ocultar en página pública" : "Mostrar en página pública"}
-                                        >
-                                            {item.visible !== false ? '👁️' : '🚫'}
-                                        </button>
+                    {/* Vista de listado con expansión individual */}
+                    <div className="space-y-2">
+                        {currentLinks.map((item, index) => (
+                            <div key={item.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                {/* Fila del ListView clickeable para expandir/contraer */}
+                                <div 
+                                    className="bg-gray-50 p-3 cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                                    onClick={(e) => {
+                                        // Solo expandir si no se hizo click en un botón de acción
+                                        if (!(e.target as HTMLElement).closest('button')) {
+                                            toggleItemExpansion(item.id)
+                                        }
+                                    }}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                            {/* Indicador de expansión */}
+                                            <span className="text-sm text-gray-400 min-w-[1.5ch] flex-shrink-0">
+                                                {expandedItems.has(item.id) ? '▼' : '▶️'}
+                                            </span>
+                                            
+                                            {/* Posición */}
+                                            <span className="text-sm font-mono text-gray-500 min-w-[2ch] flex-shrink-0">
+                                                {index + 1}
+                                            </span>
+                                            
+                                            {/* Información del item - Permitir truncado */}
+                                            <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden">
+                                                <span className="text-sm font-medium text-gray-900 truncate">
+                                                    {item.type === 'link' ? (item as Link).label :
+                                                     item.type === 'product' ? (item as Product).title :
+                                                     (item as Item).title || 'Sin título'}
+                                                </span>
+                                                
+                                                {/* Características - Solo mostrar en pantallas más grandes */}
+                                                <div className="hidden sm:flex items-center space-x-1 flex-shrink-0">
+                                                    {item.visible === false && (
+                                                        <span className="text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded whitespace-nowrap">
+                                                            Oculto
+                                                        </span>
+                                                    )}
+                                                    {item.type === 'product' && !(item as Product).price && (
+                                                        <span className="text-xs text-gray-600 bg-gray-100 px-1 py-0.5 rounded whitespace-nowrap">
+                                                            Sin precio
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Controles de acción - Siempre visibles a la derecha */}
+                                        <div className="flex items-center space-x-1 flex-shrink-0 ml-2" onClick={e => e.stopPropagation()}>
+                                            {/* Mostrar estado oculto en móvil como icono */}
+                                            {item.visible === false && (
+                                                <span className="sm:hidden text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded flex-shrink-0">
+                                                    ❌
+                                                </span>
+                                            )}
+                                            
+                                            {/* Control de visibilidad - Siempre visible */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleToggleVisibilityByIndex(index)
+                                                }}
+                                                className={`p-2 rounded text-base flex-shrink-0 ${
+                                                    item.visible !== false
+                                                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                                                        : 'text-red-600 hover:text-red-700 hover:bg-red-50'
+                                                }`}
+                                                title={item.visible !== false ? "Ocultar" : "Mostrar"}
+                                            >
+                                                {item.visible !== false ? '👁️' : '🚫'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
+                                
+                                {/* Formulario de detalle expandible */}
+                                {expandedItems.has(item.id) && (
+                                    <div className="bg-white border-t border-gray-200">
+                                        {item.type === 'link' ? (
+                                            <LinkCard
+                                                link={item as Link}
+                                                availableCategories={availableCategories}
+                                                onRemove={() => onRemoveLink(item.id)}
+                                                onUpdate={(id, field, value) => onUpdateLink(id, field, value)}
+                                                onUpdateCategories={(id, categories) => onUpdateLinkCategories(id, categories)}
+                                                linkCardBackgroundColor={linkCardBackgroundColor}
+                                                linkCardTextColor={linkCardTextColor}
+                                            />
+                                        ) : item.type === 'product' ? (
+                                            <ProductItem
+                                                product={item as Product}
+                                                availableCategories={availableCategories}
+                                                onUpdate={(id, updatedProduct) => onUpdateProduct(id, updatedProduct)}
+                                                onRemove={() => onRemoveLink(item.id)}
+                                            />
+                                        ) : item.type === 'item' ? (
+                                            <ItemForm
+                                                item={item as Item}
+                                                availableCategories={availableCategories}
+                                                onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
+                                                onRemove={() => onRemoveLink(item.id)}
+                                                onCategoriesChange={onCategoriesChange}
+                                                linkCardBackgroundColor={linkCardBackgroundColor}
+                                                linkCardTextColor={linkCardTextColor}
+                                            />
+                                        ) : null}
+                                    </div>
+                                )}
                             </div>
-
-                            <div className="flex">
-                                {/* Controles laterales - solo desktop */}
-                                <div className="hidden sm:flex flex-col items-center space-y-1 pt-4 px-3 bg-gray-50 border-r border-gray-200">
-                                    <button
-                                        onClick={() => handleMoveUp(index)}
-                                        disabled={index === 0}
-                                        className={`p-2 rounded-md text-lg transition-all duration-200 ${
-                                            index === 0 
-                                                ? 'text-gray-300 cursor-not-allowed' 
-                                                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-110'
-                                        }`}
-                                        title="Subir"
-                                    >
-                                        ⬆️
-                                    </button>
-                                    
-                                    <span className="text-xs text-gray-400 font-mono min-w-[2ch] text-center bg-gray-100 px-2 py-1 rounded">
-                                        {index + 1}
-                                    </span>
-                                    
-                                    <button
-                                        onClick={() => handleMoveDown(index)}
-                                        disabled={index === currentLinks.length - 1}
-                                        className={`p-2 rounded-md text-lg transition-all duration-200 ${
-                                            index === currentLinks.length - 1 
-                                                ? 'text-gray-300 cursor-not-allowed' 
-                                                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-110'
-                                        }`}
-                                        title="Bajar"
-                                    >
-                                        ⬇️
-                                    </button>
-                                    
-                                    {/* Botón de visibilidad */}
-                                    <div className="flex flex-col items-center space-y-1 mt-2">
-                                        <button
-                                            onClick={() => onToggleVisibility(item.id)}
-                                            className={`p-2 rounded-md text-lg transition-all duration-200 ${
-                                                item.visible !== false
-                                                    ? 'text-green-600 hover:text-green-700 hover:bg-green-50 hover:scale-110'
-                                                    : 'text-red-600 hover:text-red-700 hover:bg-red-50 hover:scale-110'
-                                            }`}
-                                            title={item.visible !== false ? "Ocultar en página pública" : "Mostrar en página pública"}
-                                        >
-                                            {item.visible !== false ? '👁️' : '🚫'}
-                                        </button>
-                                        <span className={`text-xs font-medium transition-colors duration-200 ${
-                                            item.visible !== false ? 'text-green-600' : 'text-red-600'
-                                        }`}>
-                                            {item.visible !== false ? 'Visible' : 'Oculto'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Contenido del elemento */}
-                                <div className={`flex-1 w-full transition-opacity duration-200 ${
-                                    item.visible === false ? 'opacity-50' : 'opacity-100'
-                                }`}>
-                                    {item.type === 'link' ? (
-                                        <LinkCard
-                                            key={item.id}
-                                            link={item as Link}
-                                            availableCategories={availableCategories}
-                                            onRemove={() => onRemoveLink(item.id)}
-                                            onUpdate={(id, field, value) => onUpdateLink(id, field, value)}
-                                            onUpdateCategories={(id, categories) => onUpdateLinkCategories(id, categories)}
-                                            linkCardBackgroundColor={linkCardBackgroundColor}
-                                            linkCardTextColor={linkCardTextColor}
-                                        />
-                                    ) : item.type === 'product' ? (
-                                        <ProductItem
-                                            key={item.id}
-                                            product={item as Product}
-                                            availableCategories={availableCategories}
-                                            onUpdate={(id, updatedProduct) => onUpdateProduct(id, updatedProduct)}
-                                            onRemove={() => onRemoveLink(item.id)}
-                                        />
-                                    ) : item.type === 'item' ? (
-                                        <ItemForm
-                                            key={item.id}
-                                            item={item as Item}
-                                            availableCategories={availableCategories}
-                                            onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
-                                            onRemove={() => onRemoveLink(item.id)}
-                                            linkCardBackgroundColor={linkCardBackgroundColor}
-                                            linkCardTextColor={linkCardTextColor}
-                                        />
-                                    ) : null}
-                                </div>
+                        ))}
+                        
+                        {currentLinks.length === 0 && (
+                            <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                                <p className="text-lg mb-2">📄 No hay enlaces, productos o items configurados</p>
+                                <p className="text-sm">Agrega tu primer elemento usando los botones de arriba</p>
                             </div>
-                        </div>
-                    ))}
-                    
-                    {currentLinks.length === 0 && (
-                        <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                            <p className="text-lg mb-2">📄 No hay enlaces, productos o items configurados</p>
-                            <p className="text-sm">Agrega tu primer elemento usando los botones de arriba</p>
-                        </div>
-                    )}
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /sign-in/
 Disallow: /sign-up/
 
-Sitemap: https://tu-dominio-produccion.com/sitemap.xml
+Sitemap: https://biomechanics.cl/sitemap.xml

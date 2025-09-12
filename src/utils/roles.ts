@@ -1,5 +1,7 @@
 import { Roles } from '../types/globals'
 import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import 'server-only' // Esto garantiza que este archivo solo se use en el servidor
 
 export const checkRole = async (role: Roles) => {
     const { sessionClaims } = await auth()
@@ -31,4 +33,12 @@ export const isAuthenticated = async () => {
 
 export const isAdmin = async () => {
     return checkRole('admin')
+}
+
+export const checkAdminPermissions = async () => {
+    if (!await checkRole('admin')) {
+        redirect('/')
+        return false
+    }
+    return true
 }

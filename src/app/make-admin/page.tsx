@@ -28,7 +28,7 @@ export default async function MakeAdmin() {
     }
 
     return (
-        <div className="p-6 bg-gray-100 min-h-screen">
+        <div className="p-6 bg-gray-100 min-h-screen text-black">
             <h1 className="text-2xl font-bold mb-6">Asignar Rol Admin</h1>
             
             <div className="space-y-4">

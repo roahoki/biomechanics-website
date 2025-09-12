@@ -14,7 +14,7 @@ export function FileInfo({ selectedFile, previewType }: FileInfoProps) {
             <p><strong>Tamaño:</strong> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
             <p><strong>Tipo:</strong> {selectedFile.type}</p>
             <p className="text-xs mt-1">
-                El {getFileTypeText(previewType as any).toLowerCase()} se guardará al presionar "Guardar Cambios"
+                El {getFileTypeText(previewType as any).toLowerCase()} se guardará al presionar "Guardar Cambios" o "Ctrl + Enter".
             </p>
         </div>
     )

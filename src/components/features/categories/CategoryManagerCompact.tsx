@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, PencilIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, PencilIcon, TrashIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 
 interface CategoryManagerCompactProps {
   categories: string[]
@@ -12,7 +12,8 @@ export default function CategoryManagerCompact({ categories, onCategoriesChange 
   const [newCategoryName, setNewCategoryName] = useState('')
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingName, setEditingName] = useState('')
-  const [isLoading, setIsLoading] = useState(false) // Conservado para deshabilitar UI mientras se procesa localmente
+  const [isLoading, setIsLoading] = useState(false)
+  const [showAddInput, setShowAddInput] = useState(false)
 
   const addCategory = () => {
     if (!newCategoryName.trim() || newCategoryName.length > 20) return
@@ -20,6 +21,7 @@ export default function CategoryManagerCompact({ categories, onCategoriesChange 
     const updatedCategories = [...categories, newCategoryName.trim()]
     onCategoriesChange(updatedCategories)
     setNewCategoryName('')
+    setShowAddInput(false)
     setIsLoading(false)
   }
 
@@ -57,109 +59,163 @@ export default function CategoryManagerCompact({ categories, onCategoriesChange 
     setIsLoading(false)
   }
 
+  const cancelAdd = () => {
+    setNewCategoryName('')
+    setShowAddInput(false)
+  }
+
   return (
     <div className="space-y-3">
-      {/* Agregar nueva categoría */}
-      <div className="flex space-x-2">
-        <input
-          type="text"
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value.slice(0, 20))}
-          placeholder="Nueva categoría..."
-          className="flex-1 px-2 py-1 text-sm bg-gray-600 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          onKeyDown={(e) => e.key === 'Enter' && addCategory()}
-          disabled={isLoading}
-        />
-        <button
-          onClick={addCategory}
-          disabled={isLoading || !newCategoryName.trim()}
-          className="px-2 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-        >
-          <PlusIcon className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Lista de categorías */}
-      <div className="space-y-2">
+      {/* Vista de chips/tags horizontales inspirada en Pinterest */}
+      <div className="flex flex-wrap gap-2 items-center min-h-[2.5rem]">
         {categories.map((category, index) => (
-          <div key={index} className="flex items-center space-x-2 p-2 bg-gray-600 rounded">
+          <div key={index} className="relative group">
             {editingIndex === index ? (
-              <>
+              /* Chip en modo edición */
+              <div className="flex items-center bg-blue-50 border border-blue-200 rounded-full px-3 py-1.5">
                 <input
                   type="text"
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value.slice(0, 20))}
-                  className="flex-1 px-2 py-1 text-sm bg-gray-700 border border-gray-500 rounded text-white"
+                  className="text-sm bg-transparent border-none outline-none text-gray-800 w-20 min-w-0"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') saveEdit()
                     if (e.key === 'Escape') cancelEdit()
                   }}
                   autoFocus
+                  onBlur={saveEdit}
                 />
                 <button
                   onClick={saveEdit}
-                  className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
+                  className="ml-1 p-0.5 text-green-600 hover:text-green-700 rounded-full hover:bg-green-100 transition-colors"
                 >
-                  ✓
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
                 </button>
                 <button
                   onClick={cancelEdit}
-                  className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+                  className="ml-0.5 p-0.5 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
                 >
-                  ✕
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
-              </>
+              </div>
             ) : (
-              <>
-                {/* Controles de orden */}
-                <div className="flex flex-col items-center space-y-1">
+              /* Chip normal con controles ocultos que aparecen al hover */
+              <div className="flex items-center bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-1.5 transition-colors cursor-pointer">
+                {/* Controles de movimiento (solo visibles en hover) */}
+                <div className="flex items-center space-x-0.5 opacity-0 group-hover:opacity-100 transition-opacity mr-1">
                   <button
                     onClick={() => moveCategory(index, index - 1)}
                     disabled={index === 0 || isLoading}
-                    className={`p-1 rounded text-gray-300 hover:text-white hover:bg-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors`}
-                    title="Subir"
+                    className={`p-0.5 rounded-full text-xs ${
+                      index === 0 
+                        ? 'text-gray-300 cursor-not-allowed' 
+                        : 'text-gray-500 hover:text-blue-600 hover:bg-blue-100'
+                    } transition-colors`}
+                    title="Mover izquierda"
                   >
-                    <ArrowUpIcon className="w-3 h-3" />
+                    <ArrowLeftIcon className="w-2.5 h-2.5" />
                   </button>
                   <button
                     onClick={() => moveCategory(index, index + 1)}
                     disabled={index === categories.length - 1 || isLoading}
-                    className={`p-1 rounded text-gray-300 hover:text-white hover:bg-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors`}
-                    title="Bajar"
+                    className={`p-0.5 rounded-full text-xs ${
+                      index === categories.length - 1 
+                        ? 'text-gray-300 cursor-not-allowed' 
+                        : 'text-gray-500 hover:text-blue-600 hover:bg-blue-100'
+                    } transition-colors`}
+                    title="Mover derecha"
                   >
-                    <ArrowDownIcon className="w-3 h-3" />
+                    <ArrowRightIcon className="w-2.5 h-2.5" />
                   </button>
                 </div>
-                <span className="flex-1 text-sm text-gray-200 truncate">{category}</span>
-                <button
-                  onClick={() => {
-                    setEditingIndex(index)
-                    setEditingName(category)
-                  }}
-                  className="p-1 text-gray-400 hover:text-yellow-400"
-                  disabled={isLoading}
-                >
-                  <PencilIcon className="w-3 h-3" />
-                </button>
-                <button
-                  onClick={() => deleteCategory(index)}
-                  className="p-1 text-gray-400 hover:text-red-400"
-                  disabled={isLoading}
-                >
-                  <TrashIcon className="w-3 h-3" />
-                </button>
-              </>
+
+                {/* Nombre de la categoría */}
+                <span className="text-sm text-gray-700 font-medium select-none truncate max-w-[120px]">
+                  {category}
+                </span>
+
+                {/* Controles de acción (solo visibles en hover) */}
+                <div className="flex items-center space-x-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+                  <button
+                    onClick={() => {
+                      setEditingIndex(index)
+                      setEditingName(category)
+                    }}
+                    className="p-0.5 text-gray-500 hover:text-amber-600 hover:bg-amber-100 rounded-full transition-colors"
+                    disabled={isLoading}
+                    title="Editar"
+                  >
+                    <PencilIcon className="w-2.5 h-2.5" />
+                  </button>
+                  <button
+                    onClick={() => deleteCategory(index)}
+                    className="p-0.5 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full transition-colors"
+                    disabled={isLoading}
+                    title="Eliminar"
+                  >
+                    <TrashIcon className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         ))}
+
+        {/* Botón/Input para agregar nueva categoría */}
+        {showAddInput ? (
+          <div className="flex items-center bg-blue-50 border-2 border-blue-200 border-dashed rounded-full px-3 py-1.5">
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value.slice(0, 20))}
+              placeholder="Nueva..."
+              className="text-sm bg-transparent border-none outline-none text-gray-800 w-20 min-w-0 placeholder-gray-500"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') addCategory()
+                if (e.key === 'Escape') cancelAdd()
+              }}
+              autoFocus
+              onBlur={cancelAdd}
+              disabled={isLoading}
+            />
+            <button
+              onClick={addCategory}
+              disabled={isLoading || !newCategoryName.trim()}
+              className="ml-1 p-0.5 text-blue-600 hover:text-blue-700 rounded-full hover:bg-blue-100 transition-colors disabled:opacity-50"
+            >
+              <PlusIcon className="w-3 h-3" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowAddInput(true)}
+            className="flex items-center bg-gray-50 hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-200 border-dashed rounded-full px-3 py-1.5 transition-colors group"
+            disabled={isLoading}
+          >
+            <PlusIcon className="w-3 h-3 text-gray-400 group-hover:text-blue-500 mr-1" />
+            <span className="text-sm text-gray-500 group-hover:text-blue-600 font-medium">
+              Agregar
+            </span>
+          </button>
+        )}
       </div>
 
-      {categories.length === 0 && (
-        <p className="text-center text-gray-400 text-xs py-4">
-          No hay categorías.<br />Agrega una nueva arriba.
-        </p>
+      {/* Estado vacío */}
+      {categories.length === 0 && !showAddInput && (
+        <div className="text-center py-4">
+          <p className="text-gray-400 text-sm mb-2">📂 No hay categorías</p>
+          <button
+            onClick={() => setShowAddInput(true)}
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline"
+          >
+            Agrega tu primera categoría
+          </button>
+        </div>
       )}
-      <p className="text-[10px] text-gray-400 text-right">Los cambios se guardarán al presionar "Guardar Cambios".</p>
     </div>
   )
 }

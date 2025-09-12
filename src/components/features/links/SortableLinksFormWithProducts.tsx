@@ -22,7 +22,6 @@ import { StyleConfig } from '../profile/StyleConfig'
 import { LinksListUpdated } from './SortableLinksForm/LinksListUpdated'
 import { DeleteModal } from './SortableLinksForm/DeleteModal'
 import { ActionButtons } from './SortableLinksForm/ActionButtons'
-import { PreviewModalUpdated } from './SortableLinksForm/PreviewModalUpdated'
 
 export function SortableLinksFormWithProducts({
     links,
@@ -83,6 +82,7 @@ export function SortableLinksFormWithProducts({
         uploadFileToSupabase,
         uploadMultipleProductImages,
         uploadMultipleItemImages,
+        uploadCroppedItemImages,
         uploadBackgroundImage 
     } = useFileUpload({
         onStatusChange: setStatus
@@ -139,6 +139,7 @@ export function SortableLinksFormWithProducts({
     // Gestión de links y productos
     const {
         currentLinks,
+        currentLinksRef,
         setCurrentLinks,
         addNewLink,
         addNewProduct,
@@ -226,13 +227,6 @@ export function SortableLinksFormWithProducts({
         setStatus({ message: 'Guardando cambios...' })
 
         try {
-            console.log('🔄 Iniciando proceso de guardado...')
-            console.log('📋 Estado inicial de imágenes:', {
-                profileImage: previewUrl,
-                backgroundImageUrl: backgroundImageUrl,
-                backgroundSettingsImageUrl: backgroundSettings.imageUrl,
-                selectedBackgroundFile: !!selectedBackgroundFile
-            })
 
             // 1. Subir imagen de perfil si es necesaria
             let finalProfileImage = previewUrl
@@ -241,12 +235,10 @@ export function SortableLinksFormWithProducts({
             if (selectedFile) {
                 setStatus({ message: 'Subiendo imagen de perfil...' })
                 try {
-                    console.log('🔄 Intentando subir imagen de perfil...')
                     const uploadedUrl = await uploadFileToSupabase(selectedFile)
                     if (uploadedUrl) {
                         finalProfileImage = uploadedUrl
                         finalProfileImageType = previewType
-                        console.log('✅ Imagen de perfil subida:', uploadedUrl)
                     } else {
                         console.warn('⚠️ La subida devolvió null')
                     }
@@ -255,7 +247,7 @@ export function SortableLinksFormWithProducts({
                     console.error('❌ Error subiendo imagen de perfil:', error)
                     console.error('❌ Mensaje del error:', errorMessage)
                     // No fallar todo el proceso por la imagen de perfil
-                    console.log('⚠️ Continuando sin imagen de perfil nueva...')
+
                 }
             }
 
@@ -266,11 +258,9 @@ export function SortableLinksFormWithProducts({
             if (selectedBackgroundFile) {
                 setStatus({ message: 'Subiendo imagen de fondo...' })
                 try {
-                    console.log('🔄 Intentando subir imagen de fondo...')
                     const uploadedUrl = await uploadBackgroundImage(selectedBackgroundFile)
                     if (uploadedUrl) {
                         finalBackgroundImageUrl = uploadedUrl
-                        console.log('✅ Imagen de fondo subida:', uploadedUrl)
                     }
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
@@ -286,53 +276,49 @@ export function SortableLinksFormWithProducts({
             }
 
             // 3. Procesar productos e items para subir imágenes a Supabase
-            console.log('🔄 Procesando productos e items...')
+            
+            // Obtener el estado más actualizado usando ref (evita stale closures)
+            const latestLinks = currentLinksRef.current
+            
             const processedLinks = await Promise.all(
-                currentLinks.map(async (item) => {
-                    console.log(`📝 Procesando item tipo: ${item.type}, ID: ${item.id}`)
+                latestLinks.map(async (item) => {
                     
                     // Procesar productos
                     if (item.type === 'product' && item.images.length > 0) {
-                        const dataUrls = item.images.filter(img => img.startsWith('data:'))
-                        const publicUrls = item.images.filter(img => !img.startsWith('data:'))
-                        
-                        console.log(`📦 Producto "${item.title}": ${dataUrls.length} nuevas imágenes, ${publicUrls.length} existentes`)
+                        const dataUrls = item.images.filter((img: string) => img.startsWith('data:'))
+                        const publicUrls = item.images.filter((img: string) => !img.startsWith('data:'))
                         
                         if (dataUrls.length > 0) {
                             setStatus({ message: `Subiendo imágenes del producto "${item.title}"...` })
                             try {
                                 const uploadedUrls = await uploadMultipleProductImages(dataUrls, item.id)
-                                console.log(`✅ Producto "${item.title}": ${uploadedUrls.length} imágenes subidas`)
                                 return {
                                     ...item,
                                     images: [...publicUrls, ...uploadedUrls]
                                 }
                             } catch (error) {
                                 const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-                                console.error(`❌ Error subiendo imágenes del producto "${item.title}":`, error)
                                 throw new Error(`Error subiendo imágenes del producto "${item.title}": ${errorMessage}`)
                             }
                         }
                     }
-                    // Procesar items
+                    // Procesar items - MÉTODO SIMPLE
                     else if (item.type === 'item' && item.images.length > 0) {
-                        const dataUrls = item.images.filter(img => img.startsWith('data:'))
-                        const publicUrls = item.images.filter(img => !img.startsWith('data:'))
-                        
-                        console.log(`🎯 Item "${item.title}": ${dataUrls.length} nuevas imágenes, ${publicUrls.length} existentes`)
+                        const dataUrls = item.images.filter((img: string) => img.startsWith('data:'))
+                        const publicUrls = item.images.filter((img: string) => !img.startsWith('data:'))
                         
                         if (dataUrls.length > 0) {
                             setStatus({ message: `Subiendo imágenes del item "${item.title}"...` })
                             try {
                                 const uploadedUrls = await uploadMultipleItemImages(dataUrls, item.id)
-                                console.log(`✅ Item "${item.title}": ${uploadedUrls.length} imágenes subidas`)
+
                                 return {
                                     ...item,
                                     images: [...publicUrls, ...uploadedUrls]
                                 }
                             } catch (error) {
                                 const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-                                console.error(`❌ Error subiendo imágenes del item "${item.title}":`, error)
+
                                 throw new Error(`Error subiendo imágenes del item "${item.title}": ${errorMessage}`)
                             }
                         }
@@ -439,36 +425,44 @@ export function SortableLinksFormWithProducts({
     return (
         <div className="w-full">
             <form ref={formRef} onSubmit={handleSubmit} className="p-3 sm:p-4 lg:p-6">
-                {/* Layout completamente responsivo - Aprovecha todo el espacio */}
-                <div className="space-y-6 xl:space-y-0 xl:grid xl:grid-cols-4 xl:gap-6">
-                    {/* Primera columna: Perfil y descripción */}
-                    <div className="space-y-4 sm:space-y-6 xl:col-span-1">
-                        {/* Avatar Upload */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
-                                Foto/Video de Perfil
-                            </label>
-                            <AvatarUpload
-                                previewUrl={previewUrl}
-                                previewType={previewType}
-                                onFileSelect={onFileSelect}
-                                selectedFile={selectedFile}
-                            />
-                            <FileInfo selectedFile={selectedFile} previewType={previewType} />
-                        </div>
+                {/* Layout móvil: Stack vertical con prioridad al listado de items */}
+                <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-5 lg:gap-6">
+                    {/* Configuraciones principales - Acordeón en móvil */}
+                    <div className="lg:col-span-2 space-y-4">
+                        {/* Panel colapsable para móvil */}
+                        <details className="lg:hidden group bg-gray-800 rounded-lg">
+                            <summary className="flex items-center justify-between cursor-pointer p-4 text-gray-200 hover:bg-gray-700 transition-colors rounded-lg">
+                                <span className="text-sm font-medium">⚙️ Configuración del perfil</span>
+                                <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <div className="p-4 pt-0 space-y-4">
+                                {/* Avatar Upload */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                                        Foto/Video de Perfil
+                                    </label>
+                                    <AvatarUpload
+                                        previewUrl={previewUrl}
+                                        previewType={previewType}
+                                        onFileSelect={onFileSelect}
+                                        selectedFile={selectedFile}
+                                    />
+                                </div>
 
-                        {/* Título */}
-                        <div>
-                            <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
-                                Título de la página
-                            </label>
-                            <input
-                                type="text"
-                                id="title"
-                                value={localTitle}
+                                {/* Título */}
+                                <div>
+                                    <label htmlFor="title-mobile" className="block text-sm font-medium text-gray-200 mb-2">
+                                        Título de la página
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="title-mobile"
+                                        value={localTitle}
                                         onChange={(e) => setLocalTitle(e.target.value.slice(0, 65))}
                                         maxLength={65}
-                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="biomechanics.wav"
                                     />
                                     <div className="text-xs text-gray-400 mt-1">
@@ -478,29 +472,37 @@ export function SortableLinksFormWithProducts({
 
                                 {/* Descripción */}
                                 <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">
+                                    <label htmlFor="description-mobile" className="block text-sm font-medium text-gray-200 mb-2">
                                         Descripción/Subtítulo
                                     </label>
                                     <input
                                         type="text"
-                                        id="description"
+                                        id="description-mobile"
                                         value={localDescription}
                                         onChange={(e) => setLocalDescription(e.target.value)}
-                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="Tu nombre o descripción"
                                     />
                                 </div>
+                            </div>
+                        </details>
 
+                        {/* Configuraciones avanzadas - Acordeón en móvil */}
+                        <details className="lg:hidden group bg-gray-800 rounded-lg">
+                            <summary className="flex items-center justify-between cursor-pointer p-4 text-gray-200 hover:bg-gray-700 transition-colors rounded-lg">
+                                <span className="text-sm font-medium">🎨 Configuración de estilo</span>
+                                <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <div className="p-4 pt-0 space-y-4">
                                 {/* Iconos Sociales */}
                                 <SocialIconsConfig
                                     socialIconColors={socialIconColors}
                                     onColorChange={handleSocialIconColorChange}
                                     isValidHexColor={isValidHexColor}
                                 />
-                            </div>
 
-                            {/* Segunda columna: Configuración de estilo */}
-                            <div className="space-y-4 sm:space-y-6">
                                 {/* Configuración de Fondo */}
                                 <BackgroundConfig
                                     backgroundType={backgroundType}
@@ -529,109 +531,163 @@ export function SortableLinksFormWithProducts({
                                     isValidHexColor={isValidHexColor}
                                 />
                             </div>
+                        </details>
 
-                            {/* Tercera columna: Lista de Links y Productos */}
-                            <div className="space-y-4 sm:space-y-6 w-full lg:col-span-3">
-                                {/* Lista de Links y Productos */}
-                                <div className="w-full">
-                                    <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
-                                        Enlaces y Productos
-                                    </label>
-                                    <div className="w-full">
-                                        <LinksListUpdated
-                                            currentLinks={currentLinks}
-                                            onAddNewLink={addNewLink}
-                                            onAddNewProduct={addNewProduct}
-                                            onAddNewItem={addNewItem}
-                                            onRemoveLink={removeLink}
-                                            onUpdateLink={updateLink}
-                                            onUpdateProduct={updateProduct}
-                                            onUpdateItem={updateItem}
-                                            onReorderLinks={reorderLinks}
-                                            onToggleVisibility={toggleVisibility}
-                                            linkCardBackgroundColor={linkCardBackgroundColor}
-                                            linkCardTextColor={linkCardTextColor}
-                                            availableCategories={localCategories}
-                                            onUpdateLinkCategories={(linkId: number, newCategories: string[]) => {
-                                                const updatedLinks = currentLinks.map(link => 
-                                                    link.id === linkId 
-                                                        ? { ...link, categories: newCategories }
-                                                        : link
-                                                )
-                                                setCurrentLinks(updatedLinks)
-                                            }}
-                                            onCategoriesChange={(cats: string[]) => setLocalCategories(cats)}
-                                        />
-                                    </div>
+                        {/* Desktop: Configuraciones siempre visibles */}
+                        <div className="hidden lg:block space-y-6">
+                            {/* Avatar Upload */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-200 mb-2 sm:mb-3">
+                                    Foto/Video de Perfil
+                                </label>
+                                <AvatarUpload
+                                    previewUrl={previewUrl}
+                                    previewType={previewType}
+                                    onFileSelect={onFileSelect}
+                                    selectedFile={selectedFile}
+                                />
+                            </div>
+
+                            {/* Título */}
+                            <div>
+                                <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
+                                    Título de la página
+                                </label>
+                                <input
+                                    type="text"
+                                    id="title"
+                                    value={localTitle}
+                                    onChange={(e) => setLocalTitle(e.target.value.slice(0, 65))}
+                                    maxLength={65}
+                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="biomechanics.wav"
+                                />
+                                <div className="text-xs text-gray-400 mt-1">
+                                    {localTitle.length}/65 caracteres
                                 </div>
                             </div>
+
+                            {/* Descripción */}
+                            <div>
+                                <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">
+                                    Descripción/Subtítulo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="description"
+                                    value={localDescription}
+                                    onChange={(e) => setLocalDescription(e.target.value)}
+                                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Tu nombre o descripción"
+                                />
+                            </div>
+
+                            {/* Iconos Sociales */}
+                            <SocialIconsConfig
+                                socialIconColors={socialIconColors}
+                                onColorChange={handleSocialIconColorChange}
+                                isValidHexColor={isValidHexColor}
+                            />
+
+                            {/* Configuración de Fondo */}
+                            <BackgroundConfig
+                                backgroundType={backgroundType}
+                                setBackgroundType={setBackgroundType}
+                                bgColor={bgColor}
+                                setBgColor={setBgColor}
+                                backgroundPreviewUrl={backgroundPreviewUrl}
+                                backgroundImageOpacity={backgroundImageOpacity}
+                                setBackgroundImageOpacity={setBackgroundImageOpacity}
+                                onBackgroundFileSelect={onBackgroundFileSelect}
+                                isValidHexColor={isValidHexColor}
+                            />
+
+                            {/* Configuración de Estilos */}
+                            <StyleConfig
+                                titleColor={titleColor}
+                                setTitleColor={setTitleColor}
+                                linkCardBackgroundColor={linkCardBackgroundColor}
+                                setLinkCardBackgroundColor={setLinkCardBackgroundColor}
+                                linkCardTextColor={linkCardTextColor}
+                                setLinkCardTextColor={setLinkCardTextColor}
+                                productBuyButtonColor={productBuyButtonColor}
+                                setProductBuyButtonColor={setProductBuyButtonColor}
+                                itemButtonColor={itemButtonColor}
+                                setItemButtonColor={setItemButtonColor}
+                                isValidHexColor={isValidHexColor}
+                            />
                         </div>
+                    </div>
 
-                        {/* Action Buttons */}
-                        <ActionButtons
-                            onPreview={() => setShowPreviewModal(true)}
-                            onSubmit={() => {}}
-                            isSubmitting={isSubmitting}
-                            uploadingImage={false}
-                            previewType={previewType}
-                            selectedFile={selectedFile}
-                        />
-                        {/* Toast de cambios sin guardar */}
-                        {showUnsaved && !isSubmitting && !toast && (
-                          <div className="fixed bottom-4 right-4 z-50 max-w-sm bg-yellow-500/95 text-white px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in">
-                            <span className="text-lg">⚠️</span>
-                            <div className="text-sm leading-snug">
-                              <p className="font-semibold">Cambios sin guardar</p>
-                              <p>Pulsa "Guardar Cambios" para persistirlos.</p>
-                            </div>
-                            <button onClick={() => setShowUnsaved(false)} className="ml-2 text-white/80 hover:text-white">✕</button>
-                          </div>
-                        )}
-                        {/* Toast de resultado */}
-                        {toast && (
-                          <div className={`fixed bottom-4 right-4 z-50 max-w-sm px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in ${toast.type === 'success' ? 'bg-green-600/95' : 'bg-red-600/95'}`}> 
-                            <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
-                            <div className="text-sm leading-snug">
-                              <p className="font-semibold">{toast.type === 'success' ? 'Éxito' : 'Error'}</p>
-                              <p>{toast.message}</p>
-                            </div>
-                            <button onClick={() => setToast(null)} className="ml-2 text-white/80 hover:text-white">✕</button>
-                          </div>
-                        )}
-                    </form>
-
-                    {/* Modales */}
-                    <DeleteModal
-                        isOpen={showDeleteModal}
-                        onConfirm={confirmDelete}
-                        onCancel={cancelDelete}
-                    />
-
-                    {/* <PreviewModalUpdated
-                        isOpen={showPreviewModal}
-                        onClose={() => setShowPreviewModal(false)}
-                        previewUrl={previewUrl}
-                        previewType={previewType}
-                        titleColor={titleColor}
-                        title={localTitle}
-                        description={localDescription}
-                        socialIconColors={socialIconColors}
-                        socialIcons={socialIcons}
-                        currentLinks={currentLinks}
-                        linkCardBackgroundColor={linkCardBackgroundColor}
-                        linkCardTextColor={linkCardTextColor}
-                        backgroundType={backgroundType}
-                        backgroundPreviewUrl={backgroundPreviewUrl}
-                        backgroundImageUrl={backgroundImageUrl}
-                        backgroundImageOpacity={backgroundImageOpacity}
-                        bgColor={bgColor}
-                        styleSettings={{
-                            titleColor,
-                            linkCardBackgroundColor,
-                            linkCardTextColor,
-                            productBuyButtonColor
-                        }}
-                    /> */}
+                    {/* Lista de Items - Prioridad total en móvil */}
+                    <div className="lg:col-span-3">
+                        <div className="w-full">
+                            <LinksListUpdated
+                                currentLinks={currentLinks}
+                                onAddNewLink={addNewLink}
+                                onAddNewProduct={addNewProduct}
+                                onAddNewItem={addNewItem}
+                                onRemoveLink={removeLink}
+                                onUpdateLink={updateLink}
+                                onUpdateProduct={updateProduct}
+                                onUpdateItem={updateItem}
+                                onReorderLinks={reorderLinks}
+                                onToggleVisibility={toggleVisibility}
+                                linkCardBackgroundColor={linkCardBackgroundColor}
+                                linkCardTextColor={linkCardTextColor}
+                                availableCategories={localCategories}
+                                onUpdateLinkCategories={(linkId: number, newCategories: string[]) => {
+                                    const updatedLinks = currentLinks.map(link => 
+                                        link.id === linkId 
+                                            ? { ...link, categories: newCategories }
+                                            : link
+                                    )
+                                    setCurrentLinks(updatedLinks)
+                                }}
+                                onCategoriesChange={(cats: string[]) => setLocalCategories(cats)}
+                            />
+                        </div>
+                    </div>
                 </div>
-            )
+
+                {/* Action Buttons */}
+                <ActionButtons
+                    onPreview={() => setShowPreviewModal(true)}
+                    onSubmit={() => {}}
+                    isSubmitting={isSubmitting}
+                    uploadingImage={false}
+                    previewType={previewType}
+                    selectedFile={selectedFile}
+                />
+                {/* Toast de cambios sin guardar */}
+                {showUnsaved && !isSubmitting && !toast && (
+                    <div className="fixed bottom-4 right-4 z-50 max-w-sm bg-yellow-500/95 text-white px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in">
+                    <span className="text-lg">⚠️</span>
+                    <div className="text-sm leading-snug">
+                        <p className="font-semibold">Cambios sin guardar</p>
+                        <p>Pulsa "Guardar Cambios" para persistirlos.</p>
+                    </div>
+                    <button onClick={() => setShowUnsaved(false)} className="ml-2 text-white/80 hover:text-white">✕</button>
+                    </div>
+                )}
+                {/* Toast de resultado */}
+                {toast && (
+                    <div className={`fixed bottom-4 right-4 z-50 max-w-sm px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in ${toast.type === 'success' ? 'bg-green-600/95' : 'bg-red-600/95'}`}> 
+                    <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
+                    <div className="text-sm leading-snug">
+                        <p className="font-semibold">{toast.type === 'success' ? 'Éxito' : 'Error'}</p>
+                        <p>{toast.message}</p>
+                    </div>
+                    <button onClick={() => setToast(null)} className="ml-2 text-white/80 hover:text-white">✕</button>
+                    </div>
+                )}
+            </form>
+            {/* Modales */}
+            <DeleteModal
+                isOpen={showDeleteModal}
+                onConfirm={confirmDelete}
+                onCancel={cancelDelete}
+            />
+        </div>
+        )
         }

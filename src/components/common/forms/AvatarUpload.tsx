@@ -12,7 +12,7 @@ export function AvatarUpload({ previewUrl, previewType, selectedFile, onFileSele
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const renderAvatar = () => {
-        const commonClasses = "w-32 h-32 rounded-full border-4 border-[var(--color-accent-organic)] mb-4 shadow-lg object-cover"
+        const commonClasses = "w-32 h-32 rounded-full border-4  mb-4 shadow-lg object-cover"
         
         // Si no hay URL o está vacía, mostrar un placeholder
         if (!previewUrl) {
