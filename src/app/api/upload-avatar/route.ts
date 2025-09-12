@@ -21,8 +21,6 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Acceso denegado: se requieren permisos de administrador' }, { status: 403 })
         }
 
-        console.log('✅ Usuario verificado como admin')
-
         // Obtener los datos del formulario
         const formData = await request.formData()
         const file = formData.get('file') as File

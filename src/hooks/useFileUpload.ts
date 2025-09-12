@@ -159,6 +159,45 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
         }
     }
 
+    // Nueva función para subir blobs croppeados directamente
+    const uploadCroppedItemImages = async (blobs: Blob[], itemId?: number): Promise<string[]> => {
+        try {
+            // Crear FormData para enviar a la API
+            const formData = new FormData()
+            blobs.forEach((blob, index) => {
+                const file = new File([blob], `item-cropped-${Date.now()}-${index}.jpg`, { 
+                    type: 'image/jpeg' 
+                })
+                formData.append('images', file)
+            })
+            if (itemId) {
+                formData.append('itemId', itemId.toString())
+            }
+
+            console.log(`🔄 Enviando ${blobs.length} imágenes croppeadas de item a la API de subida...`)
+
+            // Llamar a la API de subida
+            const response = await fetch('/api/upload-item-images', {
+                method: 'POST',
+                body: formData
+            })
+
+            const result = await response.json()
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Error en la API de subida')
+            }
+
+            console.log(`✅ ${result.urls.length} imágenes croppeadas de item subidas exitosamente`)
+            return result.urls
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+            console.error('Error uploading cropped item images:', errorMessage)
+            throw error
+        }
+    }
+
     const uploadMultipleItemImages = async (dataUrls: string[], itemId?: number): Promise<string[]> => {
         try {
             // Convertir data URLs a archivos
@@ -249,6 +288,7 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
         uploadFileToSupabase,
         uploadMultipleProductImages,
         uploadMultipleItemImages,
+        uploadCroppedItemImages,
         uploadBackgroundImage,
         handleFileSelect,
         handleBackgroundFileSelect,
