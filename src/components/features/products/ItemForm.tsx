@@ -342,7 +342,7 @@ export function ItemForm({
                                 onChange={(e) => handleTitleChange(e.target.value)}
                                 placeholder="Añade un título"
                                 maxLength={50}
-                                className={`w-full px-3 py-3 text-base lg:text-lg border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                className={`w-full px-3 py-3 text-base lg:text-lg border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 text-black ${
                                     errors.title ? 'border-red-300' : 'border-gray-200'
                                 }`}
                             />
@@ -367,7 +367,7 @@ export function ItemForm({
                                 placeholder="Describe tu item..."
                                 maxLength={1000}
                                 rows={3}
-                                className={`w-full px-3 py-3 border-0 border-b-2 bg-transparent resize-none focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                className={`w-full px-3 py-3 border-0 border-b-2 bg-transparent resize-none focus:outline-none focus:border-blue-500 placeholder-gray-400 text-black ${
                                     errors.description ? 'border-red-300' : 'border-gray-200'
                                 }`}
                             />
@@ -413,7 +413,7 @@ export function ItemForm({
                                     value={formatPrice(price)}
                                     onChange={(e) => handlePriceChange(e.target.value)}
                                     placeholder="25000"
-                                    className={`w-full pl-8 pr-3 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                    className={`w-full pl-8 pr-3 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 text-black ${
                                         errors.price ? 'border-red-300' : 'border-gray-200'
                                     }`}
                                 />
@@ -433,7 +433,7 @@ export function ItemForm({
                                 value={paymentLink}
                                 onChange={(e) => handlePaymentLinkChange(e.target.value)}
                                 placeholder="https://..."
-                                className={`w-full px-3 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                className={`w-full px-3 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 text-black ${
                                     errors.paymentLink ? 'border-red-300' : 'border-gray-200'
                                 }`}
                             />
@@ -470,7 +470,7 @@ export function ItemForm({
                                     onChange={(e) => handleSubtitleChange(e.target.value)}
                                     placeholder="Subtítulo opcional"
                                     maxLength={150}
-                                    className={`w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                    className={`w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-gray-400 text-black ${
                                         errors.subtitle ? 'border-red-300' : ''
                                     }`}
                                 />
@@ -495,7 +495,7 @@ export function ItemForm({
                                     onChange={(e) => handleButtonTextChange(e.target.value)}
                                     placeholder="Ver más"
                                     maxLength={20}
-                                    className={`w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 ${
+                                    className={`w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-black ${
                                         errors.buttonText ? 'border-red-300' : ''
                                     }`}
                                 />
@@ -554,7 +554,7 @@ export function ItemForm({
                                 onChange={(e) => handleSubtitleChange(e.target.value)}
                                 placeholder="Añade un subtítulo (opcional)"
                                 maxLength={150}
-                                className={`w-full px-0 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 ${
+                                className={`w-full px-0 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400 text-black ${
                                     errors.subtitle ? 'border-red-300' : 'border-gray-200'
                                 }`}
                             />
@@ -579,7 +579,7 @@ export function ItemForm({
                                 onChange={(e) => handleButtonTextChange(e.target.value)}
                                 placeholder="Ver más"
                                 maxLength={20}
-                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black ${
                                     errors.buttonText ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                                 }`}
                             />
