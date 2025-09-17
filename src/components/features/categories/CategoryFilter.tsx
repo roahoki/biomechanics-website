@@ -16,31 +16,55 @@ export default function CategoryFilter({
   className = ""
 }: CategoryFilterProps) {
   const [isScrollable, setIsScrollable] = useState(false)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
 
   // Ya no es necesario agregar "Todo" aquí, se hace en el hook useCategoryFilter
   const allCategories = categories
 
-  // Verificar si el contenedor es scrolleable
-  useEffect(() => {
+  // Verificar si el contenedor es scrolleable y la posición del scroll
+  const updateScrollState = () => {
     const container = document.getElementById('category-filter-container')
     if (container) {
-      setIsScrollable(container.scrollWidth > container.clientWidth)
+      const isScrollableNow = container.scrollWidth > container.clientWidth
+      const scrollLeft = container.scrollLeft
+      const maxScrollLeft = container.scrollWidth - container.clientWidth
+      
+      setIsScrollable(isScrollableNow)
+      setCanScrollLeft(scrollLeft > 5) // Un poco de margen para evitar flickering
+      setCanScrollRight(scrollLeft < maxScrollLeft - 5)
+    }
+  }
+
+  useEffect(() => {
+    updateScrollState()
+    
+    const container = document.getElementById('category-filter-container')
+    if (container) {
+      container.addEventListener('scroll', updateScrollState)
+      // También verificar cuando cambia el tamaño de la ventana
+      window.addEventListener('resize', updateScrollState)
+      
+      return () => {
+        container.removeEventListener('scroll', updateScrollState)
+        window.removeEventListener('resize', updateScrollState)
+      }
     }
   }, [categories])
 
   return (
-    <div className={`relative py-2 z-10`}>
-      {/* Contenedor scrolleable - ahora con fondo semi-transparente más suave */}
+    <div className={`relative w-full ${className}`}>
       <div
         id="category-filter-container"
-        className="flex justify-start lg:justify-center space-x-4 lg:space-x-6 overflow-x-auto overflow-y-visible scrollbar-hide px-2 mx-auto lg:max-w-3xl lg:bg-black/30 lg:backdrop-blur-sm lg:rounded-full lg:px-4 lg:py-1"
+        className="flex space-x-3 md:space-x-6 overflow-x-auto overflow-y-visible scrollbar-hide px-4 md:px-6 py-2 mx-auto md:max-w-3xl md:bg-black/30 md:backdrop-blur-sm md:rounded-full scroll-smooth"
         style={{
           scrollbarWidth: 'none', /* Firefox */
           msOverflowStyle: 'none', /* Internet Explorer 10+ */
-          transition: 'all 0.3s ease' /* Transición suave */
+          transition: 'all 0.3s ease', /* Transición suave */
+          scrollSnapType: 'x mandatory' /* Snap scroll en móvil */
         }}
       >
-        {allCategories.map((category) => {
+        {allCategories.map((category, index) => {
           const isSelected = selectedCategory === category
           
           return (
@@ -48,13 +72,17 @@ export default function CategoryFilter({
               key={category}
               onClick={() => onCategoryChange(category)}
               className={`
-                flex-shrink-0 px-2.5 py-2 text-xs lg:text-sm font-medium transition-all duration-300 ease-in-out
-                min-w-fit whitespace-nowrap relative border-b-2
+                flex-shrink-0 px-3 py-2.5 md:px-2.5 md:py-2 text-sm md:text-sm font-medium transition-all duration-300 ease-in-out
+                min-w-fit whitespace-nowrap relative border-b-2 rounded-t-lg md:rounded-none
+                scroll-snap-align-start
                 ${isSelected
-                  ? 'text-white border-white font-semibold'
-                  : 'text-white/70 border-transparent hover:text-white hover:border-white/30'
+                  ? 'text-white border-white font-semibold bg-white/10 md:bg-transparent'
+                  : 'text-white/70 border-transparent hover:text-white hover:border-white/30 hover:bg-white/5 md:hover:bg-transparent'
                 }
               `}
+              style={{
+                scrollSnapAlign: index === 0 ? 'start' : index === allCategories.length - 1 ? 'end' : 'center'
+              }}
             >
               {category}
             </button>
@@ -62,13 +90,31 @@ export default function CategoryFilter({
         })}
       </div>
 
-      {/* Gradientes para indicar scroll (opcional) */}
+      {/* Indicadores de scroll para móvil */}
       {isScrollable && (
         <>
           {/* Gradiente izquierdo */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r pointer-events-none" />
+          {canScrollLeft && (
+            <div className="absolute left-0 top-0 bottom-0 w-6 md:w-8 bg-gradient-to-r from-black/60 to-transparent pointer-events-none z-10 md:hidden" />
+          )}
           {/* Gradiente derecho */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
+          {canScrollRight && (
+            <div className="absolute right-0 top-0 bottom-0 w-6 md:w-8 bg-gradient-to-l from-black/60 to-transparent pointer-events-none z-10 md:hidden" />
+          )}
+          
+          {/* Indicador de scroll en móvil */}
+          <div className="flex justify-center mt-2 md:hidden">
+            <div className="flex space-x-1">
+              {allCategories.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                    allCategories[index] === selectedCategory ? 'bg-white' : 'bg-white/30'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </>
       )}
 

@@ -242,7 +242,7 @@ export default function Page() {
 
                 {/* Filtro de categorías */}
                 {categoriesWithItems.length > 1 && (
-                    <div className="w-full max-w-4xl mb-4 flex justify-center z-30 px-2 -mx-2 sticky-category-filter">
+                    <div className="w-full mb-4 flex justify-center z-30 sticky-category-filter">
                         <CategoryFilter
                             categories={categoriesWithItems}
                             selectedCategory={selectedCategory}
@@ -317,20 +317,25 @@ export default function Page() {
                 
                 /* Estilo para el filtro de categorías fijo */
                 .sticky-category-filter {
-                    position: relative;
-                    /* En móvil se comporta normalmente */
+                    position: sticky;
+                    top: 0;
+                    padding-top: 0.5rem;
+                    padding-bottom: 0.5rem;
+                    margin-bottom: 1rem;
+                    z-index: 40;
+                    background: rgba(0, 0, 0, 0.8);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
                 }
                 
                 /* En escritorio, ajustamos la estructura */
                 @media (min-width: 768px) {
                     .sticky-category-filter {
-                        position: sticky;
-                        top: 0;
+                        background: transparent;
+                        backdrop-filter: none;
+                        -webkit-backdrop-filter: none;
                         padding-top: 1rem;
                         padding-bottom: 1rem;
-                        background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 80%, rgba(0,0,0,0) 100%);
-                        margin-bottom: 1rem;
-                        z-index: 40;
                     }
                     
                     /* Contenedor de la lista de presionables en escritorio */
@@ -344,6 +349,27 @@ export default function Page() {
                         max-width: 100% !important; /* Asegurar que use todo el ancho disponible */
                         width: 100% !important;
                         padding-bottom: 40px; /* Espacio inferior para mejorar UX */
+                    }
+                }
+                
+                /* Mejoras específicas para el scroll de categorías en móvil */
+                @media (max-width: 767px) {
+                    /* Asegurar que el contenedor de categorías tenga un comportamiento suave */
+                    #category-filter-container {
+                        -webkit-overflow-scrolling: touch;
+                        overscroll-behavior-x: contain;
+                        scroll-padding: 1rem;
+                    }
+                    
+                    /* Optimizar el rendimiento del scroll */
+                    #category-filter-container button {
+                        transform: translateZ(0);
+                        -webkit-transform: translateZ(0);
+                    }
+                    
+                    /* Evitar el bounce del scroll en iOS */
+                    .sticky-category-filter {
+                        overscroll-behavior: contain;
                     }
                 }
             `}</style>
