@@ -223,9 +223,28 @@ export function SortableLinksFormWithProducts({
         }
     }
 
+    // Referencia para controlar guardado intencional
+    const isIntentionalSaveRef = useRef(false)
+
+    // Función para iniciar guardado manual
+    const handleManualSave = () => {
+        isIntentionalSaveRef.current = true
+        formRef.current?.requestSubmit()
+    }
+
     // Función para manejar el envío del formulario
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+        
+        // Solo proceder si es un guardado intencional
+        if (!isIntentionalSaveRef.current) {
+            console.log('Submit accidental bloqueado - se requiere guardado manual')
+            return
+        }
+        
+        // Reset del flag después de usar
+        isIntentionalSaveRef.current = false
+        
         setIsSubmitting(true)
         setStatus({ message: 'Validando datos...' })
 
@@ -456,7 +475,7 @@ export function SortableLinksFormWithProducts({
             if (e.ctrlKey && e.key === 'Enter') {
                 e.preventDefault()
                 if (!isSubmitting) {
-                    formRef.current?.requestSubmit()
+                    handleManualSave()
                 }
             }
         }
@@ -695,7 +714,7 @@ export function SortableLinksFormWithProducts({
                 {/* Action Buttons */}
                 <ActionButtons
                     onPreview={() => setShowPreviewModal(true)}
-                    onSubmit={() => {}}
+                    onSubmit={handleManualSave}
                     isSubmitting={isSubmitting}
                     uploadingImage={false}
                     previewType={previewType}

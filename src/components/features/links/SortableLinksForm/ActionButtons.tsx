@@ -32,7 +32,8 @@ export function ActionButtons({
 
                 {/* Botón para guardar cambios */}
                 <button
-                    type="submit"
+                    type="button"
+                    onClick={onSubmit}
                     disabled={isSubmitting || uploadingImage}
                     className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-white rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium transition-all duration-200 ${
                         isSubmitting || uploadingImage 
