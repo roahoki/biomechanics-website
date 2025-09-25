@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { type ProfileImageType } from '@/utils/file-utils'
 import { type SocialIcons, type BackgroundSettings, type StyleSettings } from '@/utils/links'
 import { LinkItem } from '@/types/product'
+import { DetailedError } from '@/types/errors'
+import { validateItemsForPublic, filterValidItemsForPublic, isItemDraft } from '@/utils/validation-utils'
 
 // Hooks
 import { useFileUpload } from '@/hooks/useFileUpload'
@@ -16,6 +18,7 @@ import { useFormState } from '@/hooks/useFormState'
 // Componentes
 import { AvatarUpload } from '../../common/forms/AvatarUpload'
 import { FileInfo } from '../../common/ui/FileInfo'
+import { ErrorToast, SuccessToast } from '../../common/ui/Toast'
 import { SocialIconsConfig } from '../profile/SocialIconsConfig'
 import { BackgroundConfig } from '../profile/BackgroundConfig'
 import { StyleConfig } from '../profile/StyleConfig'
@@ -166,7 +169,7 @@ export function SortableLinksFormWithProducts({
     // Estado local de categorías (editable hasta guardar)
     const [localCategories, setLocalCategories] = useState<string[]>(categories || [])
     const [showUnsaved, setShowUnsaved] = useState(false)
-    const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+    const [toast, setToast] = useState<{ type: 'success'; message: string } | { type: 'error'; error: DetailedError } | null>(null)
 
     // Baseline para comparar (se actualiza tras guardar con éxito)
     const [baseline, setBaseline] = useState(() => ({
@@ -224,9 +227,28 @@ export function SortableLinksFormWithProducts({
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         setIsSubmitting(true)
-        setStatus({ message: 'Guardando cambios...' })
+        setStatus({ message: 'Validando datos...' })
 
         try {
+            // PASO 0: Validación pre-guardado
+            const currentLinksForValidation = currentLinksRef.current
+            const validation = validateItemsForPublic(currentLinksForValidation)
+            
+            if (!validation.isValid) {
+                // Mostrar el primer error encontrado
+                const firstError = validation.errors[0]
+                setToast({ type: 'error', error: firstError })
+                setTimeout(() => setToast(null), 8000)
+                setIsSubmitting(false)
+                return
+            }
+
+            // Mostrar warnings si los hay
+            if (validation.warnings.length > 0) {
+                console.warn('⚠️ Advertencias de validación:', validation.warnings)
+            }
+
+            setStatus({ message: 'Guardando cambios...' })
 
             // 1. Subir imagen de perfil si es necesaria
             let finalProfileImage = previewUrl
@@ -235,19 +257,20 @@ export function SortableLinksFormWithProducts({
             if (selectedFile) {
                 setStatus({ message: 'Subiendo imagen de perfil...' })
                 try {
-                    const uploadedUrl = await uploadFileToSupabase(selectedFile)
-                    if (uploadedUrl) {
-                        finalProfileImage = uploadedUrl
+                    const uploadResult = await uploadFileToSupabase(selectedFile)
+                    if (uploadResult.success && uploadResult.data) {
+                        finalProfileImage = uploadResult.data
                         finalProfileImageType = previewType
-                    } else {
-                        console.warn('⚠️ La subida devolvió null')
+                    } else if (uploadResult.error) {
+                        setToast({ type: 'error', error: uploadResult.error })
+                        setTimeout(() => setToast(null), 8000)
+                        // Continuar con el resto del proceso sin la imagen
+                        console.warn('⚠️ Continuando sin subir imagen de perfil')
                     }
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
                     console.error('❌ Error subiendo imagen de perfil:', error)
-                    console.error('❌ Mensaje del error:', errorMessage)
                     // No fallar todo el proceso por la imagen de perfil
-
                 }
             }
 
@@ -258,14 +281,18 @@ export function SortableLinksFormWithProducts({
             if (selectedBackgroundFile) {
                 setStatus({ message: 'Subiendo imagen de fondo...' })
                 try {
-                    const uploadedUrl = await uploadBackgroundImage(selectedBackgroundFile)
-                    if (uploadedUrl) {
-                        finalBackgroundImageUrl = uploadedUrl
+                    const uploadResult = await uploadBackgroundImage(selectedBackgroundFile)
+                    if (uploadResult.success && uploadResult.data) {
+                        finalBackgroundImageUrl = uploadResult.data
+                    } else if (uploadResult.error) {
+                        setToast({ type: 'error', error: uploadResult.error })
+                        setTimeout(() => setToast(null), 8000)
+                        // Continuar sin la imagen de fondo
+                        console.warn('⚠️ Continuando sin subir imagen de fondo')
                     }
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
                     console.error('❌ Error subiendo imagen de fondo:', error)
-                    console.error('❌ Mensaje del error:', errorMessage)
                     // No fallar todo el proceso por la imagen de fondo
                     console.log('⚠️ Continuando sin imagen de fondo nueva...')
                 }
@@ -290,15 +317,19 @@ export function SortableLinksFormWithProducts({
                         
                         if (dataUrls.length > 0) {
                             setStatus({ message: `Subiendo imágenes del producto "${item.title}"...` })
-                            try {
-                                const uploadedUrls = await uploadMultipleProductImages(dataUrls, item.id)
+                            const uploadResult = await uploadMultipleProductImages(dataUrls, item.id, item.title)
+                            if (uploadResult.success && uploadResult.data) {
                                 return {
                                     ...item,
-                                    images: [...publicUrls, ...uploadedUrls]
+                                    images: [...publicUrls, ...uploadResult.data]
                                 }
-                            } catch (error) {
-                                const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-                                throw new Error(`Error subiendo imágenes del producto "${item.title}": ${errorMessage}`)
+                            } else if (uploadResult.error) {
+                                setToast({ type: 'error', error: uploadResult.error })
+                                // Continuar con las URLs públicas existentes
+                                return {
+                                    ...item,
+                                    images: publicUrls
+                                }
                             }
                         }
                     }
@@ -309,17 +340,19 @@ export function SortableLinksFormWithProducts({
                         
                         if (dataUrls.length > 0) {
                             setStatus({ message: `Subiendo imágenes del item "${item.title}"...` })
-                            try {
-                                const uploadedUrls = await uploadMultipleItemImages(dataUrls, item.id)
-
+                            const uploadResult = await uploadMultipleItemImages(dataUrls, item.id, item.title)
+                            if (uploadResult.success && uploadResult.data) {
                                 return {
                                     ...item,
-                                    images: [...publicUrls, ...uploadedUrls]
+                                    images: [...publicUrls, ...uploadResult.data]
                                 }
-                            } catch (error) {
-                                const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-
-                                throw new Error(`Error subiendo imágenes del item "${item.title}": ${errorMessage}`)
+                            } else if (uploadResult.error) {
+                                setToast({ type: 'error', error: uploadResult.error })
+                                // Continuar con las URLs públicas existentes
+                                return {
+                                    ...item,
+                                    images: publicUrls
+                                }
                             }
                         }
                     }
@@ -371,7 +404,7 @@ export function SortableLinksFormWithProducts({
 
             if (result.success) {
                 setStatus({ message: result.message })
-                setToast({ type: 'success', message: 'Cambios guardados correctamente.' })
+                setToast({ type: 'success', message: result.message || 'Cambios guardados correctamente.' })
                 // Actualizar baseline para reflejar el nuevo estado persistido
                 setBaseline({
                     categories: [...localCategories],
@@ -391,9 +424,18 @@ export function SortableLinksFormWithProducts({
                 setShowUnsaved(false)
                 setTimeout(() => setToast(null), 4000)
             } else {
-                setStatus({ error: result.error || 'Error desconocido' })
-                setToast({ type: 'error', message: result.error || 'Error al guardar.' })
-                setTimeout(() => setToast(null), 5000)
+                setStatus({ error: result.error?.userMessage || 'Error desconocido' })
+                if (result.error) {
+                    setToast({ type: 'error', error: result.error })
+                } else {
+                    setToast({ type: 'error', error: {
+                        type: 'DATABASE' as any,
+                        step: 'guardado en base de datos' as any,
+                        originalError: 'Error desconocido',
+                        userMessage: 'Error al guardar los cambios'
+                    }})
+                }
+                setTimeout(() => setToast(null), 8000)
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido al guardar los cambios'
@@ -672,14 +714,19 @@ export function SortableLinksFormWithProducts({
                 )}
                 {/* Toast de resultado */}
                 {toast && (
-                    <div className={`fixed bottom-4 right-4 z-50 max-w-sm px-4 py-3 rounded shadow-lg flex items-start space-x-3 animate-fade-in ${toast.type === 'success' ? 'bg-green-600/95' : 'bg-red-600/95'}`}> 
-                    <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
-                    <div className="text-sm leading-snug">
-                        <p className="font-semibold">{toast.type === 'success' ? 'Éxito' : 'Error'}</p>
-                        <p>{toast.message}</p>
-                    </div>
-                    <button onClick={() => setToast(null)} className="ml-2 text-white/80 hover:text-white">✕</button>
-                    </div>
+                    <>
+                        {toast.type === 'success' ? (
+                            <SuccessToast
+                                message={toast.message}
+                                onClose={() => setToast(null)}
+                            />
+                        ) : (
+                            <ErrorToast
+                                error={toast.error}
+                                onClose={() => setToast(null)}
+                            />
+                        )}
+                    </>
                 )}
             </form>
             {/* Modales */}
