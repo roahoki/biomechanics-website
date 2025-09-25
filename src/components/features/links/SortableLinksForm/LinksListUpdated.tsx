@@ -5,6 +5,7 @@ import { ItemForm } from '../../products/ItemForm'
 import ListView from '../../../common/ui/ListView'
 import CategoryManagerCompact from '../../categories/CategoryManagerCompact'
 import { LinkItem, Product, Item, Link } from '@/types/product'
+import { isItemDraft, validateItemForPublic } from '@/utils/validation-utils'
 
 interface LinksListProps {
     currentLinks: LinkItem[]
@@ -183,7 +184,14 @@ export function LinksListUpdated({
                                             
                                             {/* Información del item - Permitir truncado */}
                                             <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden">
-                                                <span className="text-sm font-medium text-gray-900 truncate">
+                                                {/* Indicador de estado borrador */}
+                                                {isItemDraft(item) && (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 flex-shrink-0">
+                                                        📝 Borrador
+                                                    </span>
+                                                )}
+                                                
+                                                <span className={`text-sm font-medium truncate ${isItemDraft(item) ? 'text-gray-500' : 'text-gray-900'}`}>
                                                     {item.type === 'link' ? (item as Link).label :
                                                      item.type === 'product' ? (item as Product).title :
                                                      (item as Item).title || 'Sin título'}

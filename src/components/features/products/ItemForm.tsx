@@ -296,7 +296,7 @@ export function ItemForm({
             {/* Header mobile-first */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900">
-                    {item ? 'Editar Item' : 'Crear Item'}
+                    {item ? `Editar Item ${item.id}` : 'Crear Item'}
                 </h3>
                 <button
                     onClick={onRemove}
