@@ -23,6 +23,7 @@ export function ProductForm({ product, availableCategories, onUpdate, onRemove }
     const [paymentLink, setPaymentLink] = useState(product?.paymentLink || '')
     const [description, setDescription] = useState(product?.description || '')
     const [images, setImages] = useState<string[]>(product?.images || [])
+    const [aspectRatios, setAspectRatios] = useState<number[]>(product?.aspectRatios || [])
     const [categories, setCategories] = useState<string[]>(product?.categories || [])
 
     // Validaciones
@@ -142,6 +143,11 @@ export function ProductForm({ product, availableCategories, onUpdate, onRemove }
         onUpdate({ images: newImages })
     }
 
+    const handleAspectRatiosChange = (newAspectRatios: number[]) => {
+        setAspectRatios(newAspectRatios)
+        onUpdate({ aspectRatios: newAspectRatios })
+    }
+
     const handleCategoriesChange = (newCategories: string[]) => {
         setCategories(newCategories)
         onUpdate({ categories: newCategories })
@@ -188,7 +194,9 @@ export function ProductForm({ product, availableCategories, onUpdate, onRemove }
                 </label>
                 <ImageCarousel
                     images={images}
+                    aspectRatios={aspectRatios}
                     onImagesChange={handleImagesChange}
+                    onAspectRatiosChange={handleAspectRatiosChange}
                     maxImages={10}
                     maxSizeInMB={1024}
                 />

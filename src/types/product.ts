@@ -7,8 +7,15 @@ export interface Product {
     paymentLink: string
     description: string
     images: string[]
+    aspectRatios?: number[]
     categories?: string[]
     visible?: boolean
+    // Campo temporal para datos de imagen con blobs croppeados
+    _imageData?: Array<{
+        url: string
+        blob?: Blob
+        aspectRatio: number
+    }>
 }
 
 export interface Item {
