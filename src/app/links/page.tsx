@@ -153,7 +153,7 @@ export default function Page() {
         <div className="relative min-h-screen" style={cssVariables}>
             {/* Capa de fondo optimizada y responsive */}
             <div 
-                className="fixed inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat md:bg-cover sm:bg-contain"
+                className="fixed inset-0 z-0 pointer-events-none bg-cover bg-top bg-no-repeat md:bg-cover sm:bg-contain"
                 style={{
                     backgroundImage: hasImageBackground 
                         ? `linear-gradient(rgba(0, 0, 0, calc(1 - var(--bg-opacity))), rgba(0, 0, 0, calc(1 - var(--bg-opacity)))), var(--bg-image)`
