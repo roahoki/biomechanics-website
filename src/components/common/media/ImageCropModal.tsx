@@ -36,7 +36,6 @@ export default function ImageCropModal({
   const [cropperInstance, setCropperInstance] = useState<Cropper | null>(null)
 
   const imgRef = useRef<HTMLImageElement>(null)
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
 
   // Detectar móvil
   useEffect(() => {
@@ -85,54 +84,7 @@ export default function ImageCropModal({
     }
   }
 
-  // Actualizar previsualización
-  const updatePreview = useCallback(() => {
-    if (!cropperInstance || !previewCanvasRef.current) return
 
-    const cropBoxData = cropperInstance.getCropBoxData()
-    const canvasData = cropperInstance.getCanvasData()
-    
-    if (!cropBoxData || !canvasData) return
-
-    const canvas = previewCanvasRef.current
-    const context = canvas.getContext('2d')
-    
-    if (!context) return
-
-    const previewSize = 200
-    canvas.width = previewSize
-    canvas.height = previewSize
-
-    const scaleX = previewSize / cropBoxData.width
-    const scaleY = previewSize / cropBoxData.height
-
-    context.drawImage(
-      imgRef.current!,
-      cropBoxData.left - canvasData.left,
-      cropBoxData.top - canvasData.top,
-      cropBoxData.width,
-      cropBoxData.height,
-      0,
-      0,
-      previewSize,
-      previewSize
-    )
-  }, [cropperInstance])
-
-  // Actualizar previsualización cuando cambie el crop
-  useEffect(() => {
-    if (!cropperInstance) return
-
-    const handleCrop = () => {
-      updatePreview()
-    }
-
-    const imgElement = imgRef.current
-    imgElement?.addEventListener('crop', handleCrop)
-    return () => {
-      imgElement?.removeEventListener('crop', handleCrop)
-    }
-  }, [cropperInstance, updatePreview])
 
   // Generar imagen recortada
   const generateCroppedImage = useCallback(async () => {
@@ -332,23 +284,6 @@ export default function ImageCropModal({
                       <span className="text-sm opacity-75">{option.ratio}</span>
                     </button>
                   ))}
-                </div>
-              </div>
-
-              {/* Previsualización */}
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Previsualización</h3>
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 flex justify-center">
-                  <canvas
-                    ref={previewCanvasRef}
-                    className="rounded border"
-                    width={200}
-                    height={200}
-                    style={{
-                      width: '200px',
-                      height: '200px',
-                    }}
-                  />
                 </div>
               </div>
 
