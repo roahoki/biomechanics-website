@@ -28,26 +28,39 @@ export function PressableItem({
         }).format(price).replace('CLP', '').trim()
     }
 
-    // Generamos un número basado en el ID o índice del item para que la altura sea constante
-    // para el mismo elemento (evitando cambios de altura al cambiar categorías)
-    const getRandomHeight = (id: string | number) => {
-        // Convertir el ID a string si no lo es
-        const idStr = typeof id === 'string' ? id : id.toString();
-        // Sumar los valores ASCII de los caracteres para generar un número "aleatorio" pero consistente
-        let sum = 0;
-        for (let i = 0; i < idStr.length; i++) {
-            sum += idStr.charCodeAt(i);
+    // Calcular la altura basada en el aspect ratio de la primera imagen
+    // Similar a Pinterest, donde las cards tienen el mismo aspect ratio que la imagen
+    const getHeightFromAspectRatio = (aspectRatio?: number, fallbackId?: string | number) => {
+        // Ancho base de la card (considerando padding y grid)
+        const baseWidth = 280; // Ancho mínimo definido en el grid
+        
+        if (aspectRatio && aspectRatio > 0) {
+            // Calcular altura basada en el aspect ratio
+            const height = Math.round(baseWidth / aspectRatio);
+            // Limitar entre valores más amplios para hacer los cambios más visibles
+            return Math.max(150, Math.min(600, height));
         }
-        // Generar un número entre 160 y 300px basado en la suma
-        return (sum % 140) + 160;
+        
+        // Fallback: altura pseudo-aleatoria pero consistente para items sin aspect ratio
+        if (fallbackId) {
+            const idStr = typeof fallbackId === 'string' ? fallbackId : fallbackId.toString();
+            let sum = 0;
+            for (let i = 0; i < idStr.length; i++) {
+                sum += idStr.charCodeAt(i);
+            }
+            return (sum % 200) + 200; // Rango más amplio: 200-400px
+        }
+        
+        return 300; // Altura por defecto
     };
 
     // Si es un producto
     if (item.type === 'product') {
         const product = item as Product
         
-        // Altura pseudo-aleatoria pero consistente para el mismo producto
-        const itemHeight = getRandomHeight(product.id || index);
+        // Altura basada en aspect ratio de la primera imagen
+        const firstImageAspectRatio = product.aspectRatios?.[0];
+        const itemHeight = getHeightFromAspectRatio(firstImageAspectRatio, product.id || index);
         
         return (
             <motion.div
@@ -92,8 +105,9 @@ export function PressableItem({
     if (item.type === 'item') {
         const itemData = item as Item
         
-        // Altura pseudo-aleatoria pero consistente para el mismo item
-        const itemHeight = getRandomHeight(itemData.id || index);
+        // Altura basada en aspect ratio de la primera imagen
+        const firstImageAspectRatio = itemData.aspectRatios?.[0];
+        const itemHeight = getHeightFromAspectRatio(firstImageAspectRatio, itemData.id || index);
         
         return (
             <motion.div

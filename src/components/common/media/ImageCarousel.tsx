@@ -4,7 +4,8 @@ import { useState, useRef } from 'react'
 import ImageCropModal from './ImageCropModal'
 
 interface ImageData {
-    url: string // Data URL para mostrar
+    url: string // Data URL cropeado para mostrar en carrusel
+    originalUrl?: string // Data URL original para edición (solo para imágenes locales)
     blob?: Blob // Blob croppeado para subir (si existe)
     aspectRatio: number
 }
@@ -45,6 +46,7 @@ export function ImageCarousel({
     const [cropModalOpen, setCropModalOpen] = useState(false)
     const [currentCropImage, setCurrentCropImage] = useState<string | null>(null)
     const [pendingCropIndex, setPendingCropIndex] = useState<number | null>(null)
+    const [currentOriginalImage, setCurrentOriginalImage] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const touchStartX = useRef<number>(0)
     const touchEndX = useRef<number>(0)
@@ -110,6 +112,7 @@ export function ImageCarousel({
         reader.onload = (e) => {
             const imageUrl = e.target?.result as string
             setCurrentCropImage(imageUrl)
+            setCurrentOriginalImage(imageUrl) // Guardar la imagen original
             setPendingCropIndex(currentImageData.length) // Nueva imagen al final
             setCropModalOpen(true)
         }
@@ -138,13 +141,16 @@ export function ImageCarousel({
                         // Nueva imagen
                         newImageData.push({
                             url: croppedImageDataURL,
+                            originalUrl: currentOriginalImage || undefined, // Guardar imagen original para edición
                             aspectRatio
                         })
                         setCurrentIndex(newImageData.length - 1)
                     } else {
-                        // Imagen existente editada
+                        // Imagen existente editada - mantener la originalUrl si existe
+                        const existingData = currentImageData[pendingCropIndex]
                         newImageData[pendingCropIndex] = {
                             url: croppedImageDataURL,
+                            originalUrl: existingData?.originalUrl || currentOriginalImage || undefined,
                             aspectRatio
                         }
                     }
@@ -183,10 +189,11 @@ export function ImageCarousel({
                 }
             }
             
-            // Cerrar modal
+            // Cerrar modal y limpiar estados
             setCropModalOpen(false)
             setCurrentCropImage(null)
             setPendingCropIndex(null)
+            setCurrentOriginalImage(null)
         }
         reader.readAsDataURL(croppedBlob)
     }
@@ -195,12 +202,19 @@ export function ImageCarousel({
     const handleCancelCrop = () => {
         setCropModalOpen(false)
         setCurrentCropImage(null)
+        setCurrentOriginalImage(null)
         setPendingCropIndex(null)
     }
 
     // Editar imagen existente
     const handleEditImage = (index: number) => {
-        setCurrentCropImage(currentImageData[index]?.url || images[index])
+        const imageData = currentImageData[index]
+        
+        // Si existe originalUrl (imagen local), usarla; si no, usar la imagen cropeada
+        const imageToEdit = imageData?.originalUrl || imageData?.url || images[index]
+        
+        setCurrentCropImage(imageToEdit)
+        setCurrentOriginalImage(imageData?.originalUrl || null) // Mantener referencia de la original
         setPendingCropIndex(index)
         setCropModalOpen(true)
     }

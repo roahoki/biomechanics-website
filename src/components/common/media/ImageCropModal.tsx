@@ -1,15 +1,8 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import ReactCrop, { 
-  Crop, 
-  PixelCrop, 
-  centerCrop, 
-  makeAspectCrop, 
-  convertToPixelCrop 
-} from 'react-image-crop'
+import Cropper from 'cropperjs'
 import { XMarkIcon, CheckIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
-import 'react-image-crop/dist/ReactCrop.css'
 
 interface AspectRatioOption {
   value: number | null
@@ -37,16 +30,12 @@ export default function ImageCropModal({
   onCancel,
   defaultAspectRatio = 1
 }: ImageCropModalProps) {
-  const [crop, setCrop] = useState<Crop>()
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop>()
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<number | null>(defaultAspectRatio)
-  const [scale, setScale] = useState(1)
-  const [rotate, setRotate] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [cropperInstance, setCropperInstance] = useState<Cropper | null>(null)
 
   const imgRef = useRef<HTMLImageElement>(null)
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
 
   // Detectar móvil
   useEffect(() => {
@@ -56,100 +45,88 @@ export default function ImageCropModal({
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Función para centrar el crop cuando cambia el aspect ratio
-  function centerAspectCrop(
-    mediaWidth: number,
-    mediaHeight: number,
-    aspect: number | null,
-  ) {
-    if (!aspect) {
-      // Crop libre - usar 80% de la imagen
-      return centerCrop(
-        makeAspectCrop({ unit: '%', width: 80 }, mediaWidth / mediaHeight, mediaWidth, mediaHeight),
-        mediaWidth,
-        mediaHeight,
-      )
-    }
-    
-    return centerCrop(
-      makeAspectCrop(
-        { unit: '%', width: 90 },
-        aspect,
-        mediaWidth,
-        mediaHeight,
-      ),
-      mediaWidth,
-      mediaHeight,
-    )
-  }
+  // Inicializar Cropper cuando la imagen se carga
+  useEffect(() => {
+    if (!isOpen || !imgRef.current) return
 
-  // Cuando la imagen carga
-  function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    const { width, height } = e.currentTarget
-    setCrop(centerAspectCrop(width, height, selectedAspectRatio))
-  }
+    const cropper = new Cropper(imgRef.current, {
+      aspectRatio: selectedAspectRatio || NaN, // NaN permite ratio libre
+      viewMode: 1,
+      background: false,
+      autoCropArea: 0.8,
+      responsive: true,
+      restore: false,
+      modal: true,
+      guides: true,
+      center: true,
+      highlight: true,
+      cropBoxMovable: true,
+      cropBoxResizable: true,
+      toggleDragModeOnDblclick: false,
+    })
+
+    setCropperInstance(cropper)
+
+    return () => {
+      if (cropper) {
+        cropper.destroy()
+      }
+      setCropperInstance(null)
+    }
+  }, [isOpen, imageUrl, selectedAspectRatio])
 
   // Cambiar aspect ratio
   const handleAspectRatioChange = (aspectRatio: number | null) => {
     setSelectedAspectRatio(aspectRatio)
     
-    if (imgRef.current) {
-      const { width, height } = imgRef.current
-      setCrop(centerAspectCrop(width, height, aspectRatio))
+    if (cropperInstance) {
+      cropperInstance.setAspectRatio(aspectRatio || NaN)
     }
   }
 
+
+
   // Generar imagen recortada
   const generateCroppedImage = useCallback(async () => {
-    if (!completedCrop || !imgRef.current || !previewCanvasRef.current) return
+    if (!cropperInstance) return
 
     setIsProcessing(true)
 
-    const image = imgRef.current
-    const canvas = previewCanvasRef.current
-    const crop = completedCrop
+    try {
+      // Obtener el canvas croppeado usando Cropper.js 1.x
+      const canvas = cropperInstance.getCroppedCanvas({
+        width: 800, // Ancho máximo
+        height: 800, // Alto máximo 
+        minWidth: 256,
+        minHeight: 256,
+        maxWidth: 4096,
+        maxHeight: 4096,
+        fillColor: '#fff',
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+      })
 
-    const scaleX = image.naturalWidth / image.width
-    const scaleY = image.naturalHeight / image.height
-    const ctx = canvas.getContext('2d')
-
-    if (!ctx) {
-      setIsProcessing(false)
-      return
-    }
-
-    const pixelRatio = window.devicePixelRatio || 1
-
-    canvas.width = crop.width * pixelRatio
-    canvas.height = crop.height * pixelRatio
-
-    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
-    ctx.imageSmoothingQuality = 'high'
-
-    ctx.drawImage(
-      image,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
-      0,
-      0,
-      crop.width,
-      crop.height,
-    )
-
-    // Convertir canvas a blob
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          onCrop(blob, selectedAspectRatio || 1)
-        }
+      if (!canvas) {
         setIsProcessing(false)
-      },
-      'image/jpeg',
-      0.95
-    )
-  }, [completedCrop, onCrop, selectedAspectRatio])
+        return
+      }
+
+      // Convertir canvas a blob
+      canvas.toBlob(
+        (blob: Blob | null) => {
+          if (blob) {
+            onCrop(blob, selectedAspectRatio || 1)
+          }
+          setIsProcessing(false)
+        },
+        'image/jpeg',
+        0.95
+      )
+    } catch (error) {
+      console.error('Error al generar imagen recortada:', error)
+      setIsProcessing(false)
+    }
+  }, [cropperInstance, onCrop, selectedAspectRatio])
 
   // Manejar teclado
   useEffect(() => {
@@ -215,28 +192,16 @@ export default function ImageCropModal({
           {/* Área de crop móvil */}
           <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
             <div className="w-full h-full flex items-center justify-center">
-              <ReactCrop
-                crop={crop}
-                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                onComplete={(c) => setCompletedCrop(c)}
-                aspect={selectedAspectRatio || undefined}
-                minWidth={50}
-                minHeight={50}
-                className="max-w-full max-h-full"
-              >
-                <img
-                  ref={imgRef}
-                  alt="Recorte"
-                  src={imageUrl}
-                  style={{ 
-                    transform: `scale(${scale}) rotate(${rotate}deg)`,
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    objectFit: 'contain'
-                  }}
-                  onLoad={onImageLoad}
-                />
-              </ReactCrop>
+              <img
+                ref={imgRef}
+                alt="Recorte"
+                src={imageUrl}
+                className="max-w-full max-h-full block"
+                style={{ 
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
+              />
             </div>
           </div>
 
@@ -252,7 +217,7 @@ export default function ImageCropModal({
               </button>
               <button
                 onClick={generateCroppedImage}
-                disabled={!completedCrop || isProcessing}
+                disabled={!cropperInstance || isProcessing}
                 className="flex-1 px-4 py-3 text-base text-white bg-blue-500 rounded-xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center"
               >
                 {isProcessing ? (
@@ -286,28 +251,16 @@ export default function ImageCropModal({
           <div className="flex flex-1 overflow-hidden">
             {/* Panel izquierdo - Imagen y crop */}
             <div className="flex-1 flex items-center justify-center p-6 bg-gray-50">
-              <ReactCrop
-                crop={crop}
-                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                onComplete={(c) => setCompletedCrop(c)}
-                aspect={selectedAspectRatio || undefined}
-                minWidth={50}
-                minHeight={50}
-                className="max-w-full max-h-full"
-              >
-                <img
-                  ref={imgRef}
-                  alt="Recorte"
-                  src={imageUrl}
-                  style={{ 
-                    transform: `scale(${scale}) rotate(${rotate}deg)`,
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    objectFit: 'contain'
-                  }}
-                  onLoad={onImageLoad}
-                />
-              </ReactCrop>
+              <img
+                ref={imgRef}
+                alt="Recorte"
+                src={imageUrl}
+                className="max-w-full max-h-full block"
+                style={{ 
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
+              />
             </div>
 
             {/* Panel derecho - Controles */}
@@ -334,28 +287,23 @@ export default function ImageCropModal({
                 </div>
               </div>
 
-              {/* Previsualización */}
-              {completedCrop && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">Previsualización</h3>
-                  <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                    <canvas
-                      ref={previewCanvasRef}
-                      className="max-w-full h-auto rounded border"
-                      style={{
-                        width: Math.min(200, completedCrop.width),
-                        height: Math.min(200, completedCrop.height),
-                      }}
-                    />
-                  </div>
+              {/* Información sobre el recorte */}
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Instrucciones</h3>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    • Arrastra para mover el área de recorte<br/>
+                    • Usa las esquinas para redimensionar<br/>
+                    • Selecciona un formato arriba para fijar proporciones
+                  </p>
                 </div>
-              )}
+              </div>
 
               {/* Botones */}
               <div className="mt-auto space-y-3">
                 <button
                   onClick={generateCroppedImage}
-                  disabled={!completedCrop || isProcessing}
+                  disabled={!cropperInstance || isProcessing}
                   className="w-full px-4 py-3 text-white bg-blue-500 rounded-xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center"
                 >
                   {isProcessing ? (
@@ -378,11 +326,7 @@ export default function ImageCropModal({
         </div>
       )}
 
-      {/* Canvas oculto para el procesamiento */}
-      <canvas
-        ref={previewCanvasRef}
-        className="hidden"
-      />
+
     </div>
   )
 }
