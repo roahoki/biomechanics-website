@@ -28,26 +28,39 @@ export function PressableItem({
         }).format(price).replace('CLP', '').trim()
     }
 
-    // Generamos un número basado en el ID o índice del item para que la altura sea constante
-    // para el mismo elemento (evitando cambios de altura al cambiar categorías)
-    const getRandomHeight = (id: string | number) => {
-        // Convertir el ID a string si no lo es
-        const idStr = typeof id === 'string' ? id : id.toString();
-        // Sumar los valores ASCII de los caracteres para generar un número "aleatorio" pero consistente
-        let sum = 0;
-        for (let i = 0; i < idStr.length; i++) {
-            sum += idStr.charCodeAt(i);
+    // Calcular la altura basada en el aspect ratio de la primera imagen
+    // Similar a Pinterest, donde las cards tienen el mismo aspect ratio que la imagen
+    const getHeightFromAspectRatio = (aspectRatio?: number, fallbackId?: string | number) => {
+        // Ancho base más compacto estilo Pinterest
+        const baseWidth = 180; // Reducido para más densidad visual
+        
+        if (aspectRatio && aspectRatio > 0) {
+            // Calcular altura basada en el aspect ratio
+            const height = Math.round(baseWidth / aspectRatio);
+            // Límites más compactos estilo Pinterest
+            return Math.max(120, Math.min(350, height));
         }
-        // Generar un número entre 160 y 300px basado en la suma
-        return (sum % 140) + 160;
+        
+        // Fallback: altura pseudo-aleatoria pero consistente para items sin aspect ratio
+        if (fallbackId) {
+            const idStr = typeof fallbackId === 'string' ? fallbackId : fallbackId.toString();
+            let sum = 0;
+            for (let i = 0; i < idStr.length; i++) {
+                sum += idStr.charCodeAt(i);
+            }
+            return (sum % 150) + 150; // Rango más compacto: 150-300px
+        }
+        
+        return 200; // Altura por defecto más compacta
     };
 
     // Si es un producto
     if (item.type === 'product') {
         const product = item as Product
         
-        // Altura pseudo-aleatoria pero consistente para el mismo producto
-        const itemHeight = getRandomHeight(product.id || index);
+        // Altura basada en aspect ratio de la primera imagen
+        const firstImageAspectRatio = product.aspectRatios?.[0];
+        const itemHeight = getHeightFromAspectRatio(firstImageAspectRatio, product.id || index);
         
         return (
             <motion.div
@@ -58,14 +71,21 @@ export function PressableItem({
             >
                 <button
                     onClick={() => onProductClick?.(product)}
-                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
-                        product.images?.length > 0 ? '' : 'bg-gray-200'
+                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl ${
+                        product.images?.length > 0 ? 'bg-gray-100' : 'bg-gray-200'
                     }`}
                     style={{
                         backgroundImage: product.images?.length > 0 
                             ? `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${product.images[0]})` 
                             : undefined,
-                        height: `${itemHeight}px`
+                        backgroundSize: 'cover',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                        // Si hay aspect ratio, usarlo; si no, usar altura fija
+                        ...(firstImageAspectRatio && firstImageAspectRatio > 0 
+                            ? { aspectRatio: `${firstImageAspectRatio} / 1` }
+                            : { height: `${itemHeight}px` }
+                        )
                     }}
                 >
                     {/* Fallback para productos sin imagen */}
@@ -79,7 +99,7 @@ export function PressableItem({
 
                     {/* Título centrado */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <h3 className="text-white font-bold text-xl text-center px-4 drop-shadow-lg">
+                        <h3 className="text-white font-bold text-sm text-center px-2 drop-shadow-lg leading-tight">
                             {product.title}
                         </h3>
                     </div>
@@ -92,8 +112,9 @@ export function PressableItem({
     if (item.type === 'item') {
         const itemData = item as Item
         
-        // Altura pseudo-aleatoria pero consistente para el mismo item
-        const itemHeight = getRandomHeight(itemData.id || index);
+        // Altura basada en aspect ratio de la primera imagen
+        const firstImageAspectRatio = itemData.aspectRatios?.[0];
+        const itemHeight = getHeightFromAspectRatio(firstImageAspectRatio, itemData.id || index);
         
         return (
             <motion.div
@@ -104,14 +125,21 @@ export function PressableItem({
             >
                 <button
                     onClick={() => onItemClick?.(itemData)}
-                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
-                        itemData.images?.length > 0 ? '' : 'bg-gray-200'
+                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl ${
+                        itemData.images?.length > 0 ? 'bg-gray-100' : 'bg-gray-200'
                     }`}
                     style={{
                         backgroundImage: itemData.images?.length > 0 
                             ? `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${itemData.images[0]})` 
                             : undefined,
-                        height: `${itemHeight}px`
+                        backgroundSize: 'cover',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                        // Si hay aspect ratio, usarlo; si no, usar altura fija
+                        ...(firstImageAspectRatio && firstImageAspectRatio > 0 
+                            ? { aspectRatio: `${firstImageAspectRatio} / 1` }
+                            : { height: `${itemHeight}px` }
+                        )
                     }}
                 >
                     {/* Fallback para items sin imagen */}
@@ -124,10 +152,10 @@ export function PressableItem({
                     )}
 
                     {/* Contenido superpuesto */}
-                    <div className="absolute inset-0 flex flex-col justify-between p-3">
+                    <div className="absolute inset-0 flex flex-col justify-between p-2">
                         {/* Título y precio centrados en la parte superior */}
                         <div className="flex-1 flex flex-col items-center justify-center">
-                            <h3 className="text-white font-bold text-xl text-center drop-shadow-lg">
+                            <h3 className="text-white font-bold text-sm text-center drop-shadow-lg leading-tight">
                                 {itemData.title}
                             </h3>
                         </div>

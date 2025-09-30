@@ -7,9 +7,17 @@ import { getLinksData, LinksData, SocialIcons } from '@/utils/links'
 import { getSupabaseClient } from '@/lib/supabase-db'
 import { LinkItem, Product } from '@/types/product'
 import { cleanupItemCategories } from '@/utils/category-utils'
+import { 
+  OperationResult, 
+  DetailedError, 
+  ErrorStep, 
+  createDatabaseError, 
+  createPermissionError, 
+  createValidationError 
+} from '@/types/errors'
 
 // Función para guardar datos en Supabase
-export async function saveLinksToSupabase(linksData: LinksData) {
+export async function saveLinksToSupabase(linksData: LinksData): Promise<OperationResult<void>> {
   try {
     // Usar el cliente admin de Supabase para operaciones del servidor
     const supabase = getSupabaseClient({ admin: true });
@@ -60,22 +68,42 @@ export async function saveLinksToSupabase(linksData: LinksData) {
     }
 
     if (result.error) {
-      throw new Error(`Error al actualizar Supabase: ${result.error.message}`);
+      return {
+        success: false,
+        error: createDatabaseError(`Error al actualizar Supabase: ${result.error.message}`)
+      }
     }
 
     console.log('✅ Datos guardados exitosamente en Supabase')
     return { success: true };
   } catch (error: any) {
     console.error('❌ Error guardando datos en Supabase:', error);
-    throw new Error(`Error guardando datos: ${error.message}`);
+    return {
+      success: false,
+      error: createDatabaseError(`Error guardando datos: ${error.message}`)
+    }
   }
 }
 
-export async function updateAdminLinksWithProducts(items: LinkItem[], otherData: Partial<LinksData>) {
+export async function updateAdminLinksWithProducts(items: LinkItem[], otherData: Partial<LinksData>): Promise<OperationResult<void>> {
   try {
     // Verificar permisos
     if (!checkRole('admin')) {
-      throw new Error('No tienes autorización para esta acción')
+      return {
+        success: false,
+        error: createPermissionError(ErrorStep.DATABASE_SAVE)
+      }
+    }
+    
+    // Validar que hay items para procesar
+    if (!items || items.length === 0) {
+      return {
+        success: false,
+        error: createValidationError(
+          ErrorStep.VALIDATION,
+          'No se proporcionaron elementos para guardar'
+        )
+      }
     }
     
     // Obtener los datos actuales para mantener la estructura
@@ -121,7 +149,11 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
     })
     
     // Guardar en Supabase
-    await saveLinksToSupabase(linksData)
+    const saveResult = await saveLinksToSupabase(linksData)
+    
+    if (!saveResult.success) {
+      return saveResult
+    }
     
     // Revalidar todas las rutas que pueden usar estos datos
     revalidatePath('/links')
@@ -130,6 +162,11 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
     return { success: true, message: 'Enlaces y productos actualizados con éxito' }
   } catch (error) {
     console.error('Error al actualizar enlaces y productos:', error)
-    return { success: false, error: (error as Error).message }
+    return { 
+      success: false, 
+      error: createDatabaseError(
+        `Error inesperado al actualizar enlaces: ${(error as Error).message}`
+      )
+    }
   }
 }

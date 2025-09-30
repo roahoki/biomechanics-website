@@ -151,22 +151,14 @@ export default function Page() {
     // Vista de solo lectura para usuarios comunes
     return (
         <div className="relative min-h-screen" style={cssVariables}>
-            {/* Capa de fondo fija que no depende del contenido */}
+            {/* Capa de fondo optimizada y responsive */}
             <div 
-                className="fixed inset-0 z-0 pointer-events-none bg-background-layer"
+                className="fixed inset-0 z-0 pointer-events-none bg-cover bg-top bg-no-repeat md:bg-cover sm:bg-contain"
                 style={{
-                    backgroundImage: hasImageBackground ? 'var(--bg-image)' : 'none',
+                    backgroundImage: hasImageBackground 
+                        ? `linear-gradient(rgba(0, 0, 0, calc(1 - var(--bg-opacity))), rgba(0, 0, 0, calc(1 - var(--bg-opacity)))), var(--bg-image)`
+                        : 'none',
                     backgroundColor: hasImageBackground ? 'transparent' : 'var(--bg-color)',
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundAttachment: "fixed",
-                    // Aplicar opacidad directamente a la imagen usando linear-gradient
-                    ...(hasImageBackground && {
-                        backgroundBlendMode: 'normal',
-                        // Esto crea un overlay negro con la opacidad deseada sin necesitar un div adicional
-                        backgroundImage: `linear-gradient(rgba(0, 0, 0, calc(1 - var(--bg-opacity))), rgba(0, 0, 0, calc(1 - var(--bg-opacity)))), var(--bg-image)`,
-                    })
                 }}
             />
 
@@ -299,19 +291,38 @@ export default function Page() {
                 />
             )}
             
-            {/* Estilos para manejar el fondo y transiciones */}
+            {/* Estilos optimizados para el fondo */}
             <style jsx global>{`
-                /* Clase para la capa de fondo */
-                .bg-background-layer {
-                    transition: background-image 0.3s ease-in-out, background-color 0.3s ease-in-out;
-                    will-change: background-image, background-color;
-                    backface-visibility: hidden;
+                /* Optimizaciones de rendimiento para el fondo */
+                .bg-cover {
+                    background-size: cover;
+                }
+                .bg-center {
+                    background-position: center;
+                }
+                .bg-no-repeat {
+                    background-repeat: no-repeat;
                 }
                 
-                /* Optimizaciones para mejorar el rendimiento */
-                @media (hover: hover) {
-                    .bg-background-layer {
-                        transform: translateZ(0);
+                /* Transiciones suaves */
+                .fixed.inset-0 {
+                    transition: background-image 0.3s ease-out, background-color 0.3s ease-out;
+                    will-change: auto;
+                }
+                
+                /* Optimizaciones móvil */
+                @media (max-width: 768px) {
+                    .fixed.inset-0 {
+                        /* Reducir transiciones en móvil para mejor performance */
+                        transition: background-color 0.2s ease-out;
+                    }
+                }
+                
+                /* Optimizaciones desktop */
+                @media (min-width: 769px) {
+                    .fixed.inset-0 {
+                        /* Transiciones más suaves en desktop */
+                        transition: background-image 0.4s ease-out, background-color 0.4s ease-out;
                     }
                 }
                 

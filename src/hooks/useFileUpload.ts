@@ -1,6 +1,15 @@
 import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { getFileType, isValidAvatarFile, type ProfileImageType } from '@/utils/file-utils'
+import { 
+    DetailedError, 
+    OperationResult, 
+    ErrorStep, 
+    createUploadError, 
+    createValidationError, 
+    createNetworkError,
+    createPermissionError 
+} from '@/types/errors'
 
 interface UseFileUploadProps {
     onStatusChange: (status: { message?: string; error?: string } | null) => void
@@ -10,10 +19,13 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
     const { user } = useUser()
     const [uploadingImage, setUploadingImage] = useState(false)
 
-    const uploadFileToSupabase = async (file: File): Promise<string | null> => {
+    const uploadFileToSupabase = async (file: File): Promise<OperationResult<string>> => {
         try {
             if (!user) {
-                throw new Error('Usuario no autenticado')
+                return {
+                    success: false,
+                    error: createPermissionError(ErrorStep.PROFILE_IMAGE_UPLOAD)
+                }
             }
 
             console.log('🔄 Subiendo archivo de perfil:', file.name)
@@ -29,22 +41,44 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
             if (!response.ok) {
                 const errorData = await response.json()
                 console.error('❌ Error de la API:', errorData)
-                throw new Error(errorData.error || `Error HTTP: ${response.status}`)
+                
+                return {
+                    success: false,
+                    error: createUploadError(
+                        ErrorStep.PROFILE_IMAGE_UPLOAD,
+                        file.name,
+                        errorData.error || `Error HTTP: ${response.status}`
+                    )
+                }
             }
 
             const result = await response.json()
             
             if (result.success) {
                 console.log('✅ Archivo de perfil subido exitosamente:', result.url)
-                return result.url
+                return {
+                    success: true,
+                    data: result.url
+                }
             } else {
-                throw new Error(result.error || 'Error desconocido de la API')
+                return {
+                    success: false,
+                    error: createUploadError(
+                        ErrorStep.PROFILE_IMAGE_UPLOAD,
+                        file.name,
+                        result.error || 'Error desconocido de la API'
+                    )
+                }
             }
 
         } catch (error) {
             console.error('💥 Error en uploadFileToSupabase:', error)
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-            throw new Error(errorMessage)
+            
+            return {
+                success: false,
+                error: createNetworkError(ErrorStep.PROFILE_IMAGE_UPLOAD, errorMessage)
+            }
         }
     }
 
@@ -53,25 +87,41 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
         setSelectedFile: (file: File | null) => void,
         setPreviewUrl: (url: string) => void,
         setPreviewType: (type: ProfileImageType) => void
-    ) => {
+    ): OperationResult<void> => {
         // Validar archivo
         if (!isValidAvatarFile(file)) {
-            onStatusChange({ error: 'Archivo no válido. Formatos soportados: JPG, PNG, WebP, GIF, MP4, WebM. Máximo 50MB.' })
-            return
+            const error = createValidationError(
+                ErrorStep.FILE_PROCESSING,
+                `Archivo "${file.name}" no válido. Formatos soportados: JPG, PNG, WebP, GIF, MP4, WebM. Máximo 1GB.`,
+                file.name
+            )
+            onStatusChange({ error: error.userMessage })
+            return { success: false, error }
         }
 
-        setSelectedFile(file)
-        const fileType = getFileType(file)
-        setPreviewType(fileType)
-        
-        // Crear preview del archivo
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            setPreviewUrl(e.target?.result as string)
+        try {
+            setSelectedFile(file)
+            const fileType = getFileType(file)
+            setPreviewType(fileType)
+            
+            // Crear preview del archivo
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                setPreviewUrl(e.target?.result as string)
+            }
+            reader.readAsDataURL(file)
+            
+            onStatusChange(null) // Limpiar errores previos
+            return { success: true }
+        } catch (error) {
+            const detailedError = createValidationError(
+                ErrorStep.FILE_PROCESSING,
+                `Error procesando archivo "${file.name}": ${error instanceof Error ? error.message : 'Error desconocido'}`,
+                file.name
+            )
+            onStatusChange({ error: detailedError.userMessage })
+            return { success: false, error: detailedError }
         }
-        reader.readAsDataURL(file)
-        
-        onStatusChange(null) // Limpiar errores previos
     }
 
     const handleBackgroundFileSelect = (
@@ -103,7 +153,7 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
         onStatusChange(null) // Limpiar errores previos
     }
 
-    const uploadMultipleProductImages = async (dataUrls: string[], productId?: number): Promise<string[]> => {
+    const uploadMultipleProductImages = async (dataUrls: string[], productId?: number, productName?: string): Promise<OperationResult<string[]>> => {
         try {
             // Convertir data URLs a archivos
             const files = await Promise.all(
@@ -146,16 +196,31 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
             const result = await response.json()
 
             if (!response.ok || !result.success) {
-                throw new Error(result.error || 'Error en la API de subida')
+                return {
+                    success: false,
+                    error: createUploadError(
+                        ErrorStep.PRODUCT_IMAGES_UPLOAD,
+                        `${files.length} imágenes de producto`,
+                        result.error || 'Error en la API de subida',
+                        productName
+                    )
+                }
             }
 
             console.log(`✅ ${result.urls.length} imágenes subidas exitosamente`)
-            return result.urls
+            return {
+                success: true,
+                data: result.urls
+            }
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
             console.error('Error uploading multiple product images:', errorMessage)
-            throw error
+            
+            return {
+                success: false,
+                error: createNetworkError(ErrorStep.PRODUCT_IMAGES_UPLOAD, errorMessage)
+            }
         }
     }
 
@@ -198,7 +263,7 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
         }
     }
 
-    const uploadMultipleItemImages = async (dataUrls: string[], itemId?: number): Promise<string[]> => {
+    const uploadMultipleItemImages = async (dataUrls: string[], itemId?: number, itemName?: string): Promise<OperationResult<string[]>> => {
         try {
             // Convertir data URLs a archivos
             const files = await Promise.all(
@@ -241,20 +306,35 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
             const result = await response.json()
 
             if (!response.ok || !result.success) {
-                throw new Error(result.error || 'Error en la API de subida')
+                return {
+                    success: false,
+                    error: createUploadError(
+                        ErrorStep.ITEM_IMAGES_UPLOAD,
+                        `${files.length} imágenes de item`,
+                        result.error || 'Error en la API de subida',
+                        itemName
+                    )
+                }
             }
 
             console.log(`✅ ${result.urls.length} imágenes de item subidas exitosamente`)
-            return result.urls
+            return {
+                success: true,
+                data: result.urls
+            }
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
             console.error('Error uploading multiple item images:', errorMessage)
-            throw error
+            
+            return {
+                success: false,
+                error: createNetworkError(ErrorStep.ITEM_IMAGES_UPLOAD, errorMessage)
+            }
         }
     }
 
-    const uploadBackgroundImage = async (file: File): Promise<string> => {
+    const uploadBackgroundImage = async (file: File): Promise<OperationResult<string>> => {
         try {
             console.log(`🔄 Subiendo imagen de fondo...`)
 
@@ -271,16 +351,30 @@ export function useFileUpload({ onStatusChange }: UseFileUploadProps) {
             const result = await response.json()
 
             if (!response.ok || !result.success) {
-                throw new Error(result.error || 'Error en la API de subida de fondo')
+                return {
+                    success: false,
+                    error: createUploadError(
+                        ErrorStep.BACKGROUND_IMAGE_UPLOAD,
+                        file.name,
+                        result.error || 'Error en la API de subida de fondo'
+                    )
+                }
             }
 
             console.log(`✅ Imagen de fondo subida exitosamente`)
-            return result.url
+            return {
+                success: true,
+                data: result.url
+            }
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
             console.error('Error uploading background image:', errorMessage)
-            throw error
+            
+            return {
+                success: false,
+                error: createNetworkError(ErrorStep.BACKGROUND_IMAGE_UPLOAD, errorMessage)
+            }
         }
     }
 

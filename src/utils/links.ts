@@ -1,5 +1,6 @@
 import { getSupabaseClient } from '@/lib/supabase-db'
 import { LinkItem } from '@/types/product'
+import { filterValidItemsForPublic } from '@/utils/validation-utils'
 
 export interface Link {
   id: number
@@ -112,24 +113,25 @@ function transformDataFromSupabase(data: any): LinksData {
     return DEFAULT_LINKS_DATA;
   }
   
-  // Si los datos ya están en el formato correcto
-  if (typeof data === 'object' && 'links' in data) {
-    const transformedData = {
-      ...DEFAULT_LINKS_DATA,
-      ...data,
-    };
-    
-    // Migración: agregar categorías por defecto si no existen
-    if (!transformedData.categories) {
-      transformedData.categories = ["Destacados", "Música", "Tienda", "Eventos", "Prensa", "Posts"];
-    }
-    
-    return transformedData;
-  }
-  
-  // Si los datos están en el formato antiguo (items en lugar de links)
+    // Si los datos ya están en el formato correcto
+    if (typeof data === 'object' && 'links' in data) {
+      const transformedData = {
+        ...DEFAULT_LINKS_DATA,
+        ...data,
+      };
+      
+      // Migración: agregar categorías por defecto si no existen
+      if (!transformedData.categories) {
+        transformedData.categories = ["Destacados", "Música", "Tienda", "Eventos", "Prensa", "Posts"];
+      }
+      
+      // Filtrar items válidos para vista pública
+      transformedData.links = filterValidItemsForPublic(transformedData.links || []);
+      
+      return transformedData;
+    }  // Si los datos están en el formato antiguo (items en lugar de links)
   const migratedData = {
-    links: data.items || [],
+    links: filterValidItemsForPublic(data.items || []), // Filtrar items válidos
     categories: data.categories || ["Música", "Tienda", "Eventos", "Prensa", "Posts"],
     title: data.title || DEFAULT_LINKS_DATA.title,
     description: data.description || DEFAULT_LINKS_DATA.description,
