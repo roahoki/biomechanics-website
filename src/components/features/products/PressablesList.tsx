@@ -32,12 +32,13 @@ export function PressablesList({
             
             const container = containerRef.current
             const containerWidth = container.offsetWidth
-            const gap = 16
+            const gap = 12 // Gap más pequeño estilo Pinterest
             
-            // Calcular número de columnas basado en el ancho del contenedor
-            let columns = 1
-            if (containerWidth >= 1200) columns = 3
-            else if (containerWidth >= 769) columns = 2
+            // Calcular número de columnas estilo Pinterest (más densidad)
+            let columns = 2 // Mínimo 2 columnas en móvil
+            if (containerWidth >= 1400) columns = 5 // Desktop grande
+            else if (containerWidth >= 1024) columns = 4 // Desktop
+            else if (containerWidth >= 768) columns = 3 // Tablet
             
             const itemWidth = Math.floor((containerWidth - gap * (columns - 1)) / columns)
             const columnHeights = new Array(columns).fill(0)
@@ -152,16 +153,26 @@ export function PressablesList({
                     --columns: 1;
                 }
                 
-                /* Variables CSS para columnas responsivas */
-                @media (min-width: 769px) and (max-width: 1199px) {
+                /* Variables CSS para columnas responsivas estilo Pinterest */
+                .pinterest-grid-js {
+                    --columns: 2; /* Mínimo 2 en móvil */
+                }
+                
+                @media (min-width: 768px) and (max-width: 1023px) {
                     .pinterest-grid-js {
-                        --columns: 2;
+                        --columns: 3; /* 3 en tablet */
                     }
                 }
                 
-                @media (min-width: 1200px) {
+                @media (min-width: 1024px) and (max-width: 1399px) {
                     .pinterest-grid-js {
-                        --columns: 3;
+                        --columns: 4; /* 4 en desktop */
+                    }
+                }
+                
+                @media (min-width: 1400px) {
+                    .pinterest-grid-js {
+                        --columns: 5; /* 5 en desktop grande */
                     }
                 }
                 

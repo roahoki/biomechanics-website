@@ -18,6 +18,8 @@ interface ItemModalProps {
 export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [isClient, setIsClient] = useState(false)
+    const [imageAspectRatios, setImageAspectRatios] = useState<number[]>([])
+    const [imagesLoaded, setImagesLoaded] = useState(false)
     // Referencia al header del modal para el swipe
     const headerRef = useRef<HTMLDivElement>(null)
 
@@ -25,6 +27,42 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
     useEffect(() => {
         setIsClient(true)
     }, [])
+
+    // Función para detectar el aspect ratio de una imagen
+    const detectImageAspectRatio = (src: string): Promise<number> => {
+        return new Promise((resolve) => {
+            const img = new Image()
+            img.onload = () => {
+                const aspectRatio = img.width / img.height
+                resolve(aspectRatio)
+            }
+            img.onerror = () => {
+                // En caso de error, usar aspect ratio cuadrado por defecto
+                resolve(1)
+            }
+            img.src = src
+        })
+    }
+
+    // Detectar aspect ratios de todas las imágenes cuando cambie el item
+    useEffect(() => {
+        if (!item?.images || item.images.length === 0) {
+            setImageAspectRatios([])
+            setImagesLoaded(false)
+            return
+        }
+
+        const detectAspectRatios = async () => {
+            setImagesLoaded(false)
+            const ratios = await Promise.all(
+                item.images.map(src => detectImageAspectRatio(src))
+            )
+            setImageAspectRatios(ratios)
+            setImagesLoaded(true)
+        }
+
+        detectAspectRatios()
+    }, [item?.id, item?.images])
 
     // Hook para gestos de swipe en móvil (solo en el header)
     useSwipeGesture({
@@ -159,7 +197,20 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                                         {item.images && item.images.length > 0 ? (
                                             <div className="relative">
                                                 {/* Imagen principal */}
-                                                <div className="w-full aspect-square md:aspect-auto md:h-96 rounded-lg overflow-hidden bg-gray-100">
+                                                <div 
+                                                    className="w-full rounded-lg overflow-hidden bg-gray-100 transition-all duration-300"
+                                                    style={{
+                                                        aspectRatio: imagesLoaded && imageAspectRatios[currentImageIndex] 
+                                                            ? `${imageAspectRatios[currentImageIndex]} / 1`
+                                                            : '1 / 1' // Fallback a cuadrado mientras carga
+                                                    }}
+                                                >
+                                                    {/* Indicador de carga mientras se detectan aspect ratios */}
+                                                    {!imagesLoaded && (
+                                                        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                                                            <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                                                        </div>
+                                                    )}
                                                     <ZoomableImage
                                                         src={item.images[currentImageIndex]}
                                                         alt={item.title}
