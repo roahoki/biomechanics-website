@@ -71,14 +71,21 @@ export function PressableItem({
             >
                 <button
                     onClick={() => onProductClick?.(product)}
-                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
-                        product.images?.length > 0 ? '' : 'bg-gray-200'
+                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl ${
+                        product.images?.length > 0 ? 'bg-gray-100' : 'bg-gray-200'
                     }`}
                     style={{
                         backgroundImage: product.images?.length > 0 
                             ? `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${product.images[0]})` 
                             : undefined,
-                        height: `${itemHeight}px`
+                        backgroundSize: 'cover',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                        // Si hay aspect ratio, usarlo; si no, usar altura fija
+                        ...(firstImageAspectRatio && firstImageAspectRatio > 0 
+                            ? { aspectRatio: `${firstImageAspectRatio} / 1` }
+                            : { height: `${itemHeight}px` }
+                        )
                     }}
                 >
                     {/* Fallback para productos sin imagen */}
@@ -118,14 +125,21 @@ export function PressableItem({
             >
                 <button
                     onClick={() => onItemClick?.(itemData)}
-                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl bg-cover bg-center bg-no-repeat ${
-                        itemData.images?.length > 0 ? '' : 'bg-gray-200'
+                    className={`relative w-full rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl ${
+                        itemData.images?.length > 0 ? 'bg-gray-100' : 'bg-gray-200'
                     }`}
                     style={{
                         backgroundImage: itemData.images?.length > 0 
                             ? `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${itemData.images[0]})` 
                             : undefined,
-                        height: `${itemHeight}px`
+                        backgroundSize: 'cover',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                        // Si hay aspect ratio, usarlo; si no, usar altura fija
+                        ...(firstImageAspectRatio && firstImageAspectRatio > 0 
+                            ? { aspectRatio: `${firstImageAspectRatio} / 1` }
+                            : { height: `${itemHeight}px` }
+                        )
                     }}
                 >
                     {/* Fallback para items sin imagen */}
