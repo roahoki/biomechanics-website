@@ -31,14 +31,14 @@ export function PressableItem({
     // Calcular la altura basada en el aspect ratio de la primera imagen
     // Similar a Pinterest, donde las cards tienen el mismo aspect ratio que la imagen
     const getHeightFromAspectRatio = (aspectRatio?: number, fallbackId?: string | number) => {
-        // Ancho base de la card (considerando padding y grid)
-        const baseWidth = 280; // Ancho mínimo definido en el grid
+        // Ancho base más compacto estilo Pinterest
+        const baseWidth = 180; // Reducido para más densidad visual
         
         if (aspectRatio && aspectRatio > 0) {
             // Calcular altura basada en el aspect ratio
             const height = Math.round(baseWidth / aspectRatio);
-            // Limitar entre valores más amplios para hacer los cambios más visibles
-            return Math.max(150, Math.min(600, height));
+            // Límites más compactos estilo Pinterest
+            return Math.max(120, Math.min(350, height));
         }
         
         // Fallback: altura pseudo-aleatoria pero consistente para items sin aspect ratio
@@ -48,10 +48,10 @@ export function PressableItem({
             for (let i = 0; i < idStr.length; i++) {
                 sum += idStr.charCodeAt(i);
             }
-            return (sum % 200) + 200; // Rango más amplio: 200-400px
+            return (sum % 150) + 150; // Rango más compacto: 150-300px
         }
         
-        return 300; // Altura por defecto
+        return 200; // Altura por defecto más compacta
     };
 
     // Si es un producto
@@ -99,7 +99,7 @@ export function PressableItem({
 
                     {/* Título centrado */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <h3 className="text-white font-bold text-xl text-center px-4 drop-shadow-lg">
+                        <h3 className="text-white font-bold text-sm text-center px-2 drop-shadow-lg leading-tight">
                             {product.title}
                         </h3>
                     </div>
@@ -152,10 +152,10 @@ export function PressableItem({
                     )}
 
                     {/* Contenido superpuesto */}
-                    <div className="absolute inset-0 flex flex-col justify-between p-3">
+                    <div className="absolute inset-0 flex flex-col justify-between p-2">
                         {/* Título y precio centrados en la parte superior */}
                         <div className="flex-1 flex flex-col items-center justify-center">
-                            <h3 className="text-white font-bold text-xl text-center drop-shadow-lg">
+                            <h3 className="text-white font-bold text-sm text-center drop-shadow-lg leading-tight">
                                 {itemData.title}
                             </h3>
                         </div>
