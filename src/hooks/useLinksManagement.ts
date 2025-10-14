@@ -46,6 +46,7 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
     // Función para agregar un nuevo item al principio
     const addNewItem = () => {
         const newId = Math.max(...currentLinks.map(item => item.id), 0) + 1
+        const today = new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD
         const newItem: Item = {
             id: newId,
             type: 'item',
@@ -56,7 +57,9 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
             paymentLink: '',
             description: '',
             images: [],
-            visible: true
+            visible: true,
+            activityDate: null,           // Fecha de actividad (opcional)
+            publicationDate: today        // Fecha de publicación (hoy por defecto)
         }
         setCurrentLinks([newItem, ...currentLinks])
     }

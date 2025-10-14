@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabase-db'
-import { LinkItem } from '@/types/product'
+import { LinkItem, Item } from '@/types/product'
 import { filterValidItemsForPublic } from '@/utils/validation-utils'
 
 export interface Link {
@@ -74,7 +74,7 @@ const DEFAULT_LINKS_DATA: LinksData = {
   }
 };
 
-export async function getLinksData(): Promise<LinksData> {
+export async function getLinksData(options?: { includeInvalid?: boolean }): Promise<LinksData> {
   try {
     // Obtener datos únicamente desde Supabase
     const supabase = getSupabaseClient();
@@ -87,7 +87,7 @@ export async function getLinksData(): Promise<LinksData> {
     // Si encontramos datos en Supabase, usarlos
     if (data && !error && data.data) {
       console.log('Datos cargados desde Supabase correctamente');
-      return transformDataFromSupabase(data.data);
+      return transformDataFromSupabase(data.data, options?.includeInvalid ?? false);
     }
     
     // Si hay un error o no hay datos, registrarlo y usar valores por defecto
@@ -107,8 +107,24 @@ export async function getLinksData(): Promise<LinksData> {
   }
 }
 
+// Función para migrar items sin fechas agregando valores por defecto
+function migrateItemDates(items: LinkItem[]): LinkItem[] {
+  const today = new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD
+  
+  return items.map(item => {
+    if (item.type === 'item') {
+      return {
+        ...item,
+        activityDate: item.activityDate !== undefined ? item.activityDate : null,
+        publicationDate: item.publicationDate || today
+      } as Item
+    }
+    return item
+  })
+}
+
 // Función para transformar datos desde el formato de Supabase
-function transformDataFromSupabase(data: any): LinksData {
+function transformDataFromSupabase(data: any, includeInvalid: boolean = false): LinksData {
   if (!data) {
     return DEFAULT_LINKS_DATA;
   }
@@ -125,13 +141,24 @@ function transformDataFromSupabase(data: any): LinksData {
         transformedData.categories = ["Destacados", "Música", "Tienda", "Eventos", "Prensa", "Posts"];
       }
       
-      // Filtrar items válidos para vista pública
-      transformedData.links = filterValidItemsForPublic(transformedData.links || []);
+      // 🆕 PRIMERO: Migrar fechas a items que no las tengan (ANTES de filtrar)
+      let migratedItems = migrateItemDates(transformedData.links || []);
+      
+      // DESPUÉS: Filtrar items válidos para vista pública (solo si no es admin)
+      let finalItems = includeInvalid ? migratedItems : filterValidItemsForPublic(migratedItems);
+      
+      transformedData.links = finalItems;
       
       return transformedData;
     }  // Si los datos están en el formato antiguo (items en lugar de links)
+  // 🆕 PRIMERO: Migrar fechas a items que no las tengan (ANTES de filtrar)
+  let migratedItems = migrateItemDates(data.items || []);
+  
+  // DESPUÉS: Filtrar items válidos para vista pública (solo si no es admin)
+  let finalItems = includeInvalid ? migratedItems : filterValidItemsForPublic(migratedItems);
+  
   const migratedData = {
-    links: filterValidItemsForPublic(data.items || []), // Filtrar items válidos
+    links: finalItems,
     categories: data.categories || ["Música", "Tienda", "Eventos", "Prensa", "Posts"],
     title: data.title || DEFAULT_LINKS_DATA.title,
     description: data.description || DEFAULT_LINKS_DATA.description,

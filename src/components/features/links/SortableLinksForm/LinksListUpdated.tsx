@@ -197,6 +197,22 @@ export function LinksListUpdated({
                                                      (item as Item).title || 'Sin título'}
                                                 </span>
                                                 
+                                                {/* Fechas para items - Compacto */}
+                                                {item.type === 'item' && (
+                                                    <div className="hidden lg:flex items-center space-x-2 flex-shrink-0 text-xs text-gray-500">
+                                                        {(item as Item).publicationDate && (
+                                                            <span className="whitespace-nowrap">
+                                                                📅 {(item as Item).publicationDate}
+                                                            </span>
+                                                        )}
+                                                        {(item as Item).activityDate && (
+                                                            <span className="whitespace-nowrap text-blue-600">
+                                                                🎯 {(item as Item).activityDate}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                
                                                 {/* Características - Solo mostrar en pantallas más grandes */}
                                                 <div className="hidden sm:flex items-center space-x-1 flex-shrink-0">
                                                     {item.visible === false && (

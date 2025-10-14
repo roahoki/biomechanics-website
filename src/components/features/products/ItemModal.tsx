@@ -310,6 +310,23 @@ export function ItemModal({ item, isOpen, onClose, styleSettings }: ItemModalPro
                                                 </p>
                                             )}
 
+                                            {/* Fecha de actividad (si existe) */}
+                                            {item.activityDate && (
+                                                <div 
+                                                    className="flex items-center justify-center md:justify-start space-x-2 text-sm md:text-base opacity-75"
+                                                    style={{ color: styleSettings?.linkCardTextColor || '#000000' }}
+                                                >
+                                                    <span>📅</span>
+                                                    <span>
+                                                        {new Date(item.activityDate).toLocaleDateString('es-CL', {
+                                                            day: 'numeric',
+                                                            month: 'long',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </span>
+                                                </div>
+                                            )}
+
                                             {/* Precio (solo si es visible) */}
                                             {item.priceVisible && item.price > 0 && (
                                                 <div 

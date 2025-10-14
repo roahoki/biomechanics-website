@@ -151,6 +151,33 @@ function validateItem(item: Item, errors: DetailedError[], warnings: string[]): 
         ))
     }
 
+  // 🆕 Validar fecha de publicación (obligatoria)
+  if (!item.publicationDate) {
+    errors.push(createValidationError(
+      ErrorStep.VALIDATION,
+      'La fecha de publicación es obligatoria',
+      displayName,
+      item.id
+    ))
+  } else if (!/^\d{4}-\d{2}-\d{2}$/.test(item.publicationDate)) {
+    errors.push(createValidationError(
+      ErrorStep.VALIDATION,
+      'La fecha de publicación tiene un formato inválido (debe ser YYYY-MM-DD)',
+      displayName,
+      item.id
+    ))
+  }
+
+  // 🆕 Validar fecha de actividad (opcional, solo si existe)
+  if (item.activityDate && !/^\d{4}-\d{2}-\d{2}$/.test(item.activityDate)) {
+    errors.push(createValidationError(
+      ErrorStep.VALIDATION,
+      'La fecha de actividad tiene un formato inválido (debe ser YYYY-MM-DD)',
+      displayName,
+      item.id
+    ))
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
