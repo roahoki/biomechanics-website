@@ -5,9 +5,10 @@ import { updateAdminLinksWithProducts } from '@/app/admin/_actions'
 import { useRouter } from 'next/navigation'
 import { type ProfileImageType } from '@/utils/file-utils'
 import { type SocialIcons, type BackgroundSettings, type StyleSettings } from '@/utils/links'
-import { LinkItem } from '@/types/product'
+import { LinkItem, SortMode } from '@/types/product'
 import { DetailedError } from '@/types/errors'
 import { validateItemsForPublic, filterValidItemsForPublic, isItemDraft } from '@/utils/validation-utils'
+import { sortLinks } from '@/utils/sort-utils'
 
 // Hooks
 import { useFileUpload } from '@/hooks/useFileUpload'
@@ -25,6 +26,7 @@ import { StyleConfig } from '../profile/StyleConfig'
 import { LinksListUpdated } from './SortableLinksForm/LinksListUpdated'
 import { DeleteModal } from './SortableLinksForm/DeleteModal'
 import { ActionButtons } from './SortableLinksForm/ActionButtons'
+import { SortModeSelector } from './index'
 
 export function SortableLinksFormWithProducts({
     links,
@@ -36,10 +38,12 @@ export function SortableLinksFormWithProducts({
     backgroundColor,
     backgroundSettings,
     styleSettings,
-    categories
+    categories,
+    sortMode: initialSortMode
 }: {
     links: any[]
     categories: string[]
+    sortMode?: SortMode
     title?: string
     description: string
     profileImage: string
@@ -168,12 +172,15 @@ export function SortableLinksFormWithProducts({
     const [localDescription, setLocalDescription] = useState(description)
     // Estado local de categorías (editable hasta guardar)
     const [localCategories, setLocalCategories] = useState<string[]>(categories || [])
+    // Estado local de sortMode
+    const [sortMode, setSortMode] = useState<SortMode>(initialSortMode || 'manual')
     const [showUnsaved, setShowUnsaved] = useState(false)
     const [toast, setToast] = useState<{ type: 'success'; message: string } | { type: 'error'; error: DetailedError } | null>(null)
 
     // Baseline para comparar (se actualiza tras guardar con éxito)
     const [baseline, setBaseline] = useState(() => ({
         categories: categories || [],
+        sortMode: initialSortMode || 'manual',
         title: title || 'biomechanics.wav',
         description,
         profileImage,
@@ -192,6 +199,7 @@ export function SortableLinksFormWithProducts({
     useEffect(() => {
         const changed = (
             JSON.stringify(localCategories) !== JSON.stringify(baseline.categories) ||
+            sortMode !== baseline.sortMode ||
             localTitle !== baseline.title ||
             localDescription !== baseline.description ||
             previewUrl !== baseline.profileImage ||
@@ -206,7 +214,7 @@ export function SortableLinksFormWithProducts({
             itemButtonColor !== baseline.itemButtonColor
         )
         setShowUnsaved(changed)
-    }, [localCategories, localTitle, localDescription, previewUrl, backgroundType, backgroundImageUrl, backgroundImageOpacity, bgColor, titleColor, linkCardBackgroundColor, linkCardTextColor, productBuyButtonColor, itemButtonColor, baseline])
+    }, [localCategories, sortMode, localTitle, localDescription, previewUrl, backgroundType, backgroundImageUrl, backgroundImageOpacity, bgColor, titleColor, linkCardBackgroundColor, linkCardTextColor, productBuyButtonColor, itemButtonColor, baseline])
 
     // Manejadores de archivo
     const onFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -408,7 +416,8 @@ export function SortableLinksFormWithProducts({
                     productBuyButtonColor,
                     itemButtonColor
                 },
-                categories: localCategories
+                categories: localCategories,
+                sortMode
             }
 
             console.log('📤 Datos finales a enviar:', {
@@ -427,6 +436,7 @@ export function SortableLinksFormWithProducts({
                 // Actualizar baseline para reflejar el nuevo estado persistido
                 setBaseline({
                     categories: [...localCategories],
+                    sortMode,
                     title: localTitle,
                     description: localDescription,
                     profileImage: finalProfileImage,
@@ -682,9 +692,21 @@ export function SortableLinksFormWithProducts({
 
                     {/* Lista de Items - Prioridad total en móvil */}
                     <div className="lg:col-span-3">
-                        <div className="w-full">
+                        <div className="w-full space-y-6">
+                            {/* Selector de modo de ordenamiento */}
+                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                                    Ordenamiento de Items
+                                </h3>
+                                <SortModeSelector
+                                    value={sortMode}
+                                    onChange={setSortMode}
+                                />
+                            </div>
+
                             <LinksListUpdated
-                                currentLinks={currentLinks}
+                                currentLinks={sortLinks(currentLinks, sortMode)}
+                                sortMode={sortMode}
                                 onAddNewLink={addNewLink}
                                 onAddNewProduct={addNewProduct}
                                 onAddNewItem={addNewItem}

@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabase-db'
-import { LinkItem, Item } from '@/types/product'
+import { LinkItem, Item, SortMode } from '@/types/product'
 import { filterValidItemsForPublic } from '@/utils/validation-utils'
 
 export interface Link {
@@ -42,6 +42,7 @@ export interface StyleSettings {
 export interface LinksData {
   links: LinkItem[]
   categories: string[]
+  sortMode: SortMode
   title?: string
   description: string
   profileImage: string
@@ -55,6 +56,7 @@ export interface LinksData {
 const DEFAULT_LINKS_DATA: LinksData = {
   links: [],
   categories: ["Música", "Tienda", "Eventos", "Prensa", "Posts"],
+  sortMode: 'manual',
   title: "biomechanics.wav",
   description: "biomechanics.wav",
   profileImage: "/ghost.jpg", // URL a una imagen por defecto
@@ -70,7 +72,8 @@ const DEFAULT_LINKS_DATA: LinksData = {
     titleColor: "#ffffff",
     linkCardBackgroundColor: "#ffffff",
     linkCardTextColor: "#000000",
-    productBuyButtonColor: "#ff6b35"
+    productBuyButtonColor: "#ff6b35",
+    itemButtonColor: "#3b82f6"
   }
 };
 
@@ -160,6 +163,7 @@ function transformDataFromSupabase(data: any, includeInvalid: boolean = false): 
   const migratedData = {
     links: finalItems,
     categories: data.categories || ["Música", "Tienda", "Eventos", "Prensa", "Posts"],
+    sortMode: data.sortMode || 'manual',
     title: data.title || DEFAULT_LINKS_DATA.title,
     description: data.description || DEFAULT_LINKS_DATA.description,
     profileImage: data.profileImage || DEFAULT_LINKS_DATA.profileImage,

@@ -52,3 +52,6 @@ export interface Link {
 }
 
 export type LinkItem = Link | Product | Item
+
+// Tipo para los modos de ordenamiento
+export type SortMode = 'manual' | 'activityDate' | 'publicationDate'
