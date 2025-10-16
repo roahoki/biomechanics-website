@@ -56,7 +56,8 @@ export function useLinksManagement(initialLinks: LinkItem[]) {
             paymentLink: '',
             description: '',
             images: [],
-            visible: true
+            visible: true,
+            publicationDate: new Date().toISOString().split('T')[0] // Fecha actual en formato YYYY-MM-DD
         }
         setCurrentLinks([newItem, ...currentLinks])
     }
