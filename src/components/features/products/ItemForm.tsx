@@ -45,6 +45,12 @@ export function ItemForm({
     const [categories, setCategories] = useState<string[]>(item?.categories || [])
     const [visible, setVisible] = useState(item?.visible ?? true)
     
+    // Estados para campos de fecha
+    const [publicationDate, setPublicationDate] = useState(
+        item?.publicationDate || new Date().toISOString().split('T')[0]
+    )
+    const [activityDate, setActivityDate] = useState(item?.activityDate || '')
+    
     // Estado para manejar imageData con blobs croppeados
     const [imageData, setImageData] = useState<ImageData[]>([])
     const imageDataRef = useRef<ImageData[]>([])
@@ -78,6 +84,8 @@ export function ItemForm({
             aspectRatios,
             visible,
             categories,
+            publicationDate,
+            activityDate: activityDate || null,
             ...overrides  // Las sobrescrituras van al final
         }
         onUpdate(completeState)
@@ -157,6 +165,14 @@ export function ItemForm({
                     delete newErrors.images
                 }
                 break
+
+            case 'publicationDate':
+                if (!value || !value.trim()) {
+                    newErrors.publicationDate = 'La fecha de publicación es obligatoria'
+                } else {
+                    delete newErrors.publicationDate
+                }
+                break
         }
 
         setErrors(newErrors)
@@ -212,6 +228,17 @@ export function ItemForm({
         setDescription(value)
         validateField('description', value)
         updateCompleteState({ description: value })
+    }
+
+    const handlePublicationDateChange = (value: string) => {
+        setPublicationDate(value)
+        validateField('publicationDate', value)
+        updateCompleteState({ publicationDate: value })
+    }
+
+    const handleActivityDateChange = (value: string) => {
+        setActivityDate(value)
+        updateCompleteState({ activityDate: value || null })
     }
 
     const handleImagesChange = (newImages: string[]) => {
@@ -288,7 +315,7 @@ export function ItemForm({
 
     // Verificar si el item está completo
     const isComplete = title.trim() && price && buttonText.trim() && paymentLink.trim() && 
-                      description.trim() && images.length > 0 && 
+                      description.trim() && images.length > 0 && publicationDate.trim() &&
                       Object.keys(errors).length === 0
 
     return (
@@ -518,6 +545,43 @@ export function ItemForm({
                                     label=""
                                 />
                             </div>
+
+                            {/* Fecha de Publicación */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Fecha de Publicación *
+                                </label>
+                                <input
+                                    type="date"
+                                    value={publicationDate}
+                                    onChange={(e) => handlePublicationDateChange(e.target.value)}
+                                    className={`w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-black ${
+                                        errors.publicationDate ? 'border-red-300' : ''
+                                    }`}
+                                />
+                                {errors.publicationDate && (
+                                    <p className="text-sm text-red-500 mt-1">{errors.publicationDate}</p>
+                                )}
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Esta fecha se usa para ordenar los items
+                                </p>
+                            </div>
+
+                            {/* Fecha de Actividad */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Fecha de Actividad/Evento
+                                </label>
+                                <input
+                                    type="date"
+                                    value={activityDate}
+                                    onChange={(e) => handleActivityDateChange(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-black"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Opcional: para eventos con fecha específica
+                                </p>
+                            </div>
                         </div>
                     </details>
 
@@ -591,6 +655,43 @@ export function ItemForm({
                                     {buttonText.length}/20
                                 </span>
                             </div>
+                        </div>
+
+                        {/* Fecha de Publicación */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Fecha de Publicación *
+                            </label>
+                            <input
+                                type="date"
+                                value={publicationDate}
+                                onChange={(e) => handlePublicationDateChange(e.target.value)}
+                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black ${
+                                    errors.publicationDate ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                                }`}
+                            />
+                            {errors.publicationDate && (
+                                <p className="text-sm text-red-500 mt-1">{errors.publicationDate}</p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">
+                                Esta fecha se usa para ordenar los items
+                            </p>
+                        </div>
+
+                        {/* Fecha de Actividad */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Fecha de Actividad/Evento
+                            </label>
+                            <input
+                                type="date"
+                                value={activityDate}
+                                onChange={(e) => handleActivityDateChange(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black border-gray-300"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Opcional: para eventos con fecha específica
+                            </p>
                         </div>
                     </div>
 
