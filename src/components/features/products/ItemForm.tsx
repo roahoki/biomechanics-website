@@ -44,10 +44,6 @@ export function ItemForm({
     const [aspectRatios, setAspectRatios] = useState<number[]>(item?.aspectRatios || [])
     const [categories, setCategories] = useState<string[]>(item?.categories || [])
     const [visible, setVisible] = useState(item?.visible ?? true)
-    const [activityDate, setActivityDate] = useState<string>(item?.activityDate || '')
-    const [publicationDate, setPublicationDate] = useState<string>(
-        item?.publicationDate || new Date().toISOString().split('T')[0]
-    )
     
     // Estados para campos de fecha
     const [publicationDate, setPublicationDate] = useState(

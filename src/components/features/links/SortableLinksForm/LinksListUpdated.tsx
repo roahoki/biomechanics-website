@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { Bars3Icon } from '@heroicons/react/24/outline'
+import { Bars3Icon, EyeIcon, EyeSlashIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { LinkCard } from './LinkCard'
 import { ProductItem } from '../../products/ProductItem'
 import { ItemForm } from '../../products/ItemForm'
@@ -99,6 +99,14 @@ export function LinksListUpdated({
         onToggleVisibility(item.id)
     }, [currentLinks, onToggleVisibility])
 
+    // Alias para compatibilidad con el código del listado
+    const handleToggleVisibility = handleToggleVisibilityByIndex
+    const toggleExpand = toggleItemExpansion
+    const handleRowClick = (index: number) => {
+        const item = currentLinks[index]
+        toggleItemExpansion(item.id)
+    }
+
     const handleDeleteByIndex = useCallback((index: number) => {
         const item = currentLinks[index]
         if (window.confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
@@ -122,6 +130,50 @@ export function LinksListUpdated({
 
         onReorderLinks(items)
     }, [currentLinks, onReorderLinks])
+
+    // Función para renderizar el formulario según el tipo de item
+    const renderItemForm = (item: LinkItem, index: number) => {
+        if (item.type === 'link') {
+            return (
+                <LinkCard
+                    link={item as Link}
+                    onUpdate={(id, field, value) => onUpdateLink(id, field, value)}
+                    onUpdateCategories={(id, categories) => onUpdateLinkCategories(id, categories)}
+                    onRemove={(id) => onRemoveLink(id)}
+                    availableCategories={availableCategories}
+                    linkCardBackgroundColor={linkCardBackgroundColor}
+                    linkCardTextColor={linkCardTextColor}
+                />
+            )
+        }
+        
+        if (item.type === 'product') {
+            return (
+                <ProductItem
+                    product={item as Product}
+                    onUpdate={(id, updatedProduct) => onUpdateProduct(id, updatedProduct)}
+                    onRemove={(id) => onRemoveLink(id)}
+                    availableCategories={availableCategories}
+                />
+            )
+        }
+        
+        if (item.type === 'item') {
+            return (
+                <ItemForm
+                    item={item as Item}
+                    onUpdate={(updatedItem) => onUpdateItem(item.id, updatedItem)}
+                    onRemove={() => onRemoveLink(item.id)}
+                    onCategoriesChange={onCategoriesChange}
+                    availableCategories={availableCategories}
+                    linkCardBackgroundColor={linkCardBackgroundColor}
+                    linkCardTextColor={linkCardTextColor}
+                />
+            )
+        }
+        
+        return null
+    }
 
     // Verificar si el drag & drop está habilitado
     const isDragEnabled = sortMode === 'manual'
@@ -189,61 +241,141 @@ export function LinksListUpdated({
                                     ref={provided.innerRef}
                                     className="space-y-2"
                                 >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                            {/* Indicador de expansión */}
-                                            <span className="text-sm text-gray-400 min-w-[1.5ch] flex-shrink-0">
-                                                {expandedItems.has(item.id) ? '▼' : '▶️'}
-                                            </span>
-                                            
-                                            {/* Posición */}
-                                            <span className="text-sm font-mono text-gray-500 min-w-[2ch] flex-shrink-0">
-                                                {index + 1}
-                                            </span>
-                                            
-                                            {/* Información del item - Permitir truncado */}
-                                            <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden">
-                                                {/* Indicador de estado borrador */}
-                                                {isItemDraft(item) && (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 flex-shrink-0">
-                                                        📝 Borrador
-                                                    </span>
-                                                )}
-                                                
-                                                <span className={`text-sm font-medium truncate ${isItemDraft(item) ? 'text-gray-500' : 'text-gray-900'}`}>
-                                                    {item.type === 'link' ? (item as Link).label :
-                                                     item.type === 'product' ? (item as Product).title :
-                                                     (item as Item).title || 'Sin título'}
-                                                </span>
-                                                
-                                                {/* Fechas para items - Compacto */}
-                                                {item.type === 'item' && (
-                                                    <div className="hidden lg:flex items-center space-x-2 flex-shrink-0 text-xs text-gray-500">
-                                                        {(item as Item).publicationDate && (
-                                                            <span className="whitespace-nowrap">
-                                                                📅 {(item as Item).publicationDate}
-                                                            </span>
-                                                        )}
-                                                        {(item as Item).activityDate && (
-                                                            <span className="whitespace-nowrap text-blue-600">
-                                                                🎯 {(item as Item).activityDate}
-                                                            </span>
+                                    {currentLinks.map((item, index) => (
+                                        <Draggable 
+                                            key={item.id} 
+                                            draggableId={`link-${item.id}`} 
+                                            index={index}
+                                            isDragDisabled={!isDragEnabled}
+                                        >
+                                            {(provided) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    onClick={() => handleRowClick(index)}
+                                                    className={`bg-white border rounded-lg transition-all cursor-pointer hover:shadow-md ${
+                                                        expandedItems.has(item.id) 
+                                                            ? 'border-blue-500 shadow-sm' 
+                                                            : 'border-gray-200'
+                                                    } ${!isDragEnabled ? 'opacity-75' : ''}`}
+                                                >
+                                                    <div className="p-3">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                                {/* Drag handle - Solo visible cuando está enabled */}
+                                                                {isDragEnabled && (
+                                                                    <div 
+                                                                        {...provided.dragHandleProps}
+                                                                        className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+                                                                    >
+                                                                        <Bars3Icon className="w-5 h-5" />
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {/* Indicador de expansión */}
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        toggleExpand(item.id)
+                                                                    }}
+                                                                    className="text-sm text-gray-400 hover:text-gray-600 min-w-[1.5ch] flex-shrink-0"
+                                                                >
+                                                                    {expandedItems.has(item.id) ? '▼' : '▶️'}
+                                                                </button>
+                                                                
+                                                                {/* Posición */}
+                                                                <span className="text-sm font-mono text-gray-500 min-w-[2ch] flex-shrink-0">
+                                                                    {index + 1}
+                                                                </span>
+                                                                
+                                                                {/* Información del item - Permitir truncado */}
+                                                                <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden">
+                                                                    {/* Indicador de estado borrador */}
+                                                                    {isItemDraft(item) && (
+                                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 flex-shrink-0">
+                                                                            📝 Borrador
+                                                                        </span>
+                                                                    )}
+                                                                    
+                                                                    <span className={`text-sm font-medium truncate ${isItemDraft(item) ? 'text-gray-500' : 'text-gray-900'}`}>
+                                                                        {item.type === 'link' ? (item as Link).label :
+                                                                         item.type === 'product' ? (item as Product).title :
+                                                                         (item as Item).title || 'Sin título'}
+                                                                    </span>
+                                                                    
+                                                                    {/* Fechas para items - Compacto */}
+                                                                    {item.type === 'item' && (
+                                                                        <div className="hidden lg:flex items-center space-x-2 flex-shrink-0 text-xs text-gray-500">
+                                                                            {(item as Item).publicationDate && (
+                                                                                <span className="whitespace-nowrap">
+                                                                                    📅 {(item as Item).publicationDate}
+                                                                                </span>
+                                                                            )}
+                                                                            {(item as Item).activityDate && (
+                                                                                <span className="whitespace-nowrap text-blue-600">
+                                                                                    🎯 {(item as Item).activityDate}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                    
+                                                                    {/* Características - Solo mostrar en pantallas más grandes */}
+                                                                    <div className="hidden sm:flex items-center space-x-1 flex-shrink-0">
+                                                                        {item.visible === false && (
+                                                                            <span className="text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded whitespace-nowrap">
+                                                                                Oculto
+                                                                            </span>
+                                                                        )}
+                                                                        {item.type === 'product' && !(item as Product).price && (
+                                                                            <span className="text-xs text-gray-600 bg-gray-100 px-1 py-0.5 rounded whitespace-nowrap">
+                                                                                Sin precio
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Botones de acción - Compactos */}
+                                                            <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        handleToggleVisibility(index)
+                                                                    }}
+                                                                    className={`p-1.5 rounded transition-colors ${
+                                                                        item.visible !== false
+                                                                            ? 'text-green-600 hover:bg-green-50'
+                                                                            : 'text-gray-400 hover:bg-gray-100'
+                                                                    }`}
+                                                                    title={item.visible !== false ? 'Visible' : 'Oculto'}
+                                                                >
+                                                                    {item.visible !== false ? (
+                                                                        <EyeIcon className="w-4 h-4" />
+                                                                    ) : (
+                                                                        <EyeSlashIcon className="w-4 h-4" />
+                                                                    )}
+                                                                </button>
+                                                                
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        handleDeleteByIndex(index)
+                                                                    }}
+                                                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                                    title="Eliminar"
+                                                                >
+                                                                    <TrashIcon className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Contenido expandido */}
+                                                        {expandedItems.has(item.id) && (
+                                                            <div className="mt-3 pt-3 border-t border-gray-200">
+                                                                {renderItemForm(item, index)}
+                                                            </div>
                                                         )}
                                                     </div>
-                                                )}
-                                                
-                                                {/* Características - Solo mostrar en pantallas más grandes */}
-                                                <div className="hidden sm:flex items-center space-x-1 flex-shrink-0">
-                                                    {item.visible === false && (
-                                                        <span className="text-xs text-red-600 bg-red-100 px-1 py-0.5 rounded whitespace-nowrap">
-                                                            Oculto
-                                                        </span>
-                                                    )}
-                                                    {item.type === 'product' && !(item as Product).price && (
-                                                        <span className="text-xs text-gray-600 bg-gray-100 px-1 py-0.5 rounded whitespace-nowrap">
-                                                            Sin precio
-                                                        </span>
-                                                    )}
                                                 </div>
                                             )}
                                         </Draggable>

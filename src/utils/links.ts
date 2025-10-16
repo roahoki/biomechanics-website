@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabase-db'
-import { LinkItem, Item } from '@/types/product'
+import { LinkItem, Item, SortMode } from '@/types/product'
 import { filterValidItemsForPublic } from '@/utils/validation-utils'
 
 export interface Link {
