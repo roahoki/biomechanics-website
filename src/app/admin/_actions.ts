@@ -112,6 +112,19 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
     // Limpiar categorías de los items antes de guardar
     const cleanedItems = cleanupItemCategories(items, currentData.categories || [])
     
+    // 🆕 Validar y asignar fechas a items (seguridad backend)
+    const today = new Date().toISOString().split('T')[0]
+    const itemsWithDates = cleanedItems.map(item => {
+      if (item.type === 'item') {
+        return {
+          ...item,
+          activityDate: item.activityDate !== undefined ? item.activityDate : null,
+          publicationDate: item.publicationDate || today // Si falta, asignar hoy
+        }
+      }
+      return item
+    })
+    
     console.log('📋 Datos actuales vs nuevos:', {
       currentBackgroundUrl: currentData.backgroundSettings?.imageUrl,
       newBackgroundUrl: otherData.backgroundSettings?.imageUrl,
@@ -126,8 +139,8 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
     // Asegurándonos de que los datos nuevos sobrescriban los actuales
     const linksData: LinksData = {
       ...currentData,
-      ...otherData, // Incluye automáticamente sortMode, categories, y otros campos
-      links: cleanedItems, // Usar los items con categorías limpias
+      ...otherData,
+      links: itemsWithDates, // 🆕 Usar los items con categorías limpias Y fechas validadas
       // Asegurar que los datos críticos se actualicen correctamente
       profileImage: otherData.profileImage ?? currentData.profileImage,
       profileImageType: otherData.profileImageType ?? currentData.profileImageType,

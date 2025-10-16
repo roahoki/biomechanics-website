@@ -44,6 +44,10 @@ export function ItemForm({
     const [aspectRatios, setAspectRatios] = useState<number[]>(item?.aspectRatios || [])
     const [categories, setCategories] = useState<string[]>(item?.categories || [])
     const [visible, setVisible] = useState(item?.visible ?? true)
+    const [activityDate, setActivityDate] = useState<string>(item?.activityDate || '')
+    const [publicationDate, setPublicationDate] = useState<string>(
+        item?.publicationDate || new Date().toISOString().split('T')[0]
+    )
     
     // Estados para campos de fecha
     const [publicationDate, setPublicationDate] = useState(
@@ -84,8 +88,8 @@ export function ItemForm({
             aspectRatios,
             visible,
             categories,
-            publicationDate,
-            activityDate: activityDate || null,
+            activityDate: activityDate || null,     // Fecha de actividad (null si está vacía)
+            publicationDate,                        // Fecha de publicación (siempre requerida)
             ...overrides  // Las sobrescrituras van al final
         }
         onUpdate(completeState)
@@ -167,10 +171,21 @@ export function ItemForm({
                 break
 
             case 'publicationDate':
-                if (!value || !value.trim()) {
+                if (!value.trim()) {
                     newErrors.publicationDate = 'La fecha de publicación es obligatoria'
+                } else if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                    newErrors.publicationDate = 'Formato de fecha inválido'
                 } else {
                     delete newErrors.publicationDate
+                }
+                break
+
+            case 'activityDate':
+                // La fecha de actividad es opcional, solo validar si existe
+                if (value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                    newErrors.activityDate = 'Formato de fecha inválido'
+                } else {
+                    delete newErrors.activityDate
                 }
                 break
         }
@@ -238,6 +253,7 @@ export function ItemForm({
 
     const handleActivityDateChange = (value: string) => {
         setActivityDate(value)
+        validateField('activityDate', value)
         updateCompleteState({ activityDate: value || null })
     }
 
@@ -315,7 +331,7 @@ export function ItemForm({
 
     // Verificar si el item está completo
     const isComplete = title.trim() && price && buttonText.trim() && paymentLink.trim() && 
-                      description.trim() && images.length > 0 && publicationDate.trim() &&
+                      description.trim() && images.length > 0 && publicationDate &&
                       Object.keys(errors).length === 0
 
     return (
@@ -406,6 +422,48 @@ export function ItemForm({
                                     {description.length}/1000
                                 </span>
                             </div>
+                        </div>
+
+                        {/* Fecha de Publicación - Obligatorio */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Fecha de Publicación *
+                            </label>
+                            <input
+                                type="date"
+                                value={publicationDate}
+                                onChange={(e) => handlePublicationDateChange(e.target.value)}
+                                className={`w-full px-3 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 text-black ${
+                                    errors.publicationDate ? 'border-red-300' : 'border-gray-200'
+                                }`}
+                            />
+                            {errors.publicationDate && (
+                                <p className="text-sm text-red-500 mt-1">{errors.publicationDate}</p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">
+                                Fecha en que se publica el item
+                            </p>
+                        </div>
+
+                        {/* Fecha de Actividad - Opcional */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Fecha de Actividad (Opcional)
+                            </label>
+                            <input
+                                type="date"
+                                value={activityDate || ''}
+                                onChange={(e) => handleActivityDateChange(e.target.value)}
+                                className={`w-full px-3 py-3 border-0 border-b-2 bg-transparent focus:outline-none focus:border-blue-500 text-black ${
+                                    errors.activityDate ? 'border-red-300' : 'border-gray-200'
+                                }`}
+                            />
+                            {errors.activityDate && (
+                                <p className="text-sm text-red-500 mt-1">{errors.activityDate}</p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">
+                                📅 Fecha del evento o actividad (si aplica)
+                            </p>
                         </div>
 
                         {/* Precio - Simplificado para móvil */}

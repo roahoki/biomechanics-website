@@ -19,6 +19,7 @@ export default function AdminSortableLinks() {
                 }
                 
                 setHasPermissions(true)
+                // Cargar datos incluyendo items inválidos/borradores para que el admin pueda editarlos
                 const result = await getLinksData({ includeInvalid: true })
                 setData(result)
             } catch (error) {
