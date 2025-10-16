@@ -32,6 +32,8 @@ export interface Item {
     aspectRatios?: number[]
     categories?: string[]
     visible?: boolean
+    activityDate?: string | null      // Fecha de actividad/evento (opcional) - Formato ISO 8601 (YYYY-MM-DD)
+    publicationDate: string            // Fecha de publicación (obligatorio) - Formato ISO 8601 (YYYY-MM-DD)
     // Campo temporal para datos de imagen con blobs croppeados
     _imageData?: Array<{
         url: string
@@ -50,3 +52,6 @@ export interface Link {
 }
 
 export type LinkItem = Link | Product | Item
+
+// Tipo para los modos de ordenamiento
+export type SortMode = 'manual' | 'activityDate' | 'publicationDate'

@@ -126,7 +126,7 @@ export async function updateAdminLinksWithProducts(items: LinkItem[], otherData:
     // Asegurándonos de que los datos nuevos sobrescriban los actuales
     const linksData: LinksData = {
       ...currentData,
-      ...otherData,
+      ...otherData, // Incluye automáticamente sortMode, categories, y otros campos
       links: cleanedItems, // Usar los items con categorías limpias
       // Asegurar que los datos críticos se actualicen correctamente
       profileImage: otherData.profileImage ?? currentData.profileImage,
