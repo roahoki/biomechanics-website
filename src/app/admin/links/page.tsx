@@ -56,7 +56,7 @@ export default function AdminSortableLinks() {
         )
     }
 
-    const { links, title, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings, categories, sortMode } = data
+    const { links, title, description, profileImage, profileImageType, socialIcons, backgroundColor, backgroundSettings, styleSettings, categories } = data
 
     return (
         <div className="min-h-screen">
@@ -70,7 +70,6 @@ export default function AdminSortableLinks() {
             <SortableLinksForm 
                 links={links}
                 categories={categories || []}
-                sortMode={sortMode}
                 title={title}
                 description={description} 
                 profileImage={profileImage}

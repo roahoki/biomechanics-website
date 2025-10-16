@@ -1,13 +1,12 @@
 'use client'
 
 import { getLinksData } from '@/utils/links'
-import { sortLinks } from '@/utils/sort-utils'
 import { SocialIcon } from '@/components'
 import { LinkItem, Product, Item } from '@/types/product'
 import Image from 'next/image'
 import { ProductModal, ItemModal, PressablesList, CategoryFilter } from '@/components'
 import { useCategoryFilter } from '@/hooks/useCategoryFilter'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Page() {
     const [linksData, setLinksData] = useState<any>(null)
@@ -15,26 +14,19 @@ export default function Page() {
     const [selectedItem, setSelectedItem] = useState<Item | null>(null)
     const [loading, setLoading] = useState(true)
 
-    // Aplicar sorting a los links según el sortMode configurado
-    const sortedLinks = useMemo(() => {
-        if (!linksData?.links || !linksData?.sortMode) return linksData?.links || []
-        return sortLinks(linksData.links, linksData.sortMode)
-    }, [linksData?.links, linksData?.sortMode])
-
-    // Filtrado por categorías (ahora usa sortedLinks)
+    // Filtrado por categorías
     const {
         filteredItems,
         categoriesWithItems,
         selectedCategory,
         setSelectedCategory
-    } = useCategoryFilter(sortedLinks, linksData?.categories || [])
+    } = useCategoryFilter(linksData?.links || [], linksData?.categories || [])
 
     useEffect(() => {
         async function loadData() {
             try {
                 const data = await getLinksData()
                 console.log('Datos cargados:', data)
-                console.log('Modo de ordenamiento:', data.sortMode)
                 console.log('Productos encontrados:', data.links.filter(item => item.type === 'product'))
                 setLinksData(data)
             } catch (error) {
@@ -42,7 +34,6 @@ export default function Page() {
                 // Proporcionar datos mínimos para que la página se renderice
                 setLinksData({
                     links: [],
-                    sortMode: 'manual',
                     title: "biomechanics.wav",
                     description: "biomechanics.wav",
                     profileImage: "/ghost.jpg", 
