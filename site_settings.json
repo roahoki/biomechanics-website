@@ -1,0 +1,289 @@
+{
+  "id": "default",
+  "data": {
+    "links": [
+      {
+        "id": 27,
+        "type": "item",
+        "price": 0,
+        "title": "",
+        "images": [],
+        "visible": true,
+        "buttonText": "Ver más",
+        "description": "",
+        "paymentLink": "",
+        "priceVisible": true
+      },
+      {
+        "id": 26,
+        "type": "item",
+        "price": 0,
+        "title": "ALL DAY LONG ",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-26/image-1756168078483-0-kxp8i.jpg"
+        ],
+        "visible": true,
+        "buttonText": "Ver publicación",
+        "categories": [
+          "Eventos",
+          "Destacados"
+        ],
+        "description": "Ok",
+        "paymentLink": "https://www.instagram.com/p/DMeGI1PNI5Z/?igsh=MTFkb2NkdDBhZWM2cg==",
+        "priceVisible": false
+      },
+      {
+        "id": 25,
+        "type": "item",
+        "price": 0,
+        "title": "Yoga & biomechanics",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-25/image-1756166826256-0-l02q6.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Biomusicalización para sesión de Yoga inmersiva",
+        "buttonText": "Ver publicación ",
+        "categories": [
+          "Eventos"
+        ],
+        "description": "Sesión de yoga, guiada por pride & flow, en la que los acompañe musicalizándola con mis ondas cerebrales y mis plantas",
+        "paymentLink": "https://www.instagram.com/p/DIcadAHspq1/?igsh=MXYyNDNrMnM4bGp1cw==",
+        "priceVisible": true
+      },
+      {
+        "id": 24,
+        "type": "item",
+        "price": 0,
+        "title": "CROCS @ Coffee Festival",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-24/image-1756166335176-0-s4wqmo.jpg",
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-24/image-1756166335177-1-j1izzc.jpg",
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-24/image-1756166335177-2-0e4ia.jpg",
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-24/image-1756166335177-3-x3dtgv.jpg",
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-24/image-1756166335177-4-9ixi87.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Sesión de 2 hrs para apertura del festival",
+        "buttonText": "Recap reel",
+        "categories": [
+          "Eventos",
+          "Destacados"
+        ],
+        "description": "",
+        "paymentLink": "https://www.instagram.com/reel/DKr8IKZRqoF/?igsh=a29oN2FwMzBoazl4",
+        "priceVisible": false
+      },
+      {
+        "id": 23,
+        "type": "item",
+        "price": 0,
+        "title": "Ruta Coffee Party @ La Jungla ",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-23/image-1756166334338-0-pehcqr.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Sesión diurna en colaboración con locales",
+        "buttonText": "Ver más",
+        "categories": [
+          "Eventos"
+        ],
+        "description": "Para celebrar el día de coffee parties en Barrio Italia, organizamos una sesión diurna con los locales de la galería.\nLink de la publicación más abajo.",
+        "paymentLink": "https://www.instagram.com/p/DMg2poIRXri/?igsh=MTBlNG1zNjVhbzNtaA==",
+        "priceVisible": false
+      },
+      {
+        "id": 22,
+        "type": "item",
+        "price": 0,
+        "title": "Biomechanics @ El Mercurio DJ Chileno Bioseñales ",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-22/image-1756166334342-0-c7rf8f.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Reportaje en El Mercurio: Biomechanics, DJ chileno que crea música electrónica con bioseñales y movimientos de plantas.",
+        "buttonText": "👉Lee reportaje aquí",
+        "categories": [
+          "Prensa",
+          "Destacados"
+        ],
+        "description": "El Mercurio Innovación destacó a Biomechanics, un proyecto artístico y tecnológico liderado por el DJ chileno Tomás Peralta, que explora nuevas formas de crear música electrónica en vivo a partir de la naturaleza. Mediante sensores que capturan bioseñales y movimientos de las plantas, estas se transforman en señales MIDI que controlan sonidos, efectos y visuales en tiempo real, generando una experiencia inmersiva donde el cuerpo, la tecnología y el medio ambiente se conectan en la pista de baile. La propuesta de Biomechanics combina arte digital, música experimental y performance DJ, situándose en la intersección entre la innovación musical, la sostenibilidad y la cultura electrónica en Chile. Este enfoque no solo replantea cómo interactuamos con la naturaleza en entornos urbanos, sino que abre un nuevo camino en la escena local e internacional, uniendo creatividad, ciencia y sonido en un relato único.",
+        "paymentLink": "https://drive.google.com/file/d/1-zKCSDGgNsmXgcb0GvQq4Xz6TgYT_kV3/view?usp=sharing",
+        "priceVisible": false
+      },
+      {
+        "id": 21,
+        "type": "item",
+        "price": 0,
+        "title": "Biomechanics @ Picamarica Ago, 2025",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-21/image-1756166827177-0-ord67k.jpg"
+        ],
+        "visible": true,
+        "subtitle": "opening techno set",
+        "buttonText": "Ver más",
+        "categories": [
+          "Eventos"
+        ],
+        "description": "\n\nhttps://www.instagram.com/p/DNOIHiKNAjS/?igsh=Mm4yNGhhNWFsb29t",
+        "paymentLink": "https://www.instagram.com/p/DNOIHiKNAjS/?igsh=Mm4yNGhhNWFsb29t",
+        "priceVisible": false
+      },
+      {
+        "id": 20,
+        "type": "product",
+        "price": 13000,
+        "title": "Picamarica | 09.08 | 23.00 hrs",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/products/product-20/image-1754364849160-0-acgh9.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Biomechanical set @ iconic party Picamarica",
+        "categories": [
+          "Eventos"
+        ],
+        "description": "Dónde: Ex Bar Loreto | Loreto 435 \nCuándo: Sábado 09-08 \nA qué hora: 23.00 hrs\n\nEste sábado trae a tus amiges a bailar a @picamaricacl. Sácame videos y fotos, publica en todos lados que estoy emocionaaaado de tocar aquí!",
+        "paymentLink": "https://www.passline.com/eventos/picamarica-0908"
+      },
+      {
+        "id": 19,
+        "type": "item",
+        "price": 10000,
+        "title": "Jockey bordado Negro",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-19/image-1754186448938-0-04iu4d.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Talla única",
+        "buttonText": "Ir a comprar",
+        "categories": [
+          "Tienda"
+        ],
+        "description": "🖤",
+        "paymentLink": "https://mpago.la/1FCBcDA",
+        "priceVisible": true
+      },
+      {
+        "id": 18,
+        "type": "item",
+        "price": 10000,
+        "title": "Jockey bordado blanco",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-18/image-1754186449036-0-0md4we.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Talla única",
+        "buttonText": "Ir a comprar",
+        "categories": [
+          "Tienda"
+        ],
+        "description": "🐼",
+        "paymentLink": "https://mpago.la/1FCBcDA",
+        "priceVisible": true
+      },
+      {
+        "id": 14,
+        "type": "item",
+        "price": 0,
+        "title": "SET SKIN #01",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-14/image-1753330512025-0-z9n6p5.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Sonic Meditations Series",
+        "buttonText": "Escuchar",
+        "categories": [
+          "Música",
+          "Destacados"
+        ],
+        "description": "Skin",
+        "paymentLink": "https://www.mixcloud.com/biomechanics-wav/biomechanics-skin-01-sonic-meditation-series-home-session-18-07-2025/",
+        "priceVisible": false
+      },
+      {
+        "id": 13,
+        "type": "item",
+        "price": 0,
+        "title": "SET: TRANSMUTAR #02🔊",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-13/image-1753302405411-0-d7u229.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Sonic Méditations Series",
+        "buttonText": "Escuchar",
+        "categories": [
+          "Música"
+        ],
+        "description": "Hola! Te dejo aquí un set grabado hace poco, que va en la serie de lo que llamé Sonic Meditations, específicamente uno de los los mixes Transmute.\n\nEsta enfocado en lo terreno, metálico, medio oscuro, y bien polritmico. Me encanta jajaj \n\n",
+        "paymentLink": "https://www.mixcloud.com/biomechanics-wav/biomechanics-transmute-02-raw-home-session-sonic-meditation-series-17-07-2025/",
+        "priceVisible": false
+      },
+      {
+        "id": 11,
+        "type": "item",
+        "price": 0,
+        "title": "COFFEE PARTY ft. Midnight Runners",
+        "images": [
+          "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/items/item-11/image-1753302403735-0-28e176.jpg"
+        ],
+        "visible": true,
+        "subtitle": "Coffee Run Sessions",
+        "buttonText": "Regístrate aquí",
+        "categories": [
+          "Eventos"
+        ],
+        "description": "Este 26/07 a las 9.30 am estaremos en La Jungla (Av. Italia 1187, Providencia, Santiago) en conjunto con Midnight Runners, realizando una corrida y posterior #CoffeeParty . La inscripción es gratuita, solo tienes que ingresar al link (botón \"Comprar\"), registrarte y llegar con todo el ánimo del mundo ese día en la mañana. \n\nTe voy a estar esperando!",
+        "paymentLink": "https://www.heylo.com/event/-OVF8uMHZSetbnBBEKD2?redirect=0&fbclid=PAQ0xDSwLmLppleHRuA2FlbQIxMQABpx1b16cK8t19jyqqn70vSEF-ASH0jhOSxqxbFq46zNefGCfCMGxTanQ51p2h_aem_nqQoV8WVEBAli1nnB_lq1Q",
+        "priceVisible": false
+      }
+    ],
+    "title": "biomechanics",
+    "categories": [
+      "Destacados",
+      "Música",
+      "Posts",
+      "Eventos",
+      "Tienda",
+      "Prensa"
+    ],
+    "description": "",
+    "socialIcons": {
+      "tiktok": {
+        "url": "https://www.tiktok.com/@biomechanics.wav",
+        "color": "#ffffff"
+      },
+      "youtube": {
+        "url": "https://youtube.com/@biomechanics-wav",
+        "color": "#ffffff"
+      },
+      "mixcloud": {
+        "url": "https://www.mixcloud.com/biomechanics-wav/",
+        "color": "#ffffff"
+      },
+      "instagram": {
+        "url": "https://www.instagram.com/biomechanics.wav",
+        "color": "#ff0000"
+      },
+      "soundcloud": {
+        "url": "https://www.soundcloud.com/biomechanics-wav",
+        "color": "#ffffff"
+      }
+    },
+    "profileImage": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/avatars/image-1756134545771.jpeg",
+    "styleSettings": {
+      "titleColor": "#ff0000",
+      "itemButtonColor": "#C23B22",
+      "linkCardTextColor": "#ebe5e5",
+      "productBuyButtonColor": "#7dff31",
+      "linkCardBackgroundColor": "#716f6f"
+    },
+    "backgroundColor": "#ff0000",
+    "profileImageType": "image",
+    "backgroundSettings": {
+      "type": "image",
+      "color": "#ff0000",
+      "imageUrl": "https://jbgwwdtjwagvradijzvy.supabase.co/storage/v1/object/public/backgrounds/background-1756137528574-sg2j5a.jpeg",
+      "imageOpacity": 0.1
+    }
+  },
+  "updated_at": "2025-09-03T04:37:21.561+00:00"
+}
