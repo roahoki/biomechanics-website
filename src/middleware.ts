@@ -3,10 +3,12 @@ import { NextResponse } from 'next/server'
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 const isAuthRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/api(.*)/clerk(.*)'])
+// Public API routes (bypass auth) for external webhooks
+const isPublicWebhookRoute = createRouteMatcher(['/api/enviroment-readings(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
-    // No aplicar protección a las rutas de autenticación
-    if (isAuthRoute(req)) {
+    // No aplicar protección a las rutas de autenticación o webhook público
+    if (isAuthRoute(req) || isPublicWebhookRoute(req)) {
         return NextResponse.next();
     }
     
