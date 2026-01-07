@@ -34,9 +34,6 @@ const initialConfig: LinksData = {
       label: "Website Oficial🌎"
     }
   ],
-  categories: ["Música", "Tienda", "Eventos", "Prensa", "Posts"],
-  sortMode: 'manual',
-  title: "biomechanics.wav",
   description: "Biomechanics Links",
   profileImage: "/profile.jpg",
   profileImageType: "image",
@@ -67,10 +64,9 @@ const initialConfig: LinksData = {
   styleSettings: {
     titleColor: "#dbdb00",
     linkCardBackgroundColor: "#0e0c18",
-    linkCardTextColor: "#cccccc",
-    productBuyButtonColor: "#ff6b35",
-    itemButtonColor: "#3b82f6"
-  }
+    linkCardTextColor: "#cccccc"
+  },
+  categories: ["Música", "Tienda", "Eventos", "Prensa", "Posts"]
 };
 
 export async function migrateJsonToSupabase() {
