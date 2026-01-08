@@ -43,7 +43,3 @@ next-env.d.ts
 
 # development
 /src/app/trials
-
-# clerk configuration (can include secrets)
-/.clerk/
-.env*.local

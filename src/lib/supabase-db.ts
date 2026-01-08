@@ -36,14 +36,7 @@ export const createAdminClient = () => {
     throw new Error('Se requieren las variables de entorno NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_KEY');
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      // Avoid any server-side localStorage usage
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
+  return createClient<Database>(supabaseUrl, supabaseServiceKey);
 };
 
 // Crear un cliente de Supabase con la clave anónima para operaciones del cliente
@@ -56,14 +49,7 @@ export const createPublicClient = () => {
     throw new Error('Se requieren las variables de entorno NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY');
   }
 
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      // Disable session persistence on the server to avoid localStorage
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
+  return createClient<Database>(supabaseUrl, supabaseAnonKey);
 };
 
 // Obtener un cliente de Supabase según el contexto
