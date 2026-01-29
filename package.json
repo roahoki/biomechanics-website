@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "dev:ngrok": "ngrok http --domain=eft-exact-mallard.ngrok-free.app 3000 & next dev",
-    "export:site-settings": "tsx scripts/export-site-settings.ts"
+    "export:site-settings": "tsx scripts/export-site-settings.ts",
+    "seed:products": "tsx scripts/seed-products.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.21.0",
@@ -20,7 +21,8 @@
     "cropperjs": "^1.6.2",
     "framer-motion": "^12.23.3",
     "jsonwebtoken": "^9.0.2",
-    "next": "15.3.1",
+    "next": "15.3.4",
+    "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "server-only": "^0.0.1"
@@ -31,6 +33,7 @@
     "@types/cropperjs": "^1.1.5",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "9.29.0",

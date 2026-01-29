@@ -1,14 +1,9 @@
 
 import type { Metadata } from "next";
+import '@/lib/server-localstorage'
 import { Space_Grotesk } from 'next/font/google';
+import { ClerkProvider } from '@clerk/nextjs';
 import "../styles/globals.css";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from '@clerk/nextjs';
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'],
@@ -35,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider dynamic>
       <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning style={{ backgroundColor: '#000000' }}>
         <head>
           {/* Aquí puedes agregar meta tags adicionales si es necesario */}

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { LinksData } from '@/utils/links';
+import { createSafeStorage } from '@/lib/supabase-storage'
 
 // Definición de tipos para Supabase
 export type Database = {
@@ -36,7 +37,14 @@ export const createAdminClient = () => {
     throw new Error('Se requieren las variables de entorno NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_KEY');
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey);
+  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storage: createSafeStorage(),
+    },
+  });
 };
 
 // Crear un cliente de Supabase con la clave anónima para operaciones del cliente
@@ -49,7 +57,14 @@ export const createPublicClient = () => {
     throw new Error('Se requieren las variables de entorno NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY');
   }
 
-  return createClient<Database>(supabaseUrl, supabaseAnonKey);
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storage: createSafeStorage(),
+    },
+  });
 };
 
 // Obtener un cliente de Supabase según el contexto

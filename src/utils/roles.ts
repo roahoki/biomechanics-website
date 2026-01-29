@@ -1,23 +1,32 @@
 import { Roles } from '../types/globals'
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import 'server-only' // Esto garantiza que este archivo solo se use en el servidor
 
 export const checkRole = async (role: Roles) => {
-    const { sessionClaims } = await auth()
-    
-    // Buscar el rol tanto en metadata como en publicMetadata
-    const userRole = 
-        sessionClaims?.metadata?.role || 
-        (sessionClaims?.publicMetadata as any)?.role;
-    
-    console.log('checkRole - verificando rol:', { 
-        requestedRole: role, 
+    const { userId, sessionClaims } = await auth()
+
+    if (!userId) return false
+
+    // Obtener SIEMPRE el rol live desde Clerk API
+    let userRole: any = undefined
+    try {
+        const client = await clerkClient()
+        const user = await client.users.getUser(userId)
+        userRole = (user.publicMetadata as any)?.role || (user.privateMetadata as any)?.role
+        console.log('checkRole - rol desde Clerk API:', { userRole })
+    } catch (e) {
+        console.warn('checkRole - no se pudo obtener usuario de Clerk API, usando claims', e)
+        userRole = sessionClaims?.metadata?.role || (sessionClaims?.publicMetadata as any)?.role
+    }
+
+    console.log('checkRole - verificando rol:', {
+        requestedRole: role,
         userRole,
         metadata: sessionClaims?.metadata,
         publicMetadata: sessionClaims?.publicMetadata
-    });
-    
+    })
+
     return userRole === role
 }
 
@@ -36,7 +45,8 @@ export const isAdmin = async () => {
 }
 
 export const checkAdminPermissions = async () => {
-    if (!await checkRole('admin')) {
+    const ok = await checkRole('admin')
+    if (!ok) {
         redirect('/')
         return false
     }

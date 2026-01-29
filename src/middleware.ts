@@ -1,12 +1,22 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
+const isPublicRoute = createRouteMatcher([
+    '/menu(.*)',
+    '/orders(.*)',
+    '/api/products/(.*)',
+    '/api/orders/(.*)',
+    '/sign-in(.*)',
+    '/sign-up(.*)',
+    '/admin-setup(.*)',
+    '/api(.*)/clerk(.*)'
+])
+
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
-const isAuthRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/api(.*)/clerk(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
-    // No aplicar protección a las rutas de autenticación
-    if (isAuthRoute(req)) {
+    // Rutas públicas: no requieren Clerk
+    if (isPublicRoute(req)) {
         return NextResponse.next();
     }
     
@@ -32,10 +42,22 @@ export default clerkMiddleware(async (auth, req) => {
             return NextResponse.redirect(signInUrl);
         }
 
-        // Verificamos el rol en ambas ubicaciones posibles
-        const isAdmin = 
-            (sessionClaims?.publicMetadata as any)?.role === 'admin' || 
-            sessionClaims?.metadata?.role === 'admin';
+        // Consultamos SIEMPRE el rol actual desde Clerk API para evitar cacheos de la sesión
+        let isAdmin = false;
+        let liveRole: any = undefined;
+        try {
+            const client = await clerkClient();
+            const user = await client.users.getUser(userId);
+            liveRole = (user.publicMetadata as any)?.role || (user.privateMetadata as any)?.role;
+            isAdmin = liveRole === 'admin';
+            console.log('Middleware - Rol (live) desde Clerk API:', { liveRole, isAdmin });
+        } catch (e) {
+            console.warn('Middleware - No se pudo obtener usuario desde Clerk API', e);
+            // Fallback a claims si falla el API
+            isAdmin = 
+                (sessionClaims?.publicMetadata as any)?.role === 'admin' || 
+                sessionClaims?.metadata?.role === 'admin';
+        }
             
         // Si está autenticado pero no es admin, redirigir a la página principal
         if (!isAdmin) {
@@ -50,9 +72,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
     matcher: [
-        // Skip Next.js internals and all static files, unless found in search params
-        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-        // Always run for API routes
-        '/(api|trpc)(.*)',
+        // Excluir archivos estáticos y _next
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)).*)',
     ],
 }
