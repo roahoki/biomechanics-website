@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     const fintocLink = `https://fintoc.me/tpp/${total}`
     const { data: order, error: oErr } = await supabase
       .from('orders')
-      .insert({ buyer_name: buyerName ?? null, buyer_contact: buyerContact ?? null, status: 'created', amount: total, payment_method: 'fintoc_tpp', redemption_code, payment_link: fintocLink })
+      .insert({ buyer_name: buyerName ?? null, buyer_contact: buyerContact ?? null, status: 'created', amount: total, payment_method: 'fintoc_tpp', redemption_code })
       .select()
       .single()
     if (oErr || !order) return NextResponse.json({ error: oErr?.message ?? 'no se pudo crear orden' }, { status: 500 })
