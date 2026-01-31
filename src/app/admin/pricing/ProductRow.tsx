@@ -22,6 +22,17 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
   const [changes, setChanges] = useState<ProductChanges>({})
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [creating, setCreating] = useState(false)
+  const [createMessage, setCreateMessage] = useState('')
+  const [newProduct, setNewProduct] = useState({
+    title: '',
+    type: 'ticket',
+    price: 0,
+    visible: true,
+    is_yoga_add_on: false,
+    stock: 25,
+    payment_link: ''
+  })
 
   const hasChanges = Object.keys(changes).length > 0
 
@@ -70,8 +81,134 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     }
   }
 
+  const canCreate = newProduct.title.trim().length > 0 && newProduct.price > 0
+
+  const createProduct = async () => {
+    if (!canCreate) return
+    setCreating(true)
+    setCreateMessage('')
+
+    try {
+      const payload = {
+        title: newProduct.title.trim(),
+        type: newProduct.type,
+        price: Number(newProduct.price),
+        visible: newProduct.visible,
+        is_yoga_add_on: newProduct.is_yoga_add_on,
+        stock: newProduct.is_yoga_add_on ? Number(newProduct.stock || 25) : null,
+        payment_link: newProduct.payment_link?.trim() || null
+      }
+
+      const res = await fetch('/api/products/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Error creando producto')
+
+      const created = json.product as Product
+      setProducts(prev => [...prev, created])
+      setCreateMessage('✅ Producto creado correctamente')
+      setNewProduct({
+        title: '',
+        type: 'ticket',
+        price: 0,
+        visible: true,
+        is_yoga_add_on: false,
+        stock: 25,
+        payment_link: ''
+      })
+      setTimeout(() => setCreateMessage(''), 3000)
+    } catch (err) {
+      setCreateMessage(`❌ Error: ${(err as Error).message}`)
+    } finally {
+      setCreating(false)
+    }
+  }
+
   return (
     <div>
+      <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
+        <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 0.7fr 0.7fr 0.7fr 0.7fr 1.5fr auto', gap: 8, alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Nombre"
+            value={newProduct.title}
+            onChange={(e) => setNewProduct(prev => ({ ...prev, title: e.target.value }))}
+            style={{ padding: 6 }}
+          />
+          <select
+            value={newProduct.type}
+            onChange={(e) => setNewProduct(prev => ({ ...prev, type: e.target.value }))}
+            style={{ padding: 6 }}
+          >
+            <option value="ticket">ticket</option>
+            <option value="item">item</option>
+          </select>
+          <input
+            type="number"
+            placeholder="Precio"
+            value={newProduct.price}
+            onChange={(e) => setNewProduct(prev => ({ ...prev, price: Number(e.target.value) }))}
+            style={{ padding: 6 }}
+          />
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+            <input
+              type="checkbox"
+              checked={newProduct.visible}
+              onChange={(e) => setNewProduct(prev => ({ ...prev, visible: e.target.checked }))}
+            />
+            Visible
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+            <input
+              type="checkbox"
+              checked={newProduct.is_yoga_add_on}
+              onChange={(e) => setNewProduct(prev => ({ ...prev, is_yoga_add_on: e.target.checked }))}
+            />
+            Yoga add-on
+          </label>
+          <input
+            type="number"
+            placeholder="Yoga cap"
+            value={newProduct.stock}
+            onChange={(e) => setNewProduct(prev => ({ ...prev, stock: Number(e.target.value) }))}
+            disabled={!newProduct.is_yoga_add_on}
+            style={{ padding: 6, opacity: newProduct.is_yoga_add_on ? 1 : 0.5 }}
+          />
+          <input
+            type="text"
+            placeholder="Fintoc link"
+            value={newProduct.payment_link}
+            onChange={(e) => setNewProduct(prev => ({ ...prev, payment_link: e.target.value }))}
+            style={{ padding: 6 }}
+          />
+          <button
+            onClick={createProduct}
+            disabled={!canCreate || creating}
+            style={{
+              padding: '8px 12px',
+              background: !canCreate || creating ? '#555' : '#7dff31',
+              color: !canCreate || creating ? '#888' : '#000',
+              cursor: !canCreate || creating ? 'not-allowed' : 'pointer',
+              border: 'none',
+              borderRadius: 4,
+              fontWeight: 'bold'
+            }}
+          >
+            {creating ? '⏳ Creando...' : '➕ Agregar'}
+          </button>
+        </div>
+        {createMessage && (
+          <div style={{ marginTop: 8, fontSize: 13, fontWeight: 'bold', color: createMessage.startsWith('✅') ? '#28a745' : '#dc3545' }}>
+            {createMessage}
+          </div>
+        )}
+      </div>
+
       <div style={{ marginBottom: 20, display: 'flex', gap: 10, alignItems: 'center' }}>
         <button
           onClick={saveChanges}
