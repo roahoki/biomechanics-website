@@ -1,7 +1,17 @@
 import { Resend } from 'resend'
-import { NextResponse } from 'next/server'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize Resend only when needed (lazy load)
+let resend: InstanceType<typeof Resend> | null = null
+
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) {
+    return null
+  }
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resend
+}
 
 export async function sendOrderEmail(
   email: string,
@@ -10,6 +20,12 @@ export async function sendOrderEmail(
   items: Array<{ title: string; quantity: number; unit_price: number }>,
   total: number
 ) {
+  const resendClient = getResendClient()
+  if (!resendClient) {
+    console.warn('Resend API key not configured. Email not sent.')
+    return { success: false, error: 'Resend not configured' }
+  }
+
   try {
     const itemsHtml = items
       .map(
@@ -74,7 +90,7 @@ export async function sendOrderEmail(
     </html>
     `
 
-    const result = await resend.emails.send({
+    const result = await resendClient.emails.send({
       from: 'noreply@biomechanics.cl',
       to: email,
       subject: `Confirmación de compra - Orden ${orderId.substring(0, 8)}`,
@@ -86,4 +102,3 @@ export async function sendOrderEmail(
     console.error('Error sending email:', error)
     throw error
   }
-}
