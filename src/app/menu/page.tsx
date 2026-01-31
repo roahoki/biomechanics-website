@@ -12,6 +12,7 @@ type Product = {
   is_yoga_add_on?: boolean
   stock?: number | null
   payment_link?: string | null
+  mercadopago_link?: string | null
 }
 
 export default function MenuPage() {
@@ -82,7 +83,7 @@ export default function MenuPage() {
                     <span>{t.title}</span>
                     <strong>${t.price}</strong>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
                     <button onClick={() => crearOrden(t.id)} style={{ padding: '8px 12px', background: '#C23B22', color: '#fff', cursor: 'pointer' }}>
                       Obtener código
                     </button>
@@ -90,6 +91,13 @@ export default function MenuPage() {
                       <a href={t.payment_link} target="_blank" rel="noopener noreferrer">
                         <button style={{ padding: '8px 12px', background: '#7dff31', color: '#000', cursor: 'pointer' }}>
                           Pagar con Fintoc
+                        </button>
+                      </a>
+                    ) : null}
+                    {t.mercadopago_link ? (
+                      <a href={t.mercadopago_link} target="_blank" rel="noopener noreferrer">
+                        <button style={{ padding: '8px 12px', background: '#009ee3', color: '#fff', cursor: 'pointer' }}>
+                          Pagar con Mercado Pago
                         </button>
                       </a>
                     ) : null}
@@ -108,7 +116,7 @@ export default function MenuPage() {
                     <span>{b.title}</span>
                     <strong>${b.price}</strong>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
                     <label>Cantidad:</label>
                     <input
                       type="number"
@@ -124,6 +132,13 @@ export default function MenuPage() {
                       <a href={b.payment_link} target="_blank" rel="noopener noreferrer">
                         <button style={{ padding: '8px 12px', background: '#7dff31', color: '#000', cursor: 'pointer' }}>
                           Pagar con Fintoc
+                        </button>
+                      </a>
+                    ) : null}
+                    {b.mercadopago_link ? (
+                      <a href={b.mercadopago_link} target="_blank" rel="noopener noreferrer">
+                        <button style={{ padding: '8px 12px', background: '#009ee3', color: '#fff', cursor: 'pointer' }}>
+                          Pagar con Mercado Pago
                         </button>
                       </a>
                     ) : null}
