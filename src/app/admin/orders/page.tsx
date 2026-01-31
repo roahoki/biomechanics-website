@@ -159,21 +159,16 @@ export default function OrdersValidationPage() {
             {status === 'created' ? 'Pendiente' : status === 'paid' ? 'Pagado' : 'Anulado'} ({orders.filter(o => o.status === status).length})
           </button>
         ))}
-      </div>
 
-      {selectedOrders.size > 0 && (
-        <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span style={{ fontSize: 14 }}>
-            <strong>{selectedOrders.size}</strong> orden(es) seleccionada(s)
-          </span>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
             onClick={() => handleBatchAction('confirm')}
-            disabled={processingBatch}
+            disabled={processingBatch || selectedOrders.size <= 1}
             style={{
               padding: '6px 12px',
-              background: processingBatch ? '#555' : '#7dff31',
-              color: processingBatch ? '#888' : '#000',
-              cursor: processingBatch ? 'not-allowed' : 'pointer',
+              background: processingBatch || selectedOrders.size <= 1 ? '#555' : '#7dff31',
+              color: processingBatch || selectedOrders.size <= 1 ? '#888' : '#000',
+              cursor: processingBatch || selectedOrders.size <= 1 ? 'not-allowed' : 'pointer',
               fontWeight: 'bold',
               border: 'none',
               borderRadius: 3,
@@ -184,12 +179,12 @@ export default function OrdersValidationPage() {
           </button>
           <button
             onClick={() => handleBatchAction('cancel')}
-            disabled={processingBatch}
+            disabled={processingBatch || selectedOrders.size <= 1}
             style={{
               padding: '6px 12px',
-              background: processingBatch ? '#555' : '#C23B22',
+              background: processingBatch || selectedOrders.size <= 1 ? '#555' : '#C23B22',
               color: '#fff',
-              cursor: processingBatch ? 'not-allowed' : 'pointer',
+              cursor: processingBatch || selectedOrders.size <= 1 ? 'not-allowed' : 'pointer',
               fontWeight: 'bold',
               border: 'none',
               borderRadius: 3,
@@ -200,11 +195,12 @@ export default function OrdersValidationPage() {
           </button>
           <button
             onClick={() => setSelectedOrders(new Set())}
+            disabled={selectedOrders.size === 0}
             style={{
               padding: '6px 12px',
-              background: '#333',
-              color: '#999',
-              cursor: 'pointer',
+              background: selectedOrders.size === 0 ? '#333' : '#333',
+              color: selectedOrders.size === 0 ? '#666' : '#999',
+              cursor: selectedOrders.size === 0 ? 'not-allowed' : 'pointer',
               border: '1px solid #555',
               borderRadius: 3,
               fontSize: 12
@@ -213,7 +209,7 @@ export default function OrdersValidationPage() {
             Limpiar
           </button>
         </div>
-      )}
+      </div>
 
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
         <thead>
