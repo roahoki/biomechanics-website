@@ -94,8 +94,10 @@ export default function MenuPage() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Error creando orden')
-      if (json.order_id) {
-        location.href = `/orders/${json.order_id}`
+      if (json.orderId) {
+        location.href = `/orders/${json.orderId}`
+      } else {
+        alert('Orden creada pero sin ID de redirección')
       }
     } catch (e: any) {
       alert(e.message)
