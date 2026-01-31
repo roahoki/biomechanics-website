@@ -91,7 +91,7 @@ export async function sendOrderEmail(
     `
 
     const result = await resendClient.emails.send({
-      from: 'noreply@biomechanics.cl',
+      from: 'ventas@biomechanics.cl',
       to: email,
       subject: `Confirmación de compra - Orden ${orderId.substring(0, 8)}`,
       html
