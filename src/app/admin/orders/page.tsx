@@ -163,12 +163,12 @@ export default function OrdersValidationPage() {
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
             onClick={() => handleBatchAction('confirm')}
-            disabled={processingBatch || selectedOrders.size <= 1}
+            disabled={processingBatch || selectedOrders.size === 0}
             style={{
               padding: '6px 12px',
-              background: processingBatch || selectedOrders.size <= 1 ? '#555' : '#7dff31',
-              color: processingBatch || selectedOrders.size <= 1 ? '#888' : '#000',
-              cursor: processingBatch || selectedOrders.size <= 1 ? 'not-allowed' : 'pointer',
+              background: processingBatch || selectedOrders.size === 0 ? '#555' : '#7dff31',
+              color: processingBatch || selectedOrders.size === 0 ? '#888' : '#000',
+              cursor: processingBatch || selectedOrders.size === 0 ? 'not-allowed' : 'pointer',
               fontWeight: 'bold',
               border: 'none',
               borderRadius: 3,
@@ -179,12 +179,12 @@ export default function OrdersValidationPage() {
           </button>
           <button
             onClick={() => handleBatchAction('cancel')}
-            disabled={processingBatch || selectedOrders.size <= 1}
+            disabled={processingBatch || selectedOrders.size === 0}
             style={{
               padding: '6px 12px',
-              background: processingBatch || selectedOrders.size <= 1 ? '#555' : '#C23B22',
-              color: '#fff',
-              cursor: processingBatch || selectedOrders.size <= 1 ? 'not-allowed' : 'pointer',
+              background: processingBatch || selectedOrders.size === 0 ? '#555' : '#C23B22',
+              color: processingBatch || selectedOrders.size === 0 ? '#888' : '#fff',
+              cursor: processingBatch || selectedOrders.size === 0 ? 'not-allowed' : 'pointer',
               fontWeight: 'bold',
               border: 'none',
               borderRadius: 3,
@@ -198,10 +198,10 @@ export default function OrdersValidationPage() {
             disabled={selectedOrders.size === 0}
             style={{
               padding: '6px 12px',
-              background: selectedOrders.size === 0 ? '#333' : '#333',
-              color: selectedOrders.size === 0 ? '#666' : '#999',
+              background: selectedOrders.size === 0 ? '#333' : '#2b6dff',
+              color: selectedOrders.size === 0 ? '#666' : '#fff',
               cursor: selectedOrders.size === 0 ? 'not-allowed' : 'pointer',
-              border: '1px solid #555',
+              border: selectedOrders.size === 0 ? '1px solid #555' : 'none',
               borderRadius: 3,
               fontSize: 12
             }}
