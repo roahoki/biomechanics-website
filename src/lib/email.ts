@@ -102,3 +102,4 @@ export async function sendOrderEmail(
     console.error('Error sending email:', error)
     throw error
   }
+}
