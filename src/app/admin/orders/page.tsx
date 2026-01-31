@@ -46,18 +46,20 @@ export default function OrdersValidationPage() {
     run()
   }, [])
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, action: 'confirm' | 'cancel') => {
     try {
-      const res = await fetch(`/api/orders/${orderId}/status`, {
+      const endpoint = action === 'confirm' ? 'confirm' : 'cancel'
+      const res = await fetch(`/api/orders/${orderId}/${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        headers: { 'Content-Type': 'application/json' }
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Error actualizando estado')
+      if (!res.ok) throw new Error(json.error || 'Error actualizando orden')
       
+      const newStatus = action === 'confirm' ? 'paid' : 'cancelled'
       // Actualizar estado local
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o))
+      alert(action === 'confirm' ? 'Pago confirmado y email enviado' : 'Orden anulada y email enviado')
     } catch (e: any) {
       alert(`Error: ${e.message}`)
     }
@@ -74,7 +76,7 @@ export default function OrdersValidationPage() {
       <p style={{ color: '#999' }}>Total de órdenes: {orders.length}</p>
 
       <div style={{ marginBottom: 24, display: 'flex', gap: 8 }}>
-        {['created', 'paid', 'redeemed'].map(status => (
+        {['created', 'paid', 'cancelled'].map(status => (
           <button
             key={status}
             onClick={() => setFilter(status)}
@@ -88,7 +90,7 @@ export default function OrdersValidationPage() {
               border: 'none'
             }}
           >
-            {status.charAt(0).toUpperCase() + status.slice(1)} ({orders.filter(o => o.status === status).length})
+            {status === 'created' ? 'Pendiente' : status === 'paid' ? 'Pagado' : 'Anulado'} ({orders.filter(o => o.status === status).length})
           </button>
         ))}
       </div>
@@ -140,7 +142,7 @@ export default function OrdersValidationPage() {
               <td style={{ padding: 12 }}>
                 {filter === 'created' && (
                   <button
-                    onClick={() => updateOrderStatus(order.id, 'paid')}
+                    onClick={() => updateOrderStatus(order.id, 'confirm')}
                     style={{
                       padding: '4px 8px',
                       background: '#7dff31',
@@ -152,12 +154,16 @@ export default function OrdersValidationPage() {
                       fontSize: 11
                     }}
                   >
-                    Marcar pagado
+                    Confirmar pago
                   </button>
                 )}
                 {filter === 'paid' && (
                   <button
-                    onClick={() => updateOrderStatus(order.id, 'redeemed')}
+                    onClick={() => {
+                      if (window.confirm('¿Estás seguro de que quieres anular esta orden?')) {
+                        updateOrderStatus(order.id, 'cancel')
+                      }
+                    }}
                     style={{
                       padding: '4px 8px',
                       background: '#C23B22',
@@ -169,7 +175,7 @@ export default function OrdersValidationPage() {
                       fontSize: 11
                     }}
                   >
-                    Marcar canjeado
+                    Anular orden
                   </button>
                 )}
               </td>
