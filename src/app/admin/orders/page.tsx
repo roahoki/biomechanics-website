@@ -139,45 +139,43 @@ export default function OrdersValidationPage() {
               <td style={{ padding: 12, fontSize: 11 }}>
                 {new Date(order.created_at).toLocaleDateString('es-CL')} {new Date(order.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
               </td>
-              <td style={{ padding: 12 }}>
-                {filter === 'created' && (
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'confirm')}
-                    style={{
-                      padding: '4px 8px',
-                      background: '#7dff31',
-                      color: '#000',
-                      cursor: 'pointer',
-                      fontWeight: 'bold',
-                      border: 'none',
-                      borderRadius: 2,
-                      fontSize: 11
-                    }}
-                  >
-                    Confirmar pago
-                  </button>
-                )}
-                {filter === 'paid' && (
-                  <button
-                    onClick={() => {
-                      if (window.confirm('¿Estás seguro de que quieres anular esta orden?')) {
-                        updateOrderStatus(order.id, 'cancel')
-                      }
-                    }}
-                    style={{
-                      padding: '4px 8px',
-                      background: '#C23B22',
-                      color: '#fff',
-                      cursor: 'pointer',
-                      fontWeight: 'bold',
-                      border: 'none',
-                      borderRadius: 2,
-                      fontSize: 11
-                    }}
-                  >
-                    Anular orden
-                  </button>
-                )}
+              <td style={{ padding: 12, display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => updateOrderStatus(order.id, 'confirm')}
+                  disabled={order.status === 'paid' || order.status === 'cancelled'}
+                  style={{
+                    padding: '4px 8px',
+                    background: order.status === 'paid' || order.status === 'cancelled' ? '#333' : '#7dff31',
+                    color: order.status === 'paid' || order.status === 'cancelled' ? '#666' : '#000',
+                    cursor: order.status === 'paid' || order.status === 'cancelled' ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold',
+                    border: 'none',
+                    borderRadius: 2,
+                    fontSize: 11
+                  }}
+                >
+                  Confirmar pago
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm('¿Estás seguro de que quieres anular esta orden?')) {
+                      updateOrderStatus(order.id, 'cancel')
+                    }
+                  }}
+                  disabled={order.status === 'cancelled'}
+                  style={{
+                    padding: '4px 8px',
+                    background: order.status === 'cancelled' ? '#333' : '#C23B22',
+                    color: order.status === 'cancelled' ? '#666' : '#fff',
+                    cursor: order.status === 'cancelled' ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold',
+                    border: 'none',
+                    borderRadius: 2,
+                    fontSize: 11
+                  }}
+                >
+                  Anular orden
+                </button>
               </td>
             </tr>
           ))}
