@@ -10,6 +10,7 @@ type Product = {
   visible: boolean
   stock_type?: 'quantity' | 'boolean' | null
   stock_value?: number | boolean | null
+  max_per_order?: number | null
 }
 
 type ProductChanges = {
@@ -29,7 +30,8 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     price: 0,
     visible: true,
     stock_type: 'quantity',
-    stock_value: 10
+    stock_value: 10,
+    max_per_order: 0
   })
 
   const hasChanges = Object.keys(changes).length > 0
@@ -87,13 +89,15 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     setCreateMessage('')
 
     try {
+      const maxPerOrder = Number(newProduct.max_per_order)
       const payload = {
         title: newProduct.title.trim(),
         type: newProduct.type,
         price: Number(newProduct.price),
         visible: newProduct.visible,
         stock_type: newProduct.stock_type,
-        stock_value: newProduct.stock_type === 'quantity' ? Number(newProduct.stock_value) : true
+        stock_value: newProduct.stock_type === 'quantity' ? Number(newProduct.stock_value) : true,
+        max_per_order: Number.isFinite(maxPerOrder) && maxPerOrder > 0 ? maxPerOrder : null
       }
 
       const res = await fetch('/api/products/create', {
@@ -114,7 +118,8 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         price: 0,
         visible: true,
         stock_type: 'quantity',
-        stock_value: 10
+        stock_value: 10,
+        max_per_order: 0
       })
       setTimeout(() => setCreateMessage(''), 3000)
     } catch (err) {
@@ -128,7 +133,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     <div>
       <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
         <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.7fr 0.9fr 1fr 0.8fr auto', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.7fr 0.9fr 1fr 0.9fr 0.8fr auto', gap: 8, alignItems: 'center' }}>
           <input
             type="text"
             placeholder="Nombre"
@@ -177,6 +182,13 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
               Disponible
             </label>
           )}
+          <input
+            type="number"
+            placeholder="Max/orden"
+            value={newProduct.max_per_order}
+            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, max_per_order: Number(e.target.value) }))}
+            style={{ padding: 6 }}
+          />
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
             <input
               type="checkbox"
@@ -252,6 +264,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
             <th style={{ padding: 8, textAlign: 'left' }}>Precio</th>
             <th style={{ padding: 8, textAlign: 'left' }}>Stock</th>
             <th style={{ padding: 8, textAlign: 'center' }}>Disponible</th>
+            <th style={{ padding: 8, textAlign: 'center' }}>Max/orden</th>
             <th style={{ padding: 8, textAlign: 'center' }}>Visible</th>
             <th></th>
           </tr>
@@ -285,6 +298,14 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
                     onChange={(e) => updateField(p.id, 'stock_value', e.target.checked)}
                   />
                 )}
+              </td>
+              <td style={{ padding: 8, textAlign: 'center' }}>
+                <input 
+                  type="number" 
+                  value={typeof p.max_per_order === 'number' ? p.max_per_order : 0}
+                  onChange={(e) => updateField(p.id, 'max_per_order', Number(e.target.value))}
+                  style={{ width: 70, padding: 4 }}
+                />
               </td>
               <td style={{ padding: 8, textAlign: 'center' }}>
                 <input 

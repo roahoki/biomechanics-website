@@ -7,7 +7,7 @@ export async function GET() {
     const supabase = createPublicClient()
     const { data, error } = await supabase
       .from('products')
-      .select('id,title,type,price,visible,category,is_yoga_add_on,stock,payment_link')
+      .select('id,title,type,price,visible,category,is_yoga_add_on,stock,payment_link,stock_type,stock_value,max_per_order')
       .eq('visible', true)
       .order('category', { ascending: true })
 

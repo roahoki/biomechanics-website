@@ -15,6 +15,7 @@ type Product = {
   mercadopago_link?: string | null
   stock_type?: 'quantity' | 'boolean' | null
   stock_value?: number | boolean | null
+  max_per_order?: number | null
 }
 
 type CartItem = {
@@ -53,20 +54,64 @@ export default function MenuPage() {
   const tickets = products.filter(p => p.type === 'ticket')
   const barItems = products.filter(p => p.type === 'item')
 
+  const getMaxPerOrder = (product: Product) => {
+    return typeof product.max_per_order === 'number' && product.max_per_order > 0
+      ? product.max_per_order
+      : null
+  }
+
+  const isAvailable = (product: Product) => {
+    if (product.stock_type === 'boolean') {
+      return product.stock_value === true || product.stock_value === 1
+    }
+    return true
+  }
+
+  const getStockLimit = (product: Product) => {
+    if (product.stock_type === 'quantity' && typeof product.stock_value === 'number') {
+      return product.stock_value
+    }
+    return null
+  }
+
   const addToCart = (productId: number) => {
     const quantity = qty[productId] ?? 1
     const product = products.find(p => p.id === productId)
     if (!product) return
+    if (!isAvailable(product)) {
+      alert('Este ítem no está disponible')
+      return
+    }
 
     const existing = cart.find(item => item.product_id === productId)
+    const existingQty = existing?.quantity ?? 0
+    const maxPerOrder = getMaxPerOrder(product)
+    const stockLimit = getStockLimit(product)
+    const limits = [maxPerOrder, stockLimit].filter((v): v is number => typeof v === 'number' && v > 0)
+    const allowedMax = limits.length > 0 ? Math.min(...limits) : null
+
+    if (allowedMax !== null && existingQty >= allowedMax) {
+      alert('Has alcanzado el máximo permitido para este ítem')
+      return
+    }
+
+    const finalQty = allowedMax !== null
+      ? Math.min(existingQty + quantity, allowedMax)
+      : existingQty + quantity
+
+    if (finalQty <= existingQty) {
+      alert('No hay stock suficiente para agregar más unidades')
+      return
+    }
+
     if (existing) {
       setCart(cart.map(item =>
         item.product_id === productId
-          ? { ...item, quantity: item.quantity + quantity }
+          ? { ...item, quantity: finalQty }
           : item
       ))
     } else {
-      setCart([...cart, { product_id: productId, quantity, product }])
+      setCart([...cart, { product_id: productId, quantity: finalQty, product }])
     }
     setQty(prev => ({ ...prev, [productId]: 1 }))
   }

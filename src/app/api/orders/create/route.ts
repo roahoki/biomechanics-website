@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     })
     const { data: products, error: prodErr } = await supabase
       .from('products')
-      .select('id,title,price,type,is_yoga_add_on,stock,payment_link')
+      .select('id,title,price,type,is_yoga_add_on,stock,payment_link,stock_type,stock_value,max_per_order')
       .in('id', productIds)
     if (prodErr) return NextResponse.json({ error: prodErr.message }, { status: 500 })
 
@@ -35,16 +35,63 @@ export async function POST(req: Request) {
     let yogaRequested = 0
     let yogaStock = 0
     const orderItemsPayload: Array<{ product_id:number, title_snapshot:string, unit_price:number, quantity:number, redeemed_qty:number }> = []
+    const requestedByProduct = new Map<number, number>()
     for (const it of items) {
       const pid = it.productId ?? it.product_id
       const p = byId.get(Number(pid))
       if (!p) return NextResponse.json({ error: `Producto ${it.productId} no existe` }, { status: 400 })
       const qty = Math.max(1, Number(it.quantity || 1))
+
+      if (typeof p.max_per_order === 'number' && p.max_per_order > 0 && qty > p.max_per_order) {
+        return NextResponse.json({ error: `Máximo por orden para ${p.title}: ${p.max_per_order}` }, { status: 400 })
+      }
+
+      if (p.stock_type === 'boolean' && !(p.stock_value === true || p.stock_value === 1)) {
+        return NextResponse.json({ error: `Producto ${p.title} no disponible` }, { status: 400 })
+      }
+
       total += p.price * qty
       orderItemsPayload.push({ product_id: p.id, title_snapshot: p.title, unit_price: p.price, quantity: qty, redeemed_qty: 0 })
+
+      requestedByProduct.set(p.id, (requestedByProduct.get(p.id) ?? 0) + qty)
       if (p.is_yoga_add_on) {
         yogaRequested += qty
         yogaStock = p.stock ?? 0
+      }
+    }
+
+    const maxLimitedProducts = products?.filter(p => typeof p.max_per_order === 'number' && p.max_per_order > 0) || []
+    if (maxLimitedProducts.length > 0) {
+      for (const p of maxLimitedProducts) {
+        const requested = requestedByProduct.get(p.id) ?? 0
+        if (requested > (p.max_per_order as number)) {
+          return NextResponse.json({ error: `Máximo por orden para ${p.title}: ${p.max_per_order}` }, { status: 400 })
+        }
+      }
+    }
+
+    const qtyLimitedProducts = products?.filter(p => p.stock_type === 'quantity' && typeof p.stock_value === 'number') || []
+    if (qtyLimitedProducts.length > 0) {
+      const qtyIds = qtyLimitedProducts.map(p => p.id)
+      const { data: committedItems, error: cErr } = await supabase
+        .from('order_items')
+        .select('product_id,quantity')
+        .in('product_id', qtyIds)
+      if (cErr) return NextResponse.json({ error: cErr.message }, { status: 500 })
+
+      const committedByProduct = new Map<number, number>()
+      committedItems?.forEach(ci => {
+        committedByProduct.set(ci.product_id, (committedByProduct.get(ci.product_id) ?? 0) + (ci.quantity || 0))
+      })
+
+      for (const p of qtyLimitedProducts) {
+        const requested = requestedByProduct.get(p.id) ?? 0
+        if (requested === 0) continue
+        const committed = committedByProduct.get(p.id) ?? 0
+        const available = typeof p.stock_value === 'number' ? p.stock_value : 0
+        if (committed + requested > available) {
+          return NextResponse.json({ error: `Stock insuficiente para ${p.title}. Disponible: ${Math.max(available - committed, 0)}` }, { status: 400 })
+        }
       }
     }
 
