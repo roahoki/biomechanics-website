@@ -28,6 +28,8 @@ export default function MenuPage() {
   const [qty, setQty] = useState<Record<number, number>>({})
   const [cart, setCart] = useState<CartItem[]>([])
   const [paying, setPaying] = useState(false)
+  const [buyerName, setBuyerName] = useState('')
+  const [buyerContact, setBuyerContact] = useState('')
 
   useEffect(() => {
     const run = async () => {
@@ -79,6 +81,14 @@ export default function MenuPage() {
       alert('El carrito está vacío')
       return
     }
+    if (!buyerName.trim()) {
+      alert('Por favor ingresa tu nombre')
+      return
+    }
+    if (!buyerContact.trim()) {
+      alert('Por favor ingresa tu contacto (email o teléfono)')
+      return
+    }
 
     setPaying(true)
     try {
@@ -86,6 +96,8 @@ export default function MenuPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          buyerName,
+          buyerContact,
           items: cart.map(item => ({
             product_id: item.product_id,
             quantity: item.quantity
@@ -94,11 +106,13 @@ export default function MenuPage() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Error creando orden')
-      if (json.payment_link) {
+      if (json.payment_link && json.orderId) {
+        // Guardar ID de orden en sessionStorage para referencia después de Fintoc
+        sessionStorage.setItem('lastOrderId', json.orderId)
         // Redirigir directamente a Fintoc TPP para el pago
         window.location.href = json.payment_link
       } else {
-        alert('Error: sin link de pago')
+        alert('Error: no se pudo generar link de pago')
       }
     } catch (e: any) {
       alert(e.message)
@@ -206,6 +220,24 @@ export default function MenuPage() {
                 ))}
               </ul>
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: '2px solid #7dff31' }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>Nombre</label>
+                  <input
+                    type="text"
+                    value={buyerName}
+                    onChange={(e) => setBuyerName(e.target.value)}
+                    placeholder="Tu nombre completo"
+                    style={{ width: '100%', padding: '8px', marginBottom: 12, boxSizing: 'border-box' }}
+                  />
+                  <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>Contacto (email o teléfono)</label>
+                  <input
+                    type="text"
+                    value={buyerContact}
+                    onChange={(e) => setBuyerContact(e.target.value)}
+                    placeholder="tu@email.com o +56 9 1234 5678"
+                    style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                  />
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                   <strong style={{ fontSize: 18 }}>Total:</strong>
                   <strong style={{ fontSize: 20, color: '#7dff31' }}>${cartTotal.toLocaleString('es-CL')}</strong>
