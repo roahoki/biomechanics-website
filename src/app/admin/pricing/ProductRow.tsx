@@ -11,7 +11,6 @@ type Product = {
   is_yoga_add_on: boolean
   stock: number | null
   payment_link: string | null
-  mercadopago_link: string | null
 }
 
 type ProductChanges = {
@@ -117,7 +116,6 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
             <th>Visible</th>
             <th>Yoga cap</th>
             <th>Fintoc link</th>
-            <th>Mercado Pago link</th>
             <th></th>
           </tr>
         </thead>
@@ -159,15 +157,6 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
                   value={p.payment_link ?? ''} 
                   onChange={(e) => updateField(p.id, 'payment_link', e.target.value)}
                   style={{ width: 200 }}
-                />
-              </td>
-              <td>
-                <input 
-                  type="text" 
-                  value={p.mercadopago_link ?? ''} 
-                  onChange={(e) => updateField(p.id, 'mercadopago_link', e.target.value)}
-                  style={{ width: 200 }}
-                  placeholder="https://mpago.la/..."
                 />
               </td>
               <td>
