@@ -29,7 +29,7 @@ export default function MenuPage() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [paying, setPaying] = useState(false)
   const [buyerName, setBuyerName] = useState('')
-  const [buyerContact, setBuyerContact] = useState('')
+  const [buyerEmail, setBuyerEmail] = useState('')
 
   useEffect(() => {
     const run = async () => {
@@ -85,8 +85,12 @@ export default function MenuPage() {
       alert('Por favor ingresa tu nombre')
       return
     }
-    if (!buyerContact.trim()) {
-      alert('Por favor ingresa tu contacto (email o teléfono)')
+    if (!buyerEmail.trim()) {
+      alert('Por favor ingresa tu email')
+      return
+    }
+    if (!buyerEmail.includes('@')) {
+      alert('Por favor ingresa un email válido')
       return
     }
 
@@ -97,7 +101,7 @@ export default function MenuPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           buyerName,
-          buyerContact,
+          buyerContact: buyerEmail,
           items: cart.map(item => ({
             product_id: item.product_id,
             quantity: item.quantity
@@ -229,12 +233,12 @@ export default function MenuPage() {
                     placeholder="Tu nombre completo"
                     style={{ width: '100%', padding: '8px', marginBottom: 12, boxSizing: 'border-box' }}
                   />
-                  <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>Contacto (email o teléfono)</label>
+                  <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>Email</label>
                   <input
-                    type="text"
-                    value={buyerContact}
-                    onChange={(e) => setBuyerContact(e.target.value)}
-                    placeholder="tu@email.com o +56 9 1234 5678"
+                    type="email"
+                    value={buyerEmail}
+                    onChange={(e) => setBuyerEmail(e.target.value)}
+                    placeholder="tu@email.com"
                     style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
                   />
                 </div>

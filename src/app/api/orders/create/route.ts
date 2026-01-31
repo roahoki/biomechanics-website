@@ -76,8 +76,8 @@ export async function POST(req: Request) {
     const { error: oiErr } = await supabase.from('order_items').insert(withOrderId)
     if (oiErr) return NextResponse.json({ error: oiErr.message }, { status: 500 })
 
-    // Enviar email si hay contacto
-    if (buyerContact && buyerContact.includes('@')) {
+    // Enviar email si hay contacto válido (obligatorio por formulario)
+    if (buyerContact) {
       try {
         const emailItems = orderItemsPayload.map(item => ({
           title: item.title_snapshot,
