@@ -5,10 +5,15 @@ import { ProductTable } from './ProductRow'
 export default async function AdminPricingPage() {
   await checkAdminPermissions()
   const supabase = createPublicClient()
-  const { data: products } = await supabase
+  // Select all columns to avoid schema cache errors with missing columns
+  const { data: products, error } = await supabase
     .from('products')
-    .select('id,title,type,price,visible,stock_type,stock_value')
+    .select('*')
     .order('type', { ascending: true })
+  
+  if (error) {
+    console.error('Error fetching products:', error)
+  }
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 16 }}>

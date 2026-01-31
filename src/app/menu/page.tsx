@@ -8,11 +8,13 @@ type Product = {
   type: 'ticket' | 'item'
   price: number
   visible: boolean
-  category: string | null
+  category?: string | null
   is_yoga_add_on?: boolean
   stock?: number | null
   payment_link?: string | null
   mercadopago_link?: string | null
+  stock_type?: 'quantity' | 'boolean' | null
+  stock_value?: number | boolean | null
 }
 
 type CartItem = {

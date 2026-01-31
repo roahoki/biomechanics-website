@@ -8,8 +8,8 @@ type Product = {
   type: string
   price: number
   visible: boolean
-  stock_type: 'quantity' | 'boolean' | null
-  stock_value: number | boolean | null
+  stock_type?: 'quantity' | 'boolean' | null
+  stock_value?: number | boolean | null
 }
 
 type ProductChanges = {
@@ -269,7 +269,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
                   style={{ width: 70, padding: 4 }}
                 />
               </td>
-              <td style={{ padding: 8, fontSize: 12 }}>{p.stock_type === 'quantity' ? 'Cantidad' : 'Booleano'}</td>
+              <td style={{ padding: 8, fontSize: 12 }}>{p.stock_type ? (p.stock_type === 'quantity' ? 'Cantidad' : 'Booleano') : '-'}</td>
               <td style={{ padding: 8, textAlign: 'center' }}>
                 {p.stock_type === 'quantity' ? (
                   <input 
