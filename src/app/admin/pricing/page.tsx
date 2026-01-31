@@ -7,7 +7,7 @@ export default async function AdminPricingPage() {
   const supabase = createPublicClient()
   const { data: products } = await supabase
     .from('products')
-    .select('id,title,type,price,visible')
+    .select('id,title,type,price,visible,stock_type,stock_value')
     .order('type', { ascending: true })
 
   return (

@@ -3,7 +3,7 @@ import { checkAdminPermissions } from '@/utils/roles'
 import { createAdminClient } from '@/lib/supabase-db'
 
 // POST /api/products/create
-// body: { title:string, type:'ticket'|'item', price:number, visible?:boolean }
+// body: { title:string, type:'ticket'|'item', price:number, visible?:boolean, stock_type?:'quantity'|'boolean', stock_value?:number|boolean }
 export async function POST(req: Request) {
   try {
     const isAllowed = await checkAdminPermissions()
@@ -14,7 +14,9 @@ export async function POST(req: Request) {
       title,
       type,
       price,
-      visible = true
+      visible = true,
+      stock_type = 'quantity',
+      stock_value = 10
     } = payload
 
     if (!title || typeof title !== 'string') {
@@ -34,9 +36,11 @@ export async function POST(req: Request) {
         title: title.trim(),
         type,
         price,
-        visible
+        visible,
+        stock_type,
+        stock_value: stock_type === 'quantity' ? stock_value : (stock_value === true || stock_value === 1)
       })
-      .select('id,title,type,price,visible')
+      .select('id,title,type,price,visible,stock_type,stock_value')
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

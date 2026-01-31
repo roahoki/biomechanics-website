@@ -8,6 +8,8 @@ type Product = {
   type: string
   price: number
   visible: boolean
+  stock_type: 'quantity' | 'boolean' | null
+  stock_value: number | boolean | null
 }
 
 type ProductChanges = {
@@ -21,11 +23,13 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
   const [message, setMessage] = useState('')
   const [creating, setCreating] = useState(false)
   const [createMessage, setCreateMessage] = useState('')
-  const [newProduct, setNewProduct] = useState({
+  const [newProduct, setNewProduct] = useState<any>({
     title: '',
     type: 'ticket',
     price: 0,
-    visible: true
+    visible: true,
+    stock_type: 'quantity',
+    stock_value: 10
   })
 
   const hasChanges = Object.keys(changes).length > 0
@@ -87,7 +91,9 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         title: newProduct.title.trim(),
         type: newProduct.type,
         price: Number(newProduct.price),
-        visible: newProduct.visible
+        visible: newProduct.visible,
+        stock_type: newProduct.stock_type,
+        stock_value: newProduct.stock_type === 'quantity' ? Number(newProduct.stock_value) : true
       }
 
       const res = await fetch('/api/products/create', {
@@ -106,7 +112,9 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         title: '',
         type: 'ticket',
         price: 0,
-        visible: true
+        visible: true,
+        stock_type: 'quantity',
+        stock_value: 10
       })
       setTimeout(() => setCreateMessage(''), 3000)
     } catch (err) {
@@ -120,17 +128,17 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     <div>
       <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
         <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 0.8fr 0.8fr 0.8fr auto', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.7fr 0.9fr 1fr 0.8fr auto', gap: 8, alignItems: 'center' }}>
           <input
             type="text"
             placeholder="Nombre"
             value={newProduct.title}
-            onChange={(e) => setNewProduct(prev => ({ ...prev, title: e.target.value }))}
+            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, title: e.target.value }))}
             style={{ padding: 6 }}
           />
           <select
             value={newProduct.type}
-            onChange={(e) => setNewProduct(prev => ({ ...prev, type: e.target.value }))}
+            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, type: e.target.value }))}
             style={{ padding: 6 }}
           >
             <option value="ticket">ticket</option>
@@ -140,14 +148,40 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
             type="number"
             placeholder="Precio"
             value={newProduct.price}
-            onChange={(e) => setNewProduct(prev => ({ ...prev, price: Number(e.target.value) }))}
+            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, price: Number(e.target.value) }))}
             style={{ padding: 6 }}
           />
+          <select
+            value={newProduct.stock_type}
+            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_type: e.target.value as 'quantity' | 'boolean' }))}
+            style={{ padding: 6 }}
+          >
+            <option value="quantity">Cantidad</option>
+            <option value="boolean">Disponible</option>
+          </select>
+          {newProduct.stock_type === 'quantity' ? (
+            <input
+              type="number"
+              placeholder="Stock inicial"
+              value={newProduct.stock_value}
+              onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_value: Number(e.target.value) }))}
+              style={{ padding: 6 }}
+            />
+          ) : (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+              <input
+                type="checkbox"
+                checked={newProduct.stock_value === true}
+                onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_value: e.target.checked }))}
+              />
+              Disponible
+            </label>
+          )}
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
             <input
               type="checkbox"
               checked={newProduct.visible}
-              onChange={(e) => setNewProduct(prev => ({ ...prev, visible: e.target.checked }))}
+              onChange={(e) => setNewProduct((prev: any) => ({ ...prev, visible: e.target.checked }))}
             />
             Visible
           </label>
@@ -161,10 +195,11 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
               cursor: !canCreate || creating ? 'not-allowed' : 'pointer',
               border: 'none',
               borderRadius: 4,
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              fontSize: 12
             }}
           >
-            {creating ? '⏳ Creando...' : '➕ Agregar'}
+            {creating ? '⏳' : '➕'}
           </button>
         </div>
         {createMessage && (
@@ -209,41 +244,57 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         )}
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Precio</th>
-            <th>Visible</th>
+          <tr style={{ background: '#1a1a1a' }}>
+            <th style={{ padding: 8, textAlign: 'left' }}>Nombre</th>
+            <th style={{ padding: 8, textAlign: 'left' }}>Tipo</th>
+            <th style={{ padding: 8, textAlign: 'left' }}>Precio</th>
+            <th style={{ padding: 8, textAlign: 'left' }}>Stock</th>
+            <th style={{ padding: 8, textAlign: 'center' }}>Disponible</th>
+            <th style={{ padding: 8, textAlign: 'center' }}>Visible</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {products.map(p => (
             <tr key={p.id} style={{ borderTop: '1px solid #555' }}>
-              <td>{p.title}</td>
-              <td>{p.type}</td>
-              <td>
+              <td style={{ padding: 8 }}>{p.title}</td>
+              <td style={{ padding: 8, fontSize: 12 }}>{p.type}</td>
+              <td style={{ padding: 8 }}>
                 <input 
                   type="number" 
                   value={p.price} 
                   onChange={(e) => updateField(p.id, 'price', Number(e.target.value))}
-                  style={{ width: 80 }}
+                  style={{ width: 70, padding: 4 }}
                 />
               </td>
-              <td>
+              <td style={{ padding: 8, fontSize: 12 }}>{p.stock_type === 'quantity' ? 'Cantidad' : 'Booleano'}</td>
+              <td style={{ padding: 8, textAlign: 'center' }}>
+                {p.stock_type === 'quantity' ? (
+                  <input 
+                    type="number" 
+                    value={typeof p.stock_value === 'number' ? p.stock_value : 0}
+                    onChange={(e) => updateField(p.id, 'stock_value', Number(e.target.value))}
+                    style={{ width: 60, padding: 4 }}
+                  />
+                ) : (
+                  <input 
+                    type="checkbox" 
+                    checked={p.stock_value === true || p.stock_value === 1}
+                    onChange={(e) => updateField(p.id, 'stock_value', e.target.checked)}
+                  />
+                )}
+              </td>
+              <td style={{ padding: 8, textAlign: 'center' }}>
                 <input 
                   type="checkbox" 
                   checked={p.visible} 
                   onChange={(e) => updateField(p.id, 'visible', e.target.checked)}
                 />
               </td>
-              <td>
-                <span>-</span>
-              </td>
-              <td>
-                <small>ID: {p.id}</small>
+              <td style={{ padding: 8, fontSize: 11, color: '#999' }}>
+                ID: {p.id}
               </td>
             </tr>
           ))}
