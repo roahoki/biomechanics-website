@@ -79,7 +79,12 @@ export async function POST(req: Request) {
     // Enviar email si hay contacto
     if (buyerContact && buyerContact.includes('@')) {
       try {
-        await sendOrderEmail(buyerContact, buyerName || 'Usuario', order.id, orderItemsPayload, total)
+        const emailItems = orderItemsPayload.map(item => ({
+          title: item.title_snapshot,
+          quantity: item.quantity,
+          unit_price: item.unit_price
+        }))
+        await sendOrderEmail(buyerContact, buyerName || 'Usuario', order.id, emailItems, total)
       } catch (emailErr) {
         console.error('Error enviando email:', emailErr)
         // No fallar la orden si falla el email
