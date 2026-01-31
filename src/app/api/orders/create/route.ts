@@ -62,9 +62,10 @@ export async function POST(req: Request) {
 
     // Crear orden
     const redemption_code = crypto.randomUUID()
+    const fintocLink = `https://www.fintoc.cl/tpp/${total}`
     const { data: order, error: oErr } = await supabase
       .from('orders')
-      .insert({ buyer_name: buyerName ?? null, buyer_contact: buyerContact ?? null, status: 'created', amount: total, payment_method: 'fintoc_tpp', redemption_code })
+      .insert({ buyer_name: buyerName ?? null, buyer_contact: buyerContact ?? null, status: 'created', amount: total, payment_method: 'fintoc_tpp', redemption_code, payment_link: fintocLink })
       .select()
       .single()
     if (oErr || !order) return NextResponse.json({ error: oErr?.message ?? 'no se pudo crear orden' }, { status: 500 })
@@ -74,7 +75,7 @@ export async function POST(req: Request) {
     const { error: oiErr } = await supabase.from('order_items').insert(withOrderId)
     if (oiErr) return NextResponse.json({ error: oiErr.message }, { status: 500 })
 
-    return NextResponse.json({ orderId: order.id, amount: total, redemption_code })
+    return NextResponse.json({ orderId: order.id, amount: total, redemption_code, payment_link: fintocLink })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }

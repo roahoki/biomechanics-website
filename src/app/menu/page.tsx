@@ -94,10 +94,11 @@ export default function MenuPage() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Error creando orden')
-      if (json.orderId) {
-        location.href = `/orders/${json.orderId}`
+      if (json.payment_link) {
+        // Redirigir directamente a Fintoc TPP para el pago
+        window.location.href = json.payment_link
       } else {
-        alert('Orden creada pero sin ID de redirección')
+        alert('Error: sin link de pago')
       }
     } catch (e: any) {
       alert(e.message)
