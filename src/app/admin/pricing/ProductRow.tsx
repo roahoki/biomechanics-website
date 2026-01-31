@@ -133,87 +133,113 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     <div>
       <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
         <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.7fr 0.9fr 1fr 0.9fr 0.8fr auto', gap: 8, alignItems: 'center' }}>
-          <input
-            type="text"
-            placeholder="Nombre"
-            value={newProduct.title}
-            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, title: e.target.value }))}
-            style={{ padding: 6 }}
-          />
-          <select
-            value={newProduct.type}
-            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, type: e.target.value }))}
-            style={{ padding: 6 }}
-          >
-            <option value="ticket">ticket</option>
-            <option value="item">item</option>
-          </select>
-          <input
-            type="number"
-            placeholder="Precio"
-            value={newProduct.price}
-            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, price: Number(e.target.value) }))}
-            style={{ padding: 6 }}
-          />
-          <select
-            value={newProduct.stock_type}
-            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_type: e.target.value as 'quantity' | 'boolean' }))}
-            style={{ padding: 6 }}
-          >
-            <option value="quantity">Cantidad</option>
-            <option value="boolean">Disponible</option>
-          </select>
-          {newProduct.stock_type === 'quantity' ? (
-            <input
-              type="number"
-              placeholder="Stock inicial"
-              value={newProduct.stock_value}
-              onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_value: Number(e.target.value) }))}
-              style={{ padding: 6 }}
-            />
-          ) : (
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-              <input
-                type="checkbox"
-                checked={newProduct.stock_value === true}
-                onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_value: e.target.checked }))}
-              />
-              Disponible
-            </label>
-          )}
-          <input
-            type="number"
-            placeholder="Max/orden"
-            value={newProduct.max_per_order}
-            onChange={(e) => setNewProduct((prev: any) => ({ ...prev, max_per_order: Number(e.target.value) }))}
-            style={{ padding: 6 }}
-          />
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-            <input
-              type="checkbox"
-              checked={newProduct.visible}
-              onChange={(e) => setNewProduct((prev: any) => ({ ...prev, visible: e.target.checked }))}
-            />
-            Visible
-          </label>
-          <button
-            onClick={createProduct}
-            disabled={!canCreate || creating}
-            style={{
-              padding: '8px 12px',
-              background: !canCreate || creating ? '#555' : '#7dff31',
-              color: !canCreate || creating ? '#888' : '#000',
-              cursor: !canCreate || creating ? 'not-allowed' : 'pointer',
-              border: 'none',
-              borderRadius: 4,
-              fontWeight: 'bold',
-              fontSize: 12
-            }}
-          >
-            {creating ? '⏳' : '➕'}
-          </button>
-        </div>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: '#1a1a1a' }}>
+              <th style={{ padding: 8, textAlign: 'left' }}>Nombre</th>
+              <th style={{ padding: 8, textAlign: 'left' }}>Tipo</th>
+              <th style={{ padding: 8, textAlign: 'left' }}>Precio</th>
+              <th style={{ padding: 8, textAlign: 'left' }}>Stock</th>
+              <th style={{ padding: 8, textAlign: 'center' }}>Disponible</th>
+              <th style={{ padding: 8, textAlign: 'center' }}>Max/orden</th>
+              <th style={{ padding: 8, textAlign: 'center' }}>Visible</th>
+              <th style={{ padding: 8 }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{ borderTop: '1px solid #555' }}>
+              <td style={{ padding: 8 }}>
+                <input
+                  type="text"
+                  placeholder="Nombre"
+                  value={newProduct.title}
+                  onChange={(e) => setNewProduct((prev: any) => ({ ...prev, title: e.target.value }))}
+                  style={{ padding: 6, width: '100%' }}
+                />
+              </td>
+              <td style={{ padding: 8 }}>
+                <select
+                  value={newProduct.type}
+                  onChange={(e) => setNewProduct((prev: any) => ({ ...prev, type: e.target.value }))}
+                  style={{ padding: 6, width: '100%' }}
+                >
+                  <option value="ticket">ticket</option>
+                  <option value="item">item</option>
+                </select>
+              </td>
+              <td style={{ padding: 8 }}>
+                <input
+                  type="number"
+                  placeholder="Precio"
+                  value={newProduct.price}
+                  onChange={(e) => setNewProduct((prev: any) => ({ ...prev, price: Number(e.target.value) }))}
+                  style={{ padding: 6, width: '100%' }}
+                />
+              </td>
+              <td style={{ padding: 8 }}>
+                <select
+                  value={newProduct.stock_type}
+                  onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_type: e.target.value as 'quantity' | 'boolean' }))}
+                  style={{ padding: 6, width: '100%' }}
+                >
+                  <option value="quantity">Cantidad</option>
+                  <option value="boolean">Disponible</option>
+                </select>
+              </td>
+              <td style={{ padding: 8, textAlign: 'center' }}>
+                {newProduct.stock_type === 'quantity' ? (
+                  <input
+                    type="number"
+                    placeholder="Stock inicial"
+                    value={newProduct.stock_value}
+                    onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_value: Number(e.target.value) }))}
+                    style={{ padding: 6, width: 90 }}
+                  />
+                ) : (
+                  <input
+                    type="checkbox"
+                    checked={newProduct.stock_value === true}
+                    onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_value: e.target.checked }))}
+                  />
+                )}
+              </td>
+              <td style={{ padding: 8, textAlign: 'center' }}>
+                <input
+                  type="number"
+                  placeholder="Max/orden"
+                  value={newProduct.max_per_order}
+                  onChange={(e) => setNewProduct((prev: any) => ({ ...prev, max_per_order: Number(e.target.value) }))}
+                  style={{ padding: 6, width: 90 }}
+                />
+              </td>
+              <td style={{ padding: 8, textAlign: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={newProduct.visible}
+                  onChange={(e) => setNewProduct((prev: any) => ({ ...prev, visible: e.target.checked }))}
+                />
+              </td>
+              <td style={{ padding: 8, textAlign: 'right' }}>
+                <button
+                  onClick={createProduct}
+                  disabled={!canCreate || creating}
+                  style={{
+                    padding: '8px 12px',
+                    background: !canCreate || creating ? '#555' : '#7dff31',
+                    color: !canCreate || creating ? '#888' : '#000',
+                    cursor: !canCreate || creating ? 'not-allowed' : 'pointer',
+                    border: 'none',
+                    borderRadius: 4,
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}
+                >
+                  {creating ? '⏳' : '➕'}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
         {createMessage && (
           <div style={{ marginTop: 8, fontSize: 13, fontWeight: 'bold', color: createMessage.startsWith('✅') ? '#28a745' : '#dc3545' }}>
             {createMessage}
