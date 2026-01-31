@@ -27,7 +27,9 @@ export default function OrdersValidationPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<string>('created') // created, paid, redeemed
+  const [filter, setFilter] = useState<string>('created')
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
+  const [processingBatch, setProcessingBatch] = useState(false)
 
   useEffect(() => {
     const run = async () => {
@@ -57,11 +59,72 @@ export default function OrdersValidationPage() {
       if (!res.ok) throw new Error(json.error || 'Error actualizando orden')
       
       const newStatus = action === 'confirm' ? 'paid' : 'cancelled'
-      // Actualizar estado local
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o))
       alert(action === 'confirm' ? 'Pago confirmado y email enviado' : 'Orden anulada y email enviado')
     } catch (e: any) {
       alert(`Error: ${e.message}`)
+    }
+  }
+
+  const handleBatchAction = async (action: 'confirm' | 'cancel') => {
+    if (selectedOrders.size === 0) {
+      alert('Selecciona al menos una orden')
+      return
+    }
+
+    const actionText = action === 'confirm' ? 'confirmar' : 'anular'
+    if (!window.confirm(`¿Estás seguro de que quieres ${actionText} ${selectedOrders.size} orden(es)?`)) {
+      return
+    }
+
+    setProcessingBatch(true)
+    const endpoint = action === 'confirm' ? 'confirm' : 'cancel'
+    const newStatus = action === 'confirm' ? 'paid' : 'cancelled'
+    
+    let successCount = 0
+    let errorCount = 0
+
+    for (const orderId of selectedOrders) {
+      try {
+        const res = await fetch(`/api/orders/${orderId}/${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        const json = await res.json()
+        if (res.ok) {
+          successCount++
+          setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o))
+        } else {
+          errorCount++
+          console.error(`Error en orden ${orderId}:`, json.error)
+        }
+      } catch (e: any) {
+        errorCount++
+        console.error(`Error en orden ${orderId}:`, e.message)
+      }
+    }
+
+    setProcessingBatch(false)
+    setSelectedOrders(new Set())
+    
+    alert(`Operación completada:\n✅ ${successCount} exitosas\n❌ ${errorCount} fallidas`)
+  }
+
+  const toggleOrderSelection = (orderId: string) => {
+    const newSelected = new Set(selectedOrders)
+    if (newSelected.has(orderId)) {
+      newSelected.delete(orderId)
+    } else {
+      newSelected.add(orderId)
+    }
+    setSelectedOrders(newSelected)
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedOrders.size === filteredOrders.length) {
+      setSelectedOrders(new Set())
+    } else {
+      setSelectedOrders(new Set(filteredOrders.map(o => o.id)))
     }
   }
 
@@ -75,11 +138,14 @@ export default function OrdersValidationPage() {
       <h1>Validación de Pagos</h1>
       <p style={{ color: '#999' }}>Total de órdenes: {orders.length}</p>
 
-      <div style={{ marginBottom: 24, display: 'flex', gap: 8 }}>
+      <div style={{ marginBottom: 24, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         {['created', 'paid', 'cancelled'].map(status => (
           <button
             key={status}
-            onClick={() => setFilter(status)}
+            onClick={() => {
+              setFilter(status)
+              setSelectedOrders(new Set())
+            }}
             style={{
               padding: '8px 16px',
               background: filter === status ? '#7dff31' : '#333',
@@ -95,9 +161,71 @@ export default function OrdersValidationPage() {
         ))}
       </div>
 
+      {selectedOrders.size > 0 && (
+        <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 4, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <span style={{ fontSize: 14 }}>
+            <strong>{selectedOrders.size}</strong> orden(es) seleccionada(s)
+          </span>
+          <button
+            onClick={() => handleBatchAction('confirm')}
+            disabled={processingBatch}
+            style={{
+              padding: '6px 12px',
+              background: processingBatch ? '#555' : '#7dff31',
+              color: processingBatch ? '#888' : '#000',
+              cursor: processingBatch ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold',
+              border: 'none',
+              borderRadius: 3,
+              fontSize: 12
+            }}
+          >
+            {processingBatch ? 'Procesando...' : '✅ Confirmar seleccionadas'}
+          </button>
+          <button
+            onClick={() => handleBatchAction('cancel')}
+            disabled={processingBatch}
+            style={{
+              padding: '6px 12px',
+              background: processingBatch ? '#555' : '#C23B22',
+              color: '#fff',
+              cursor: processingBatch ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold',
+              border: 'none',
+              borderRadius: 3,
+              fontSize: 12
+            }}
+          >
+            {processingBatch ? 'Procesando...' : '❌ Anular seleccionadas'}
+          </button>
+          <button
+            onClick={() => setSelectedOrders(new Set())}
+            style={{
+              padding: '6px 12px',
+              background: '#333',
+              color: '#999',
+              cursor: 'pointer',
+              border: '1px solid #555',
+              borderRadius: 3,
+              fontSize: 12
+            }}
+          >
+            Limpiar
+          </button>
+        </div>
+      )}
+
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
         <thead>
           <tr style={{ background: '#222' }}>
+            <th style={{ padding: 12, textAlign: 'center', borderBottom: '1px solid #444', width: 40 }}>
+              <input
+                type="checkbox"
+                checked={filteredOrders.length > 0 && selectedOrders.size === filteredOrders.length}
+                onChange={toggleSelectAll}
+                style={{ cursor: 'pointer', width: 16, height: 16 }}
+              />
+            </th>
             <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #444' }}>Orden ID</th>
             <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #444' }}>Comprador</th>
             <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #444' }}>Contacto</th>
@@ -109,7 +237,15 @@ export default function OrdersValidationPage() {
         </thead>
         <tbody>
           {filteredOrders.map(order => (
-            <tr key={order.id} style={{ borderBottom: '1px solid #333' }}>
+            <tr key={order.id} style={{ borderBottom: '1px solid #333', background: selectedOrders.has(order.id) ? '#1a1a1a' : 'transparent' }}>
+              <td style={{ padding: 12, textAlign: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={selectedOrders.has(order.id)}
+                  onChange={() => toggleOrderSelection(order.id)}
+                  style={{ cursor: 'pointer', width: 16, height: 16 }}
+                />
+              </td>
               <td style={{ padding: 12, fontFamily: 'monospace', fontSize: 10 }}>
                 <strong>{order.id.substring(0, 8)}…</strong>
               </td>
