@@ -84,20 +84,17 @@ export default function MenuPage() {
                     <strong>${t.price}</strong>
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-                    <button onClick={() => crearOrden(t.id)} style={{ padding: '8px 12px', background: '#C23B22', color: '#fff', cursor: 'pointer' }}>
-                      Obtener código
-                    </button>
                     {t.payment_link ? (
                       <a href={t.payment_link} target="_blank" rel="noopener noreferrer">
-                        <button style={{ padding: '8px 12px', background: '#7dff31', color: '#000', cursor: 'pointer' }}>
-                          Pagar con Fintoc
+                        <button style={{ padding: '8px 12px', background: '#7dff31', color: '#000', cursor: 'pointer', fontWeight: 'bold' }}>
+                          Fintoc
                         </button>
                       </a>
                     ) : null}
                     {t.mercadopago_link ? (
                       <a href={t.mercadopago_link} target="_blank" rel="noopener noreferrer">
-                        <button style={{ padding: '8px 12px', background: '#009ee3', color: '#fff', cursor: 'pointer' }}>
-                          Pagar con Mercado Pago
+                        <button style={{ padding: '8px 12px', background: '#009ee3', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
+                          Mercado Pago
                         </button>
                       </a>
                     ) : null}
@@ -125,20 +122,17 @@ export default function MenuPage() {
                       onChange={e => setQty(prev => ({ ...prev, [b.id]: Math.max(1, parseInt(e.target.value, 10)) }))}
                       style={{ width: 60 }}
                     />
-                    <button onClick={() => crearOrden(b.id)} style={{ padding: '8px 12px', background: '#C23B22', color: '#fff', cursor: 'pointer' }}>
-                      Obtener código
-                    </button>
                     {b.payment_link ? (
                       <a href={b.payment_link} target="_blank" rel="noopener noreferrer">
-                        <button style={{ padding: '8px 12px', background: '#7dff31', color: '#000', cursor: 'pointer' }}>
-                          Pagar con Fintoc
+                        <button style={{ padding: '8px 12px', background: '#7dff31', color: '#000', cursor: 'pointer', fontWeight: 'bold' }}>
+                          Fintoc
                         </button>
                       </a>
                     ) : null}
                     {b.mercadopago_link ? (
                       <a href={b.mercadopago_link} target="_blank" rel="noopener noreferrer">
-                        <button style={{ padding: '8px 12px', background: '#009ee3', color: '#fff', cursor: 'pointer' }}>
-                          Pagar con Mercado Pago
+                        <button style={{ padding: '8px 12px', background: '#009ee3', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
+                          Mercado Pago
                         </button>
                       </a>
                     ) : null}
