@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
     // Crear orden
     const redemption_code = crypto.randomUUID()
-    const fintocLink = `https://www.fintoc.cl/tpp/${total}`
+    const fintocLink = `https://fintoc.me/tpp/${total}`
     const { data: order, error: oErr } = await supabase
       .from('orders')
       .insert({ buyer_name: buyerName ?? null, buyer_contact: buyerContact ?? null, status: 'created', amount: total, payment_method: 'fintoc_tpp', redemption_code, payment_link: fintocLink })
