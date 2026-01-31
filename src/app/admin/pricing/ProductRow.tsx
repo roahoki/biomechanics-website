@@ -8,9 +8,6 @@ type Product = {
   type: string
   price: number
   visible: boolean
-  is_yoga_add_on: boolean
-  stock: number | null
-  payment_link: string | null
 }
 
 type ProductChanges = {
@@ -28,10 +25,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     title: '',
     type: 'ticket',
     price: 0,
-    visible: true,
-    is_yoga_add_on: false,
-    stock: 25,
-    payment_link: ''
+    visible: true
   })
 
   const hasChanges = Object.keys(changes).length > 0
@@ -93,10 +87,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         title: newProduct.title.trim(),
         type: newProduct.type,
         price: Number(newProduct.price),
-        visible: newProduct.visible,
-        is_yoga_add_on: newProduct.is_yoga_add_on,
-        stock: newProduct.is_yoga_add_on ? Number(newProduct.stock || 25) : null,
-        payment_link: newProduct.payment_link?.trim() || null
+        visible: newProduct.visible
       }
 
       const res = await fetch('/api/products/create', {
@@ -115,10 +106,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         title: '',
         type: 'ticket',
         price: 0,
-        visible: true,
-        is_yoga_add_on: false,
-        stock: 25,
-        payment_link: ''
+        visible: true
       })
       setTimeout(() => setCreateMessage(''), 3000)
     } catch (err) {
@@ -132,7 +120,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     <div>
       <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
         <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 0.7fr 0.7fr 0.7fr 0.7fr 1.5fr auto', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 0.8fr 0.8fr 0.8fr auto', gap: 8, alignItems: 'center' }}>
           <input
             type="text"
             placeholder="Nombre"
@@ -163,29 +151,6 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
             />
             Visible
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-            <input
-              type="checkbox"
-              checked={newProduct.is_yoga_add_on}
-              onChange={(e) => setNewProduct(prev => ({ ...prev, is_yoga_add_on: e.target.checked }))}
-            />
-            Yoga add-on
-          </label>
-          <input
-            type="number"
-            placeholder="Yoga cap"
-            value={newProduct.stock}
-            onChange={(e) => setNewProduct(prev => ({ ...prev, stock: Number(e.target.value) }))}
-            disabled={!newProduct.is_yoga_add_on}
-            style={{ padding: 6, opacity: newProduct.is_yoga_add_on ? 1 : 0.5 }}
-          />
-          <input
-            type="text"
-            placeholder="Fintoc link"
-            value={newProduct.payment_link}
-            onChange={(e) => setNewProduct(prev => ({ ...prev, payment_link: e.target.value }))}
-            style={{ padding: 6 }}
-          />
           <button
             onClick={createProduct}
             disabled={!canCreate || creating}
@@ -251,8 +216,6 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
             <th>Tipo</th>
             <th>Precio</th>
             <th>Visible</th>
-            <th>Yoga cap</th>
-            <th>Fintoc link</th>
             <th></th>
           </tr>
         </thead>
@@ -277,24 +240,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
                 />
               </td>
               <td>
-                {p.is_yoga_add_on ? (
-                  <input 
-                    type="number" 
-                    value={p.stock ?? 25} 
-                    onChange={(e) => updateField(p.id, 'stock', Number(e.target.value))}
-                    style={{ width: 60 }}
-                  />
-                ) : (
-                  <span>-</span>
-                )}
-              </td>
-              <td>
-                <input 
-                  type="text" 
-                  value={p.payment_link ?? ''} 
-                  onChange={(e) => updateField(p.id, 'payment_link', e.target.value)}
-                  style={{ width: 200 }}
-                />
+                <span>-</span>
               </td>
               <td>
                 <small>ID: {p.id}</small>
