@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-db'
+import { sendOrderEmail } from '@/lib/email'
 
 // POST /api/orders/create
 // body: { buyerName?:string, buyerContact?:string, items: Array<{ productId:number, quantity:number }> }
@@ -74,6 +75,16 @@ export async function POST(req: Request) {
     const withOrderId = orderItemsPayload.map(oi => ({ ...oi, order_id: order.id }))
     const { error: oiErr } = await supabase.from('order_items').insert(withOrderId)
     if (oiErr) return NextResponse.json({ error: oiErr.message }, { status: 500 })
+
+    // Enviar email si hay contacto
+    if (buyerContact && buyerContact.includes('@')) {
+      try {
+        await sendOrderEmail(buyerContact, buyerName || 'Usuario', order.id, orderItemsPayload, total)
+      } catch (emailErr) {
+        console.error('Error enviando email:', emailErr)
+        // No fallar la orden si falla el email
+      }
+    }
 
     return NextResponse.json({ orderId: order.id, amount: total, redemption_code, payment_link: fintocLink })
   } catch (e: any) {
