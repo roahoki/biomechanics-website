@@ -99,7 +99,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         price: Number(newProduct.price),
         visible: newProduct.visible,
         stock_type: newProduct.stock_type,
-        stock_value: newProduct.stock_type === 'quantity' ? Number(newProduct.stock_value) : true,
+        stock_value: newProduct.stock_type === 'quantity' ? Number(newProduct.stock_value) : 1,
         stock_initial: stockInitial,
         max_per_order: Number.isFinite(maxPerOrder) && maxPerOrder > 0 ? maxPerOrder : null
       }
@@ -185,7 +185,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
 
       <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
         <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }} className="mobile-scroll">
           <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: '#1a1a1a' }}>
@@ -301,7 +301,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         )}
       </div>
 
-      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div className="mobile-scroll" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <table style={{ width: '100%', minWidth: 1000, borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: '#1a1a1a' }}>
@@ -412,6 +412,12 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         @media (max-width: 768px) {
           .mobile-save-button {
             display: block !important;
+          }
+        }
+        
+        @media (min-width: 769px) {
+          .mobile-scroll {
+            overflow-x: visible !important;
           }
         }
       `}</style>

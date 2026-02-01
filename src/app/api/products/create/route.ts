@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         price,
         visible,
         stock_type,
-        stock_value: stock_type === 'quantity' ? stock_value : (stock_value === true || stock_value === 1),
+        stock_value: stock_type === 'quantity' ? stock_value : (stock_value === true || stock_value === 1 ? 1 : 0),
         stock_initial: stock_type === 'quantity' ? stock_initial : null,
         max_per_order: typeof max_per_order === 'number' && max_per_order > 0 ? max_per_order : null
       })
