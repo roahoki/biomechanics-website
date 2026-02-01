@@ -4,6 +4,11 @@
             "source": "/",
             "destination": "/links",
             "permanent": true
+        },
+        {
+            "source": "/esto-01-febrero",
+            "destination": "/links?id=34",
+            "permanent": true
         }
     ]
 }
