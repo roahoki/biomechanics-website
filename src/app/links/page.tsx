@@ -25,7 +25,8 @@ export default function Page() {
         categoriesWithItems,
         selectedCategory,
         setSelectedCategory
-    } = useCategoryFilter(linksData?.links || [], linksData?.categories || [])
+    } = useCategoryFilter(linksData?.    cd /Users/tomas/Documents/GitHub/biomechanics-website
+    npm installlinks || [], linksData?.categories || [])
 
     useEffect(() => {
         async function loadData() {

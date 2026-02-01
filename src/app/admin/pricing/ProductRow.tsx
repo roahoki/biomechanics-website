@@ -83,7 +83,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     }
   }
 
-  const canCreate = newProduct.title.trim().length > 0 && newProduct.price > 0
+  const canCreate = newProduct.title.trim().length > 0 && Number(newProduct.price) > 0
 
   const createProduct = async () => {
     if (!canCreate) return
@@ -136,6 +136,53 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
 
   return (
     <div>
+      <div style={{ 
+        marginBottom: 16, 
+        padding: '10px 16px', 
+        background: '#222', 
+        borderRadius: 6,
+        display: 'flex',
+        gap: 10,
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10
+      }}>
+        <button
+          onClick={saveChanges}
+          disabled={!hasChanges || saving}
+          style={{
+            padding: '10px 20px',
+            fontSize: 16,
+            backgroundColor: hasChanges ? '#ff6b35' : '#666',
+            color: 'white',
+            border: 'none',
+            borderRadius: 4,
+            cursor: hasChanges ? 'pointer' : 'not-allowed',
+            fontWeight: 'bold'
+          }}
+        >
+          {saving ? '⏳ Guardando...' : '💾 Guardar cambios'}
+        </button>
+        
+        {hasChanges && (
+          <span style={{ color: '#ff6b35', fontSize: 14 }}>
+            {Object.keys(changes).length} producto(s) modificado(s)
+          </span>
+        )}
+        
+        {message && (
+          <span style={{ 
+            fontSize: 14, 
+            fontWeight: 'bold',
+            color: message.startsWith('✅') ? '#28a745' : '#dc3545'
+          }}>
+            {message}
+          </span>
+        )}
+      </div>
+
       <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
         <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
@@ -254,41 +301,6 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         )}
       </div>
 
-      <div style={{ marginBottom: 20, display: 'flex', gap: 10, alignItems: 'center' }}>
-        <button
-          onClick={saveChanges}
-          disabled={!hasChanges || saving}
-          style={{
-            padding: '10px 20px',
-            fontSize: 16,
-            backgroundColor: hasChanges ? '#ff6b35' : '#666',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: hasChanges ? 'pointer' : 'not-allowed',
-            fontWeight: 'bold'
-          }}
-        >
-          {saving ? '⏳ Guardando...' : '💾 Guardar cambios'}
-        </button>
-        
-        {hasChanges && (
-          <span style={{ color: '#ff6b35', fontSize: 14 }}>
-            {Object.keys(changes).length} producto(s) modificado(s)
-          </span>
-        )}
-        
-        {message && (
-          <span style={{ 
-            fontSize: 14, 
-            fontWeight: 'bold',
-            color: message.startsWith('✅') ? '#28a745' : '#dc3545'
-          }}>
-            {message}
-          </span>
-        )}
-      </div>
-
       <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <table style={{ width: '100%', minWidth: 1000, borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
@@ -360,6 +372,49 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
           </tbody>
         </table>
       </div>
+
+      {/* Mobile sticky bottom button */}
+      {hasChanges && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: '12px 16px',
+          background: '#1a1a1a',
+          borderTop: '1px solid #444',
+          display: 'none',
+          zIndex: 20
+        }}
+        className="mobile-save-button"
+        >
+          <button
+            onClick={saveChanges}
+            disabled={!hasChanges || saving}
+            style={{
+              width: '100%',
+              padding: '12px 20px',
+              fontSize: 16,
+              backgroundColor: hasChanges ? '#ff6b35' : '#666',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: hasChanges ? 'pointer' : 'not-allowed',
+              fontWeight: 'bold'
+            }}
+          >
+            {saving ? '⏳ Guardando...' : `💾 Guardar ${Object.keys(changes).length} cambio(s)`}
+          </button>
+        </div>
+      )}
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .mobile-save-button {
+            display: block !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
