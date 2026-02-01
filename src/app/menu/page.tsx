@@ -64,6 +64,9 @@ export default function MenuPage() {
     if (product.stock_type === 'boolean') {
       return product.stock_value === true || product.stock_value === 1
     }
+    if (product.stock_type === 'quantity') {
+      return typeof product.stock_value === 'number' && product.stock_value > 0
+    }
     return true
   }
 

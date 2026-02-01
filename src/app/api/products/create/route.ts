@@ -3,7 +3,7 @@ import { checkAdminPermissions } from '@/utils/roles'
 import { createAdminClient } from '@/lib/supabase-db'
 
 // POST /api/products/create
-// body: { title:string, type:'ticket'|'item', price:number, visible?:boolean, stock_type?:'quantity'|'boolean', stock_value?:number|boolean, max_per_order?:number|null }
+// body: { title:string, type:'ticket'|'item', price:number, visible?:boolean, stock_type?:'quantity'|'boolean', stock_value?:number|boolean, stock_initial?:number|null, max_per_order?:number|null }
 export async function POST(req: Request) {
   try {
     const isAllowed = await checkAdminPermissions()
@@ -17,6 +17,7 @@ export async function POST(req: Request) {
       visible = true,
       stock_type = 'quantity',
       stock_value = 10,
+      stock_initial = null,
       max_per_order = null
     } = payload
 
@@ -40,9 +41,10 @@ export async function POST(req: Request) {
         visible,
         stock_type,
         stock_value: stock_type === 'quantity' ? stock_value : (stock_value === true || stock_value === 1),
+        stock_initial: stock_type === 'quantity' ? stock_initial : null,
         max_per_order: typeof max_per_order === 'number' && max_per_order > 0 ? max_per_order : null
       })
-      .select('id,title,type,price,visible,stock_type,stock_value,max_per_order')
+      .select('id,title,type,price,visible,stock_type,stock_value,stock_initial,max_per_order')
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

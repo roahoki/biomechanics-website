@@ -28,6 +28,28 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     if (itemsErr) return NextResponse.json({ error: itemsErr.message }, { status: 500 })
 
+    // Decrementar stock para productos tipo "quantity"
+    if (items && items.length > 0) {
+      const productIds = items.map(item => item.product_id)
+      const { data: products, error: prodErr } = await supabase
+        .from('products')
+        .select('id,stock_type,stock_value')
+        .in('id', productIds)
+      
+      if (!prodErr && products) {
+        for (const item of items) {
+          const product = products.find(p => p.id === item.product_id)
+          if (product && product.stock_type === 'quantity' && typeof product.stock_value === 'number') {
+            const newStock = Math.max(0, product.stock_value - item.quantity)
+            await supabase
+              .from('products')
+              .update({ stock_value: newStock })
+              .eq('id', product.id)
+          }
+        }
+      }
+    }
+
     // Actualizar estado a 'paid'
     const { error: updateErr } = await supabase
       .from('orders')

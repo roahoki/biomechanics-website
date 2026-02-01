@@ -10,6 +10,7 @@ type Product = {
   visible: boolean
   stock_type?: 'quantity' | 'boolean' | null
   stock_value?: number | boolean | null
+  stock_initial?: number | null
   max_per_order?: number | null
 }
 
@@ -31,6 +32,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
     visible: true,
     stock_type: 'quantity',
     stock_value: 10,
+    stock_initial: 10,
     max_per_order: 0
   })
 
@@ -90,6 +92,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
 
     try {
       const maxPerOrder = Number(newProduct.max_per_order)
+      const stockInitial = newProduct.stock_type === 'quantity' ? Number(newProduct.stock_initial) : null
       const payload = {
         title: newProduct.title.trim(),
         type: newProduct.type,
@@ -97,6 +100,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         visible: newProduct.visible,
         stock_type: newProduct.stock_type,
         stock_value: newProduct.stock_type === 'quantity' ? Number(newProduct.stock_value) : true,
+        stock_initial: stockInitial,
         max_per_order: Number.isFinite(maxPerOrder) && maxPerOrder > 0 ? maxPerOrder : null
       }
 
@@ -119,6 +123,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         visible: true,
         stock_type: 'quantity',
         stock_value: 10,
+        stock_initial: 10,
         max_per_order: 0
       })
       setTimeout(() => setCreateMessage(''), 3000)
@@ -134,14 +139,14 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
       <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
         <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: 13 }}>
+          <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: '#1a1a1a' }}>
                 <th style={{ padding: 8, textAlign: 'left' }}>Nombre</th>
                 <th style={{ padding: 8, textAlign: 'left' }}>Tipo</th>
                 <th style={{ padding: 8, textAlign: 'left' }}>Precio</th>
-                <th style={{ padding: 8, textAlign: 'left' }}>Stock</th>
-                <th style={{ padding: 8, textAlign: 'center' }}>Disponible</th>
+                <th style={{ padding: 8, textAlign: 'left' }}>Tipo Stock</th>
+                <th style={{ padding: 8, textAlign: 'center' }}>Stock inicial</th>
                 <th style={{ padding: 8, textAlign: 'center' }}>Max/orden</th>
                 <th style={{ padding: 8, textAlign: 'center' }}>Visible</th>
                 <th style={{ padding: 8 }}></th>
@@ -183,8 +188,8 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
                     onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_type: e.target.value as 'quantity' | 'boolean' }))}
                     style={{ padding: 6, width: '100%' }}
                   >
-                    <option value="quantity">Cantidad</option>
-                    <option value="boolean">Disponible</option>
+                    <option value="quantity">Por cantidad</option>
+                    <option value="boolean">Por disponibilidad</option>
                   </select>
                 </td>
                 <td style={{ padding: 8, textAlign: 'center' }}>
@@ -192,16 +197,16 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
                     <input
                       type="number"
                       placeholder="Stock inicial"
-                      value={newProduct.stock_value}
-                      onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_value: Number(e.target.value) }))}
+                      value={newProduct.stock_initial}
+                      onChange={(e) => setNewProduct((prev: any) => ({ 
+                        ...prev, 
+                        stock_initial: Number(e.target.value),
+                        stock_value: Number(e.target.value)
+                      }))}
                       style={{ padding: 6, width: 90 }}
                     />
                   ) : (
-                    <input
-                      type="checkbox"
-                      checked={newProduct.stock_value === true}
-                      onChange={(e) => setNewProduct((prev: any) => ({ ...prev, stock_value: e.target.checked }))}
-                    />
+                    <span style={{ fontSize: 11, color: '#999' }}>N/A</span>
                   )}
                 </td>
                 <td style={{ padding: 8, textAlign: 'center' }}>
@@ -285,14 +290,15 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
       </div>
 
       <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: 13 }}>
+        <table style={{ width: '100%', minWidth: 1000, borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: '#1a1a1a' }}>
               <th style={{ padding: 8, textAlign: 'left' }}>Nombre</th>
               <th style={{ padding: 8, textAlign: 'left' }}>Tipo</th>
               <th style={{ padding: 8, textAlign: 'left' }}>Precio</th>
-              <th style={{ padding: 8, textAlign: 'left' }}>Stock</th>
-              <th style={{ padding: 8, textAlign: 'center' }}>Disponible</th>
+              <th style={{ padding: 8, textAlign: 'left' }}>Tipo Stock</th>
+              <th style={{ padding: 8, textAlign: 'center' }}>Stock inicial</th>
+              <th style={{ padding: 8, textAlign: 'center' }}>Stock actual</th>
               <th style={{ padding: 8, textAlign: 'center' }}>Max/orden</th>
               <th style={{ padding: 8, textAlign: 'center' }}>Visible</th>
               <th></th>
@@ -308,18 +314,21 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
                     type="number" 
                     value={p.price} 
                     onChange={(e) => updateField(p.id, 'price', Number(e.target.value))}
-                    style={{ width: 70, padding: 4 }}
+                    style={{ width: 80, padding: 4 }}
                   />
+                  <span style={{ marginLeft: 4, fontSize: 11, color: '#999' }}>
+                    ${p.price.toLocaleString('es-CL')}
+                  </span>
                 </td>
-                <td style={{ padding: 8, fontSize: 12 }}>{p.stock_type ? (p.stock_type === 'quantity' ? 'Cantidad' : 'Booleano') : '-'}</td>
+                <td style={{ padding: 8, fontSize: 11 }}>{p.stock_type ? (p.stock_type === 'quantity' ? 'Por cantidad' : 'Por disponibilidad') : '-'}</td>
+                <td style={{ padding: 8, textAlign: 'center', fontSize: 12, color: '#999' }}>
+                  {p.stock_type === 'quantity' ? (typeof p.stock_initial === 'number' ? p.stock_initial : '-') : 'N/A'}
+                </td>
                 <td style={{ padding: 8, textAlign: 'center' }}>
                   {p.stock_type === 'quantity' ? (
-                    <input 
-                      type="number" 
-                      value={typeof p.stock_value === 'number' ? p.stock_value : 0}
-                      onChange={(e) => updateField(p.id, 'stock_value', Number(e.target.value))}
-                      style={{ width: 60, padding: 4 }}
-                    />
+                    <span style={{ fontSize: 12, fontWeight: 'bold', color: typeof p.stock_value === 'number' && p.stock_value === 0 ? '#ff4444' : '#7dff31' }}>
+                      {typeof p.stock_value === 'number' ? p.stock_value : 0}
+                    </span>
                   ) : (
                     <input 
                       type="checkbox" 
