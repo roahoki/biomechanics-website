@@ -185,8 +185,8 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
 
       <div style={{ marginBottom: 16, padding: 12, background: '#222', borderRadius: 6 }}>
         <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Agregar producto</div>
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }} className="mobile-scroll">
-          <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', fontSize: 13 }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', maxWidth: '100%' }} className="mobile-scroll">
+          <table className="pricing-table pricing-table--create" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
             <thead>
               <tr style={{ background: '#1a1a1a' }}>
                 <th style={{ padding: 8, textAlign: 'left' }}>Nombre</th>
@@ -301,8 +301,8 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
         )}
       </div>
 
-      <div className="mobile-scroll" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <table style={{ width: '100%', minWidth: 1000, borderCollapse: 'collapse', fontSize: 13 }}>
+      <div className="mobile-scroll" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', maxWidth: '100%' }}>
+        <table className="pricing-table pricing-table--list" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
           <thead>
             <tr style={{ background: '#1a1a1a' }}>
               <th style={{ padding: 8, textAlign: 'left' }}>Nombre</th>
@@ -328,7 +328,7 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
                     onChange={(e) => updateField(p.id, 'price', Number(e.target.value))}
                     style={{ width: 80, padding: 4 }}
                   />
-                  <span style={{ marginLeft: 4, fontSize: 11, color: '#999' }}>
+                  <span style={{ marginLeft: 4, fontSize: 11, color: '#999', display: 'block' }}>
                     ${p.price.toLocaleString('es-CL')}
                   </span>
                 </td>
@@ -413,11 +413,31 @@ export function ProductTable({ initialProducts }: { initialProducts: Product[] }
           .mobile-save-button {
             display: block !important;
           }
+
+          .pricing-table--create {
+            min-width: 900px;
+          }
+
+          .pricing-table--list {
+            min-width: 1000px;
+          }
         }
         
         @media (min-width: 769px) {
           .mobile-scroll {
             overflow-x: visible !important;
+          }
+
+          .pricing-table {
+            width: 100% !important;
+            table-layout: fixed;
+          }
+
+          .pricing-table th,
+          .pricing-table td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
         }
       `}</style>
