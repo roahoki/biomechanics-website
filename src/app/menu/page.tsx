@@ -176,7 +176,6 @@ export default function MenuPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: 16 }}>
-      <h1>Menú del Evento</h1>
       {loading && <p>Cargando…</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
@@ -189,8 +188,6 @@ export default function MenuPage() {
       {products.length > 0 && (
         <>
           <section>
-            <h2>Entradas</h2>
-            <p>Compra sin login. Yoga tiene cupo limitado (25).</p>
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {tickets.map(t => (
                 <li key={t.id} style={{ marginBottom: 12, border: '1px solid #333', padding: 12 }}>
