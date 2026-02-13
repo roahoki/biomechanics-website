@@ -7,8 +7,13 @@ import Image from 'next/image'
 import { ProductModal, ItemModal, PressablesList, CategoryFilter } from '@/components'
 import { useCategoryFilter } from '@/hooks/useCategoryFilter'
 import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function Page() {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const selectedId = searchParams.get('id')
+    
     const [linksData, setLinksData] = useState<any>(null)
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
     const [selectedItem, setSelectedItem] = useState<Item | null>(null)
@@ -29,6 +34,21 @@ export default function Page() {
                 console.log('Datos cargados:', data)
                 console.log('Productos encontrados:', data.links.filter(item => item.type === 'product'))
                 setLinksData(data)
+                
+                // Si hay un ID en los params, buscar y abrir el elemento
+                if (selectedId) {
+                    const id = parseInt(selectedId, 10)
+                    if (!isNaN(id)) {
+                        const item = data.links.find((link: LinkItem) => link.id === id)
+                        if (item) {
+                            if (item.type === 'product') {
+                                setSelectedProduct(item as Product)
+                            } else if (item.type === 'item') {
+                                setSelectedItem(item as Item)
+                            }
+                        }
+                    }
+                }
             } catch (error) {
                 console.error("Error al cargar datos de enlaces:", error)
                 // Proporcionar datos mínimos para que la página se renderice
@@ -49,7 +69,7 @@ export default function Page() {
             }
         }
         loadData()
-    }, [])
+    }, [selectedId])
 
     if (loading) {
         return (
@@ -257,8 +277,14 @@ export default function Page() {
                                 linkCardTextColor: '#000000',
                                 productBuyButtonColor: '#ff6b35'
                             }}
-                            onProductClick={(product) => setSelectedProduct(product)}
-                            onItemClick={(item) => setSelectedItem(item)}
+                            onProductClick={(product) => {
+                                setSelectedProduct(product)
+                                router.push(`/links?id=${product.id}`, { scroll: false })
+                            }}
+                            onItemClick={(item) => {
+                                setSelectedItem(item)
+                                router.push(`/links?id=${item.id}`, { scroll: false })
+                            }}
                         />
                     ) : (
                         <div className="w-full py-8 text-center text-white">
@@ -276,7 +302,10 @@ export default function Page() {
                 <ProductModal
                     product={selectedProduct}
                     isOpen={!!selectedProduct}
-                    onClose={() => setSelectedProduct(null)}
+                    onClose={() => {
+                        setSelectedProduct(null)
+                        router.push('/links', { scroll: false })
+                    }}
                     styleSettings={styleSettings}
                 />
             )}
@@ -286,7 +315,10 @@ export default function Page() {
                 <ItemModal
                     item={selectedItem}
                     isOpen={!!selectedItem}
-                    onClose={() => setSelectedItem(null)}
+                    onClose={() => {
+                        setSelectedItem(null)
+                        router.push('/links', { scroll: false })
+                    }}
                     styleSettings={styleSettings}
                 />
             )}

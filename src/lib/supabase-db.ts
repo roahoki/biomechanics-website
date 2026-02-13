@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { LinksData } from '@/utils/links';
+import { createSafeStorage } from '@/lib/supabase-storage'
 
 // Definición de tipos para Supabase
 export type Database = {
@@ -38,10 +39,10 @@ export const createAdminClient = () => {
 
   return createClient<Database>(supabaseUrl, supabaseServiceKey, {
     auth: {
-      // Avoid any server-side localStorage usage
-      autoRefreshToken: false,
       persistSession: false,
+      autoRefreshToken: false,
       detectSessionInUrl: false,
+      storage: createSafeStorage(),
     },
   });
 };
@@ -58,10 +59,10 @@ export const createPublicClient = () => {
 
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
-      // Disable session persistence on the server to avoid localStorage
-      autoRefreshToken: false,
       persistSession: false,
+      autoRefreshToken: false,
       detectSessionInUrl: false,
+      storage: createSafeStorage(),
     },
   });
 };

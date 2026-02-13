@@ -1,6 +1,7 @@
 import { useAuth } from '@clerk/nextjs'
 import { createClient } from '@supabase/supabase-js'
 import { useMemo } from 'react'
+import { createSafeStorage } from '@/lib/supabase-storage'
 
 // Hook para crear cliente de Supabase autenticado con Clerk
 export function useSupabaseClient() {
@@ -13,6 +14,9 @@ export function useSupabaseClient() {
       {
         auth: {
           persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+          storage: createSafeStorage(),
         },
         global: {
           // Función para obtener el token JWT de Clerk
@@ -58,5 +62,13 @@ export function useSupabaseClient() {
 // Cliente básico para operaciones públicas (sin auth)
 export const supabasePublic = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storage: createSafeStorage(),
+    },
+  }
 )

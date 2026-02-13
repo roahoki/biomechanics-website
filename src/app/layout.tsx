@@ -1,14 +1,9 @@
 
 import type { Metadata } from "next";
+import '@/lib/server-localstorage'
 import { Space_Grotesk } from 'next/font/google';
+import { ClerkProvider } from '@clerk/nextjs';
 import "../styles/globals.css";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from '@clerk/nextjs';
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'],
@@ -34,23 +29,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Ensure server/edge render has a no-op localStorage to avoid runtime errors from dependencies
-  if (typeof globalThis !== 'undefined') {
-    const ls: any = (globalThis as any).localStorage;
-    if (!ls || typeof ls.getItem !== 'function') {
-      (globalThis as any).localStorage = {
-        getItem: () => null,
-        setItem: () => {},
-        removeItem: () => {},
-        clear: () => {},
-        key: () => null,
-        length: 0,
-      } as Storage;
-    }
-  }
-
   return (
-    <ClerkProvider>
+    <ClerkProvider dynamic>
       <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning style={{ backgroundColor: '#000000' }}>
         <head>
           {/* Aquí puedes agregar meta tags adicionales si es necesario */}

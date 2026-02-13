@@ -8,17 +8,11 @@
 - Supabase: **Producción** (misma DB con RLS)
 - URL: `http://localhost:3000`
 
-### **QA/Staging (branch: shop-pressables)**
-- Variables en Vercel configuradas para esta branch específica
-- Clerk: **TEST keys** (pk_test_, sk_test_)
-- Supabase: **Producción** (misma DB con RLS)
-- URL: `https://biomechanics-website-git-shop-pressables-roahokis-projects.vercel.app`
-
 ### **Production (branch: main)**
 - Variables en Vercel configuradas para production
 - Clerk: **LIVE keys** (pk_live_, sk_live_)
 - Supabase: **Producción** (con máxima seguridad)
-- URL: `https://biomechanics.cl`
+- URL: `https://www.biomechanics.cl` (redirige desde biomechanics.cl)
 
 ## 🔧 Configuración en Vercel
 
@@ -30,20 +24,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-### 2. Variables ESPECÍFICAS para **DEVELOPMENT/QA** (branch: shop-pressables):
-```bash
-# En Vercel: Settings > Environment Variables > Development
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_cmVhbC1zYWxtb24tOTkuY2xlcmsuYWNjb3VudHMuZGV2JA
-CLERK_SECRET_KEY=sk_test_8ak0gOYcuqIbGXOLp5ecxdZopTx0DAbDzhZk1RcbXH
-NEXT_PUBLIC_APP_URL=https://biomechanics-website-git-shop-pressables-roahokis-projects.vercel.app
-```
-
-### 3. Variables ESPECÍFICAS para **PRODUCTION** (branch: main):
+### 2. Variables ESPECÍFICAS para **PRODUCTION** (branch: main):
 ```bash
 # En Vercel: Settings > Environment Variables > Production
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsuYmlvbWVjaGFuaWNzLmNsJA
 CLERK_SECRET_KEY=sk_live_x1D3IKtl3bBVOsBJbDqkBiVzST1sM2hjPL42ymMq4A
-NEXT_PUBLIC_APP_URL=https://biomechanics.cl
+NEXT_PUBLIC_APP_URL=https://www.biomechanics.cl
 ```
 
 ## ⚡ Pasos en Vercel Dashboard
