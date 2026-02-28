@@ -3,5 +3,7 @@ Allow: /
 Disallow: /admin/
 Disallow: /sign-in/
 Disallow: /sign-up/
+Disallow: /links
+Disallow: /api/
 
 Sitemap: https://biomechanics.cl/sitemap.xml
